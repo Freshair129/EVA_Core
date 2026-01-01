@@ -28,8 +28,12 @@ from datetime import datetime
 # Fix Windows console UTF-8 encoding
 import codecs
 if sys.platform == 'win32':
-    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
-    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+    try:
+        if hasattr(sys.stdout, 'buffer'):
+            sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+            sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+    except:
+        pass  # Already configured or not needed
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -204,8 +208,11 @@ class EVAOrchestrator:
             tags = ["neutral"]
         else:
             tool_call = llm_response.tool_calls[0]
-            stimulus_vector = tool_call.args["stimulus_vector"]
-            tags = tool_call.args["tags"]
+
+            # Convert protobuf objects to plain Python types (for JSON serialization)
+            stimulus_vector = dict(tool_call.args["stimulus_vector"])
+            tags = list(tool_call.args["tags"])
+
             print(f"  ✓ LLM extracted: {tags} (stress={stimulus_vector.get('stress', 0):.2f})")
 
         # Step 3: The Gap - Physiological & Memory Processing
@@ -374,24 +381,115 @@ class EVAOrchestrator:
         tags: List[str]
     ) -> str:
         """
-        Write episode to MSP
+        Write episode to MSP following Schema V2 format
 
         Returns:
             Episode ID
         """
+        # Extract stress from stimulus_vector
+        stress = stimulus_vector.get("stress", 0.3)
+        arousal = stimulus_vector.get("arousal", 0.4)
+        warmth = stimulus_vector.get("warmth", 0.5)
+        valence = stimulus_vector.get("valence", 0.6)
+
+        # Calculate Resonance Impact (RIM) for salience_anchor
+        # RIM formula: stress * 0.4 + arousal * 0.3 + warmth * 0.2 + |valence - 0.5| * 0.1
+        rim = stress * 0.4 + arousal * 0.3 + warmth * 0.2 + abs(valence - 0.5) * 0.1
+
+        # Find salience_anchor (most impactful phrase - simplified: first 5 words)
+        words = user_input.split()
+        salience_phrase = " ".join(words[:min(5, len(words))])
+
+        # Generate event_label (emotion + action pattern)
+        emotion_signal = tags[0] if tags else "neutral"
+        event_label = f"{emotion_signal}_expressed"
+
+        # Generate episode_tag (importance classification)
+        ri = 0.70  # TODO: Calculate from RIM
+        if ri >= 0.8:
+            episode_tag = "milestone"
+        elif stress > 0.7:
+            episode_tag = "important"
+        else:
+            episode_tag = "routine"
+
+        # Build Schema V2 compliant episode
         episode_data = {
-            "context_id": context_id,
-            "content": user_input,
-            "response": response,
-            "tags": tags,
-            "stimulus_vector": stimulus_vector,
-            "physio_state": physio_state,
-            "resonance_index": 0.70,  # TODO: Calculate from RIM
-            "resonance_impact": 0.65,  # TODO: Calculate from physiological impact
-            "qualia": {
-                "intensity": 0.6,
-                "tone": "neutral",
-                "texture": [0.5, 0.5, 0.5, 0.5, 0.5]
+            "episode_type": "interaction",
+            "session_id": self.session_id,
+            "event_label": event_label,
+            "episode_tag": episode_tag,
+            "situation_context": {
+                "context_id": context_id,
+                "interaction_mode": "casual",
+                "stakes_level": "low",
+                "time_pressure": "low"
+            },
+            "turn_1": {
+                "speaker": "user",
+                "raw_text": user_input,
+                "summary": user_input[:100] if len(user_input) > 100 else user_input,
+                "affective_inference": {
+                    "emotion_signal": tags[0] if tags else "neutral",
+                    "intensity": stress,
+                    "confidence": 0.8
+                },
+                "semantic_frames": tags,
+                "salience_anchor": {
+                    "phrase": salience_phrase,
+                    "Resonance_impact": rim
+                }
+            },
+            "turn_2": {
+                "speaker": "eva",
+                "text_excerpt": response,
+                "summary": response[:100] if len(response) > 100 else response,
+                "epistemic_mode": "assert"
+            },
+            "state_snapshot": {
+                "EVA_matrix": {
+                    "stress_load": stress,
+                    "social_warmth": warmth,
+                    "drive_level": arousal,
+                    "cognitive_clarity": 1.0 - stress,
+                    "joy_level": valence,
+                    "emotion_label": tags[0] if tags else "neutral"
+                },
+                "Endocrine": {
+                    "ESC_H01_ADRENALINE": physio_state.get("blood", {}).get("cortisol", 0.3),
+                    "ESC_H02_CORTISOL": physio_state.get("blood", {}).get("cortisol", 0.3),
+                    "ESC_H09_OXYTOCIN": physio_state.get("blood", {}).get("oxytocin", 0.5),
+                    # Add other hormones with default values
+                    "ESC_H03_NORADRENALINE": 0.0,
+                    "ESC_H04_ALDOSTERONE": 0.0,
+                    "ESC_H05_DOPAMINE": 0.0,
+                    "ESC_H06_SEROTONIN": 0.0,
+                    "ESC_H07_ENDORPHIN": 0.0,
+                    "ESC_H08_GABA": 0.0,
+                    "ESC_H10_VASOPRESSIN": 0.0,
+                    "ESC_H11_TESTOSTERONE": 0.0,
+                    "ESC_H12_ESTROGEN": 0.0,
+                    "ESC_H13_PROGESTERONE": 0.0,
+                    "ESC_H14_INSULIN": 0.0,
+                    "ESC_H15_GLUCAGON": 0.0,
+                    "ESC_H16_LEPTIN": 0.0,
+                    "ESC_H17_GHRELIN": 0.0,
+                    "ESC_H18_THYROXINE": 0.0,
+                    "ESC_H19_MELATONIN": 0.0,
+                    "ESC_H20_GROWTH_HORMONE": 0.0,
+                    "ESC_H21_PROLACTIN": 0.0,
+                    "ESC_H22_ADENOSINE": 0.0,
+                    "ESC_H23_HISTAMINE": 0.0
+                },
+                "Resonance_index": 0.70,  # TODO: Calculate from RIM
+                "memory_encoding_level": "L2_standard",
+                "memory_color": "#808080",  # TODO: Calculate from RMS
+                "qualia": {
+                    "intensity": stress
+                },
+                "reflex": {
+                    "threat_level": stress
+                }
             }
         }
 

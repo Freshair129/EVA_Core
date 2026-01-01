@@ -1,0 +1,37 @@
+{
+  "gratitude": {
+    "related": [
+      "appreciation",
+      "thanks",
+      "acknowledgment"
+    ]
+  },
+  "longing": {
+    "related": [
+      "desire",
+      "yearning",
+      "missing"
+    ]
+  },
+  "stress": {
+    "related": [
+      "pressure",
+      "overwhelm",
+      "tension"
+    ]
+  },
+  "joy": {
+    "related": [
+      "happiness",
+      "delight",
+      "pleasure"
+    ]
+  },
+  "sadness": {
+    "related": [
+      "sorrow",
+      "melancholy",
+      "grief"
+    ]
+  }
+}

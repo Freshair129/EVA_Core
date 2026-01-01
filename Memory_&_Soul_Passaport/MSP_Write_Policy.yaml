@@ -1,6 +1,6 @@
-schema: EVA-MSP-Write-Policy-v7.2.5
-version: 7.2.5
-updated: 2025-12-30
+schema: EVA-MSP-Write-Policy-v8.1
+version: 8.1.0
+updated: 2026-01-01
 
 owner: MSP
 role: >
@@ -25,21 +25,51 @@ principles:
 
 memory_tiers:
 
-  episodic:
+  episodic_user:
     description: >
-      Individual JSON records per interaction.
-      Contains full biological state, narrative, and crosslinks.
-    storage: "Consciousness/01_Episodic_memory/episodes/{episode_id}.json"
+      User-focused episode storage (lightweight).
+      Contains turn_1, tags, emotion, lightweight state.
+      Optimized for RAG queries without LLM response overhead.
+    storage: "Consciousness/01_Episodic_memory/episodes_user/{episode_id}_user.json"
+    size: "~500-800 bytes per episode"
 
-  episodic_index:
+  episodic_llm:
+    description: >
+      LLM-focused episode storage (detailed).
+      Contains turn_2, full physiological state (23 hormones), qualia.
+      Loaded only when full episode reconstruction needed.
+    storage: "Consciousness/01_Episodic_memory/episodes_llm/{episode_id}_llm.json"
+    size: "~2-5 KB per episode"
+
+  episodic_log:
     description: >
       Lightweight JSONL index for high-speed metadata querying.
       Powers Penta-Stream RAG.
-    storage: "Consciousness/01_Episodic_memory/episodic_index.jsonl"
+    storage: "Consciousness/01_Episodic_memory/episodic_log.jsonl"
+
+  memory_index:
+    description: >
+      JSONL index for high-quality metadata querying.
+    storage: "Consciousness/memory_index.json"
 
   semantic:
     description: >
       Concepts and narrative connections maintained in a sidecar log or graph.
+
+  sensory:
+    description: >
+     บันทึกแพทเทิ่ล จังหว่ะ รูปแบบ.
+    storage: "Consciousness/03_Sensory_memory/{sensory_id}.json"
+
+  Evidence:
+    description: >
+     บันทึก ไฟล์ต่างๆเช่นภาพ วิดีโอ ไฟล์เสียง ที่สำคัญ หรือใช้เป็นหลักฐาน ของ semantic.
+    storage: "Consciousness/03_Sensory_memory/Evidence/evidence_{sensory_id}.json"
+
+  context_storage:
+    description: >
+      "Real-time synchronization of context.delivery by CIN"
+    storage: "Consciousness/10_context_storage/{context_storage_id}.json"
 
   user_block:
     description: >
@@ -52,7 +82,29 @@ memory_tiers:
 episodic_write:
 
   authority: MSP
-  default_action: dual_write (Deep Storage + Search Index)
+  default_action: triple_write (User Storage + LLM Storage + Search Index)
+
+  write_sequence:
+    - target: episodes_user/{episode_id}_user.json
+      content:
+        - episode_id
+        - timestamp
+        - session_id
+        - event_label
+        - episode_tag
+        - compression_meta
+        - situation_context
+        - turn_1 (full)
+        - state_snapshot (EVA_matrix + Resonance_index only)
+
+    - target: episodes_llm/{episode_id}_llm.json
+      content:
+        - episode_id
+        - turn_2 (full)
+        - state_snapshot (Endocrine, memory_encoding_level, memory_color, qualia, reflex)
+
+    - target: episodic_log.jsonl
+      content: lightweight_index_entry
 
   required_fields:
     - episode_id
@@ -74,6 +126,8 @@ episodic_write:
     - tags
     - summary_user
     - summary_eva
+    - salience_anchor
+    - speaker
 
 # ==========================================================
 # PROMOTION & RETENTION
@@ -81,7 +135,7 @@ episodic_write:
 
 retention_policy:
   episodic_json: permanent (Deep Archive)
-  episodic_index: cached/current (Search Buffer)
+  memory_index: cached/current (Search Buffer)
   semantic: decay_if_unused
   user_block: permanent
 

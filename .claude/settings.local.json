@@ -5,7 +5,8 @@
       "Bash(find:*)",
       "Bash(xargs ls:*)",
       "Bash(python:*)",
-      "Bash(timeout 30 python:*)"
+      "Bash(timeout 30 python:*)",
+      "Bash(git add:*)"
     ]
   }
 }

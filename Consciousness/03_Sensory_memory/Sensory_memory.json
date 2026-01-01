@@ -1,3 +1,134 @@
 {
-  "entries": []
+  "entries": [
+    {
+      "sensory_id": "sen_260101_ba788e05",
+      "episode_id": "ep_260101_2cd24f6c",
+      "timestamp": "2026-01-01T13:17:46.517061",
+      "qualia": {
+        "intensity": 0.9,
+        "tone": "excited",
+        "texture": [
+          0.8,
+          0.7,
+          0.9,
+          0.6,
+          0.85
+        ],
+        "modality": "multimodal",
+        "vividness": 0.95
+      }
+    },
+    {
+      "sensory_id": "sen_260101_df31777e",
+      "episode_id": "ep_260101_588224e4",
+      "timestamp": "2026-01-01T13:18:23.297704",
+      "qualia": {
+        "intensity": 0.7,
+        "tone": "warm",
+        "texture": [
+          0.8,
+          0.6,
+          0.5,
+          0.7,
+          0.4
+        ]
+      }
+    },
+    {
+      "sensory_id": "sen_260101_6417facb",
+      "episode_id": "ep_260101_5968f515",
+      "timestamp": "2026-01-01T14:57:05.539466",
+      "qualia": {
+        "intensity": 0.0
+      }
+    },
+    {
+      "sensory_id": "sen_260101_5c17b4aa",
+      "episode_id": "ep_260101_877f537a",
+      "timestamp": "2026-01-01T15:10:14.233152",
+      "qualia": {
+        "intensity": 0.5
+      }
+    },
+    {
+      "sensory_id": "sen_260101_df6ab336",
+      "episode_id": "ep_260101_fca6f533",
+      "timestamp": "2026-01-01T15:10:14.276454",
+      "qualia": {
+        "intensity": 0.5
+      }
+    },
+    {
+      "sensory_id": "sen_260101_33d85140",
+      "episode_id": "ep_260101_8c0dd1f0",
+      "timestamp": "2026-01-01T15:10:14.294058",
+      "qualia": {
+        "intensity": 0.5
+      }
+    },
+    {
+      "sensory_id": "sen_260101_bb19a90f",
+      "episode_id": "ep_260101_2454fb07",
+      "timestamp": "2026-01-01T15:10:14.313604",
+      "qualia": {
+        "intensity": 0.5
+      }
+    },
+    {
+      "sensory_id": "sen_260101_f1ed8c45",
+      "episode_id": "ep_260101_cb53c31e",
+      "timestamp": "2026-01-01T15:10:14.330820",
+      "qualia": {
+        "intensity": 0.5
+      }
+    },
+    {
+      "sensory_id": "sen_260101_4a799ffc",
+      "episode_id": "ep_260101_af8c68c0",
+      "timestamp": "2026-01-01T15:10:14.348259",
+      "qualia": {
+        "intensity": 0.5
+      }
+    },
+    {
+      "sensory_id": "sen_260101_6b4c4708",
+      "episode_id": "ep_260101_ece13327",
+      "timestamp": "2026-01-01T15:10:14.365972",
+      "qualia": {
+        "intensity": 0.5
+      }
+    },
+    {
+      "sensory_id": "sen_260101_5d28422f",
+      "episode_id": "ep_260101_905ce8b7",
+      "timestamp": "2026-01-01T15:10:14.383229",
+      "qualia": {
+        "intensity": 0.5
+      }
+    },
+    {
+      "sensory_id": "sen_260101_df855cb5",
+      "episode_id": "ep_260101_4747647f",
+      "timestamp": "2026-01-01T15:10:14.401692",
+      "qualia": {
+        "intensity": 0.5
+      }
+    },
+    {
+      "sensory_id": "sen_260101_904f1bce",
+      "episode_id": "ep_260101_3f0fbabf",
+      "timestamp": "2026-01-01T15:10:14.419288",
+      "qualia": {
+        "intensity": 0.5
+      }
+    },
+    {
+      "sensory_id": "sen_260101_508f9fa2",
+      "episode_id": "ep_260101_ae457509",
+      "timestamp": "2026-01-01T15:23:46.471395",
+      "qualia": {
+        "intensity": 0.0
+      }
+    }
+  ]
 }

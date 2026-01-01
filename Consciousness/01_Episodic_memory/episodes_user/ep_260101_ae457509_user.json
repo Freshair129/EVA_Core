@@ -1,0 +1,48 @@
+{
+  "episode_id": "ep_260101_ae457509",
+  "timestamp": "2026-01-01T15:23:46.455321",
+  "session_id": "c1deb098",
+  "event_label": "gratitude_expressed",
+  "episode_tag": "routine",
+  "episode_type": "interaction",
+  "compression_meta": {
+    "session_seq": 2,
+    "core_seq": 1,
+    "sphere_seq": 0
+  },
+  "situation_context": {
+    "context_id": "ctx_v8_260101_152341_x4a104a1",
+    "interaction_mode": "casual",
+    "stakes_level": "low",
+    "time_pressure": "low"
+  },
+  "turn_1": {
+    "speaker": "user",
+    "raw_text": "ขอบคุณมากนะคะ รักเลย",
+    "summary": "ขอบคุณมากนะคะ รักเลย",
+    "affective_inference": {
+      "emotion_signal": "gratitude",
+      "intensity": 0.0,
+      "confidence": 0.8
+    },
+    "semantic_frames": [
+      "gratitude",
+      "affection"
+    ],
+    "salience_anchor": {
+      "phrase": "ขอบคุณมากนะคะ รักเลย",
+      "Resonance_impact": 0.46
+    }
+  },
+  "state_snapshot": {
+    "EVA_matrix": {
+      "stress_load": 0.0,
+      "social_warmth": 1.0,
+      "drive_level": 0.7,
+      "cognitive_clarity": 1.0,
+      "joy_level": 1.0,
+      "emotion_label": "gratitude"
+    },
+    "Resonance_index": 0.7
+  }
+}

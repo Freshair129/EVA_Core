@@ -135,7 +135,7 @@ class DynamicChunkingOrchestrator:
 
         # Fallback: Mock RIM calculation
         rim = 0.1
-        if any(anchor in chunk for anchor in self.config['terminal_anchors']):
+        if any(marker in chunk for marker in self.config['salience_markers']):
             rim = 0.8
         elif len(chunk) > 50:
             rim = 0.4
@@ -149,21 +149,21 @@ class DynamicChunkingOrchestrator:
 
     def _process_retroactive_synthesis(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Analyze the full trace to see if the terminal anchor changes the overall intent.
+        Analyze the full trace to see if the salience anchor changes the overall intent.
         """
         if not self.micro_trace:
             return {}
             
         last_reaction = self.micro_trace[-1]
-        is_terminal = any(anchor in last_reaction['chunk'] for anchor in self.config['terminal_anchors'])
-        
-        if is_terminal:
-            multiplier = self.config['parameters']['rim_weights']['terminal_anchor_multiplier']
+        has_salience = any(marker in last_reaction['chunk'] for marker in self.config['salience_markers'])
+
+        if has_salience:
+            multiplier = self.config['parameters']['rim_weights']['salience_multiplier']
             final_rim = min(1.0, last_reaction['rim_impact'] * multiplier)
-            print(f"Terminal Anchor detected! Applying multiplier: {multiplier} | Final RIM: {final_rim}")
+            print(f"Salience Anchor detected! Applying multiplier: {multiplier} | Final RIM: {final_rim}")
             return {
                 "final_rim": final_rim,
-                "analysis": "Retroactive reinforcement applied due to terminal anchor.",
+                "analysis": "Retroactive reinforcement applied due to salience anchor.",
                 "override_state": "High-Resonance"
             }
         

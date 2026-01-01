@@ -1,0 +1,245 @@
+{
+  "episodes": [
+    {
+      "episode_id": "ep_260101_5968f515",
+      "timestamp": "2026-01-01T14:57:05.537996",
+      "session_id": "8d39fbc4",
+      "event_label": "gratitude_expressed",
+      "episode_tag": "routine",
+      "summary_user": "ขอบคุณมากนะคะ",
+      "tags": [
+        "gratitude"
+      ],
+      "salience_anchor": {
+        "phrase": "ขอบคุณมากนะคะ",
+        "Resonance_impact": 0.29000000000000004
+      },
+      "speaker_1": "user",
+      "summary_eva": "The body feels calm and at peace. The parasympathetic nervous system is dominant, suggesting a state",
+      "speaker_2": "eva",
+      "resonance_index": 0.7,
+      "emotion_label": "gratitude"
+    },
+    {
+      "episode_id": "ep_260101_877f537a",
+      "timestamp": "2026-01-01T15:10:14.220810",
+      "session_id": "test_session",
+      "event_label": "test_1",
+      "episode_tag": "routine",
+      "summary_user": "Test 1",
+      "tags": [
+        "test"
+      ],
+      "salience_anchor": {
+        "phrase": "Test 1",
+        "Resonance_impact": 0.3
+      },
+      "speaker_1": "user",
+      "summary_eva": "Response 1",
+      "speaker_2": "eva",
+      "resonance_index": 0.5,
+      "emotion_label": "neutral"
+    },
+    {
+      "episode_id": "ep_260101_fca6f533",
+      "timestamp": "2026-01-01T15:10:14.233981",
+      "session_id": "test_session",
+      "event_label": "test_2",
+      "episode_tag": "routine",
+      "summary_user": "Test 2",
+      "tags": [
+        "test"
+      ],
+      "salience_anchor": {
+        "phrase": "Test 2",
+        "Resonance_impact": 0.3
+      },
+      "speaker_1": "user",
+      "summary_eva": "Response 2",
+      "speaker_2": "eva",
+      "resonance_index": 0.5,
+      "emotion_label": "neutral"
+    },
+    {
+      "episode_id": "ep_260101_8c0dd1f0",
+      "timestamp": "2026-01-01T15:10:14.277043",
+      "session_id": "test_session",
+      "event_label": "test_3",
+      "episode_tag": "routine",
+      "summary_user": "Test 3",
+      "tags": [
+        "test"
+      ],
+      "salience_anchor": {
+        "phrase": "Test 3",
+        "Resonance_impact": 0.3
+      },
+      "speaker_1": "user",
+      "summary_eva": "Response 3",
+      "speaker_2": "eva",
+      "resonance_index": 0.5,
+      "emotion_label": "neutral"
+    },
+    {
+      "episode_id": "ep_260101_2454fb07",
+      "timestamp": "2026-01-01T15:10:14.295301",
+      "session_id": "test_session",
+      "event_label": "test_4",
+      "episode_tag": "routine",
+      "summary_user": "Test 4",
+      "tags": [
+        "test"
+      ],
+      "salience_anchor": {
+        "phrase": "Test 4",
+        "Resonance_impact": 0.3
+      },
+      "speaker_1": "user",
+      "summary_eva": "Response 4",
+      "speaker_2": "eva",
+      "resonance_index": 0.5,
+      "emotion_label": "neutral"
+    },
+    {
+      "episode_id": "ep_260101_cb53c31e",
+      "timestamp": "2026-01-01T15:10:14.314172",
+      "session_id": "test_session",
+      "event_label": "test_5",
+      "episode_tag": "routine",
+      "summary_user": "Test 5",
+      "tags": [
+        "test"
+      ],
+      "salience_anchor": {
+        "phrase": "Test 5",
+        "Resonance_impact": 0.3
+      },
+      "speaker_1": "user",
+      "summary_eva": "Response 5",
+      "speaker_2": "eva",
+      "resonance_index": 0.5,
+      "emotion_label": "neutral"
+    },
+    {
+      "episode_id": "ep_260101_af8c68c0",
+      "timestamp": "2026-01-01T15:10:14.331396",
+      "session_id": "test_session",
+      "event_label": "test_6",
+      "episode_tag": "routine",
+      "summary_user": "Test 6",
+      "tags": [
+        "test"
+      ],
+      "salience_anchor": {
+        "phrase": "Test 6",
+        "Resonance_impact": 0.3
+      },
+      "speaker_1": "user",
+      "summary_eva": "Response 6",
+      "speaker_2": "eva",
+      "resonance_index": 0.5,
+      "emotion_label": "neutral"
+    },
+    {
+      "episode_id": "ep_260101_ece13327",
+      "timestamp": "2026-01-01T15:10:14.348837",
+      "session_id": "test_session",
+      "event_label": "test_7",
+      "episode_tag": "routine",
+      "summary_user": "Test 7",
+      "tags": [
+        "test"
+      ],
+      "salience_anchor": {
+        "phrase": "Test 7",
+        "Resonance_impact": 0.3
+      },
+      "speaker_1": "user",
+      "summary_eva": "Response 7",
+      "speaker_2": "eva",
+      "resonance_index": 0.5,
+      "emotion_label": "neutral"
+    },
+    {
+      "episode_id": "ep_260101_905ce8b7",
+      "timestamp": "2026-01-01T15:10:14.366642",
+      "session_id": "test_session",
+      "event_label": "test_8",
+      "episode_tag": "routine",
+      "summary_user": "Test 8",
+      "tags": [
+        "test"
+      ],
+      "salience_anchor": {
+        "phrase": "Test 8",
+        "Resonance_impact": 0.3
+      },
+      "speaker_1": "user",
+      "summary_eva": "Response 8",
+      "speaker_2": "eva",
+      "resonance_index": 0.5,
+      "emotion_label": "neutral"
+    },
+    {
+      "episode_id": "ep_260101_4747647f",
+      "timestamp": "2026-01-01T15:10:14.383831",
+      "session_id": "test_session",
+      "event_label": "test_9",
+      "episode_tag": "routine",
+      "summary_user": "Test 9",
+      "tags": [
+        "test"
+      ],
+      "salience_anchor": {
+        "phrase": "Test 9",
+        "Resonance_impact": 0.3
+      },
+      "speaker_1": "user",
+      "summary_eva": "Response 9",
+      "speaker_2": "eva",
+      "resonance_index": 0.5,
+      "emotion_label": "neutral"
+    },
+    {
+      "episode_id": "ep_260101_3f0fbabf",
+      "timestamp": "2026-01-01T15:10:14.402302",
+      "session_id": "test_session",
+      "event_label": "test_10",
+      "episode_tag": "routine",
+      "summary_user": "Test 10",
+      "tags": [
+        "test"
+      ],
+      "salience_anchor": {
+        "phrase": "Test 10",
+        "Resonance_impact": 0.3
+      },
+      "speaker_1": "user",
+      "summary_eva": "Response 10",
+      "speaker_2": "eva",
+      "resonance_index": 0.5,
+      "emotion_label": "neutral"
+    },
+    {
+      "episode_id": "ep_260101_ae457509",
+      "timestamp": "2026-01-01T15:23:46.455321",
+      "session_id": "c1deb098",
+      "event_label": "gratitude_expressed",
+      "episode_tag": "routine",
+      "summary_user": "ขอบคุณมากนะคะ รักเลย",
+      "tags": [
+        "gratitude",
+        "affection"
+      ],
+      "salience_anchor": {
+        "phrase": "ขอบคุณมากนะคะ รักเลย",
+        "Resonance_impact": 0.46
+      },
+      "speaker_1": "user",
+      "summary_eva": "The body feels calm and warm. The parasympathetic nervous system is dominant, indicating relaxation ",
+      "speaker_2": "eva",
+      "resonance_index": null,
+      "emotion_label": null
+    }
+  ]
+}

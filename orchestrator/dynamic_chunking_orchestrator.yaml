@@ -5,9 +5,9 @@ parameters:
   ri_calibration:
     default_step_latency_ms: 200
   rim_weights:
-    terminal_anchor_multiplier: 1.5
+    salience_multiplier: 1.5
 
-terminal_anchors:
+salience_markers:
   - "คะ"
   - "นะ"
   - "จ้ะ"
