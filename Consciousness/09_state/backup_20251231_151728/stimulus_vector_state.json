@@ -1,0 +1,25 @@
+{
+  "vector": {
+    "stress": 1.0,
+    "warmth": 1.0,
+    "threat": 1.0,
+    "novelty": 0.8,
+    "achievement": 0.5,
+    "pain": 1.0,
+    "hunger": 0.2,
+    "thirst": 0.2,
+    "satiety": 0.2,
+    "anxiety": 1.0,
+    "bonding": 1.0,
+    "affection": 1.0,
+    "intimacy": 0.4,
+    "surprise": 0.30000000000000004,
+    "curiosity": 0.7,
+    "success": 0.0,
+    "mastery": 0.0,
+    "fatigue": 0.0,
+    "conflict": 0.5,
+    "discomfort": 0.0
+  },
+  "ts": 1767090492.5617833
+}

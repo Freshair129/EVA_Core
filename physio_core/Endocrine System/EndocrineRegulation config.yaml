@@ -1,0 +1,150 @@
+# ============================================================
+# Endocrine Regulation Layer
+# HPA Axis + Circadian Controller
+# Version: 9.0
+# ============================================================
+
+version: "9.0"
+system: "EndocrineRegulation"
+description: >
+  Regulatory feedback layer for endocrine control.
+  Governs HPA axis dynamics and circadian modulation.
+  Outputs hormone-specific stimulus modifiers ONLY.
+  No hormone production, no blood interaction.
+
+# ------------------------------------------------------------
+# Global regulation settings
+# ------------------------------------------------------------
+global:
+  time_unit: "seconds"
+
+  smoothing:
+    type: "ema"
+    alpha: 0.2            # smoothing for feedback signals
+
+  clamp:
+    stimulus_min: -1.0
+    stimulus_max: 1.0
+
+# ------------------------------------------------------------
+# HPA AXIS (Stress Response Loop)
+# Hypothalamus → Pituitary → Adrenal (Cortisol)
+# ------------------------------------------------------------
+HPA_axis:
+
+  enabled: true
+
+  hormones:
+    CRH:
+      virtual: true       # regulatory hormone (not produced)
+      role: "hypothalamic_drive"
+
+    ACTH:
+      virtual: true
+      role: "pituitary_drive"
+
+    COR:
+      target: true        # real hormone (Cortisol)
+
+  dynamics:
+    # Stress → CRH
+    hypothalamus:
+      input:
+        stress_signal: 1.0
+        uncertainty: 0.6
+        safety_signal: -0.8
+      gain: 1.0
+      baseline: 0.1
+
+    # CRH → ACTH
+    pituitary:
+      gain: 0.9
+      latency_sec: 60.0
+
+    # ACTH → Cortisol gland stimulus
+    adrenal:
+      gain: 1.0
+      latency_sec: 300.0
+
+  negative_feedback:
+    cortisol_inhibition:
+      source: "COR"         # plasma snapshot (read-only)
+      threshold: 1.0        # relative baseline multiplier
+      strength: 0.7
+      curve: "sigmoid"
+
+  output:
+    hormone: "COR"
+    apply_to: "stimulus_modifier"
+    weight: 1.0
+
+# ------------------------------------------------------------
+# CIRCADIAN RHYTHM LOOP
+# Suprachiasmatic Nucleus (SCN) model
+# ------------------------------------------------------------
+circadian:
+
+  enabled: true
+
+  clock:
+    period_hours: 24.0
+    phase_reference: "local_time"
+    phase_offset_hours: 0.0   # adjust for jet lag / schedule shift
+
+  zeitgebers:
+    light:
+      daylight:
+        gain: 1.0
+      darkness:
+        gain: -1.0
+      blue_light:
+        gain: -1.2
+
+    activity:
+      active: 0.3
+      inactive: -0.2
+
+  hormone_modulation:
+
+    MEL:
+      night_peak:
+        start_hour: 21
+        end_hour: 6
+        amplitude: 1.0
+      daylight_suppression: -1.0
+
+    COR:
+      morning_peak:
+        start_hour: 6
+        end_hour: 9
+        amplitude: 0.6
+      evening_suppression: -0.3
+
+    GH:
+      deep_night_window:
+        start_hour: 23
+        end_hour: 3
+        amplitude: 0.8
+
+  output:
+    mode: "additive"
+    clamp: [-1.0, 1.0]
+
+# ------------------------------------------------------------
+# Output mapping
+# ------------------------------------------------------------
+outputs:
+  type: "stimulus_map"
+  description: >
+    Final output is a hormone-keyed stimulus modifier map.
+    This map is merged with EVA / cognitive stimuli
+    before entering EndocrineController.
+
+# ------------------------------------------------------------
+# Invariants
+# ------------------------------------------------------------
+invariants:
+  - Regulation layer never produces hormone mass
+  - No direct gland state mutation
+  - Plasma values are read-only
+  - Output is stimulus modulation only

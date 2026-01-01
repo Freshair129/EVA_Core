@@ -1,0 +1,26 @@
+# Autonomic Response Configuration
+version: "1.0"
+
+smoothing:
+  alpha: 0.2
+
+weights:
+  AD:
+    sympathetic: 0.9
+    parasympathetic: 0.0
+
+  NA:
+    sympathetic: 0.8
+    parasympathetic: 0.0
+
+  COR:
+    sympathetic: 0.6
+    parasympathetic: 0.1
+
+  OXT:
+    sympathetic: 0.0
+    parasympathetic: 0.8
+
+  GABA:
+    sympathetic: 0.0
+    parasympathetic: 0.9

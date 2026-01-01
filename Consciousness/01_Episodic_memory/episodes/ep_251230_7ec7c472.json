@@ -1,0 +1,64 @@
+{
+  "episode_id": "ep_251230_7ec7c472",
+  "timestamp": "2025-12-30T09:28:32.479047+00:00",
+  "interaction_mode": "casual",
+  "stakes_level": "low",
+  "situation_context": {
+    "context_id": "ctx_bc88b8e2"
+  },
+  "state_snapshot": {
+    "EVA_matrix": {
+      "stress_load": 1.7510528500089955e-08,
+      "social_warmth": 4.648063133911462e-05,
+      "drive_level": 0.0,
+      "cognitive_clarity": 0.0,
+      "joy_level": 0.0016000000000000005,
+      "primary_axis": 0.0016000175105285006,
+      "secondary_axis": 4.648063133911462e-05,
+      "affective_stability": 0.0003280279037146874,
+      "social_orientation": 4.648063133911462e-05
+    },
+    "Hemodynamics": {
+      "heart_rate": 72.0,
+      "blood_pressure_sys": 120.0,
+      "blood_pressure_dia": 80.0
+    },
+    "Endocrine": {
+      "ESC_H01_ADRENALINE": 0.0020838313277370397,
+      "ESC_H02_CORTISOL": 0.0,
+      "ESC_H03_NORADRENALINE": 0.0,
+      "ESC_H04_ALDOSTERONE": 0.0,
+      "ESC_H05_DOPAMINE": 0.0,
+      "ESC_H06_SEROTONIN": 0.0,
+      "ESC_H07_ENDORPHIN": 0.0,
+      "ESC_H08_GABA": 0.0,
+      "ESC_H09_OXYTOCIN": 0.0,
+      "ESC_H10_VASOPRESSIN": 0.0,
+      "ESC_H11_TESTOSTERONE": 0.0,
+      "ESC_H12_ESTROGEN": 0.0,
+      "ESC_H13_PROGESTERONE": 0.0,
+      "ESC_H14_INSULIN": 0.0,
+      "ESC_H15_GLUCAGON": 0.0,
+      "ESC_H16_LEPTIN": 0.0,
+      "ESC_H17_GHRELIN": 0.0,
+      "ESC_H18_THYROXINE": 0.0,
+      "ESC_H19_MELATONIN": 0.0,
+      "ESC_H20_GROWTH_HORMONE": 0.0,
+      "ESC_H21_PROLACTIN": 0.0,
+      "ESC_H22_ADENOSINE": 0.0,
+      "ESC_H23_HISTAMINE": 0.0
+    },
+    "Resonance_index": 0.5
+  },
+  "turn_1": {
+    "speaker": "USER",
+    "text": "I'm feeling really stressed and anxious about my work deadline...",
+    "summary": "I'm feeling really stressed and anxious about my work deadline..."
+  },
+  "turn_2": {
+    "speaker": "EVA",
+    "text": "Oh no! Deadlines can be such buzzkills. Tell me more about what's stressing you out, maybe we can brainstorm some silly solutions? Even if they're not *actually* helpful, sometimes a good laugh can lighten the load!",
+    "summary": "Oh no! Deadlines can be such buzzkills. Tell me more about what's stressing you out, maybe we can br"
+  },
+  "session_id": "test_session"
+}

@@ -1,0 +1,64 @@
+{
+  "episode_id": "ep_251230_ec9d902c",
+  "timestamp": "2025-12-30T10:03:55.798409+00:00",
+  "interaction_mode": "casual",
+  "stakes_level": "low",
+  "situation_context": {
+    "context_id": "ctx_1913fd3f"
+  },
+  "state_snapshot": {
+    "EVA_matrix": {
+      "stress_load": 1.6819796874497215e-08,
+      "social_warmth": 2.974760405703337e-09,
+      "drive_level": 0.0,
+      "cognitive_clarity": 0.0,
+      "joy_level": 1.0240000000000006e-07,
+      "primary_axis": 1.1921979687449726e-07,
+      "secondary_axis": 2.974760405703337e-09,
+      "affective_stability": 2.099378583774e-08,
+      "social_orientation": 2.974760405703337e-09
+    },
+    "Hemodynamics": {
+      "heart_rate": 72.0,
+      "blood_pressure_sys": 120.0,
+      "blood_pressure_dia": 80.0
+    },
+    "Endocrine": {
+      "ESC_H01_ADRENALINE": 0.002036239756795698,
+      "ESC_H02_CORTISOL": 0.0,
+      "ESC_H03_NORADRENALINE": 0.0,
+      "ESC_H04_ALDOSTERONE": 0.0,
+      "ESC_H05_DOPAMINE": 0.0,
+      "ESC_H06_SEROTONIN": 0.0,
+      "ESC_H07_ENDORPHIN": 0.0,
+      "ESC_H08_GABA": 0.0,
+      "ESC_H09_OXYTOCIN": 0.0,
+      "ESC_H10_VASOPRESSIN": 0.0,
+      "ESC_H11_TESTOSTERONE": 0.0,
+      "ESC_H12_ESTROGEN": 0.0,
+      "ESC_H13_PROGESTERONE": 0.0,
+      "ESC_H14_INSULIN": 0.0,
+      "ESC_H15_GLUCAGON": 0.0,
+      "ESC_H16_LEPTIN": 0.0,
+      "ESC_H17_GHRELIN": 0.0,
+      "ESC_H18_THYROXINE": 0.0,
+      "ESC_H19_MELATONIN": 0.0,
+      "ESC_H20_GROWTH_HORMONE": 0.0,
+      "ESC_H21_PROLACTIN": 0.0,
+      "ESC_H22_ADENOSINE": 0.0,
+      "ESC_H23_HISTAMINE": 0.0
+    },
+    "Resonance_index": 0.5
+  },
+  "turn_1": {
+    "speaker": "USER",
+    "text": "I'm feeling really stressed and anxious about my work deadline...",
+    "summary": "I'm feeling really stressed and anxious about my work deadline..."
+  },
+  "turn_2": {
+    "speaker": "EVA",
+    "text": "Oh no, deadlines can be such monsters! I totally get that stressed and anxious feeling. How much time do you have left? Maybe we can brainstorm some ways to break it down and make it feel a little less overwhelming! What's the biggest thing weighing on you right now?",
+    "summary": "Oh no, deadlines can be such monsters! I totally get that stressed and anxious feeling. How much tim"
+  },
+  "session_id": "test_session"
+}

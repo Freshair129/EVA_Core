@@ -1,0 +1,386 @@
+schema: EVA-Permissions-v2
+version: 8.1.0
+updated: 2025-12-31
+
+# Permission model for EVA 8.1.0
+# Defines who can create slots, files, and write to specific memory areas.
+# Updated for Dual-Phase One-Inference Orchestrator pattern.
+
+# ============================================================
+# ROLE DEFINITIONS
+# ============================================================
+
+roles:
+  core_system:
+    can_create_slots: true
+    can_create_files: true
+    description: "Core systems that own memory slots and manage execution logic"
+
+  system_authority:
+    can_create_slots: true
+    can_create_files: true
+    description: "Special systems with elevated privileges (e.g., PhysioController)"
+
+  subsystem:
+    can_create_slots: false
+    can_create_files: false
+    description: "Subsystems that operate under parent systems"
+
+  core_library:
+    can_create_slots: false
+    can_create_files: false
+    description: "Pure deterministic calculation layers (stateless/resettable)"
+
+  tool:
+    can_create_slots: false
+    can_create_files: false
+    description: "Helper tools without state ownership"
+
+# ============================================================
+# SYSTEM-LEVEL PERMISSIONS
+# ============================================================
+
+systems:
+
+  # ----------------------------------------------------------
+  # Memory & Persistence
+  # ----------------------------------------------------------
+
+  MSP:
+    role: core_system
+    can_read_slots:
+      - "*"  # MSP can read all slots for memory operations
+    can_write_slots:
+      - memory_core
+      - state_barcode
+      - temporal_ref
+      - resonance_log
+    can_read_files:
+      - "Consciousness/01_Episodic_memory/**/*"
+      - "Consciousness/02_Semantic_memory/**/*"
+      - "Consciousness/03_Sensory_memory/**/*"
+      - "Consciousness/10_state/*"
+      - "Memory_&_Soul_Passaport/**/*"
+    can_write_files:
+      - "Consciousness/01_Episodic_memory/episodic_index.jsonl"
+      - "Consciousness/01_Episodic_memory/episodes/**/*.json"
+      - "Consciousness/02_Semantic_memory/**/*"
+      - "Consciousness/03_Sensory_memory/**/*"
+      - "Consciousness/10_state/msp_state.json"
+    notes:
+      - "MSP is the ONLY system allowed to write episodic memory"
+      - "All memory writes must go through MSP"
+
+  # ----------------------------------------------------------
+  # Physiological Simulation
+  # ----------------------------------------------------------
+
+  PhysioController:
+    role: system_authority
+    can_read_slots:
+      - physio_state
+      - plasma_bus
+      - neural_signals
+      - ans_state
+    can_write_slots:
+      - physio_state
+      - plasma_bus
+      - neural_signals
+      - ans_state
+    can_read_files:
+      - "physio_core/**/*"
+      - "Consciousness/10_state/body_state_history.jsonl"
+    can_write_files:
+      - "Consciousness/10_state/body_state_history.jsonl"
+      - "Consciousness/10_state/physio_state.json"
+      - "Consciousness/10_state/endocrine_state.json"
+      - "Consciousness/10_state/receptor_state.json"
+      - "Consciousness/10_state/ans_state.json"
+    notes:
+      - "PhysioController orchestrates full physiological pipeline"
+      - "30Hz streaming simulation"
+
+  # ----------------------------------------------------------
+  # Psychological State
+  # ----------------------------------------------------------
+
+  EVA_Matrix:
+    role: core_system
+    can_read_slots:
+      - neural_signals
+      - matrix_state
+      - reflex_directives
+    can_write_slots:
+      - matrix_state
+      - reflex_directives
+    can_read_files:
+      - "eva_matrix/**/*"
+      - "Consciousness/10_state/eva_matrix_state.json"
+    can_write_files:
+      - "Consciousness/10_state/eva_matrix_state.json"
+    notes:
+      - "9D Psychological State Engine"
+      - "Generates Safety Reflex directives"
+
+  Artifact_Qualia:
+    role: core_system
+    can_read_slots:
+      - matrix_state
+      - qualia_state
+    can_write_slots:
+      - qualia_state
+    can_read_files:
+      - "Artifact_Qualia/**/*"
+      - "Consciousness/10_state/artifact_qualia_state.json"
+    can_write_files:
+      - "Consciousness/10_state/artifact_qualia_state.json"
+    notes:
+      - "Phenomenological experience integrator"
+      - "Pure representation, no decision-making"
+
+  # ----------------------------------------------------------
+  # Memory Encoding
+  # ----------------------------------------------------------
+
+  RMS:
+    role: core_system
+    can_read_slots:
+      - matrix_state
+      - qualia_state
+      - encoding_buffer
+      - core_color
+      - resonance_textures
+    can_write_slots:
+      - encoding_buffer
+      - core_color
+      - resonance_textures
+    can_read_files:
+      - "Resonance_Memory_System/**/*"
+      - "Consciousness/10_state/rms_state.json"
+    can_write_files:
+      - "Consciousness/10_state/rms_state.json"
+    notes:
+      - "High-fidelity memory encoding"
+      - "Trauma detection (threat > 0.85)"
+
+  # ----------------------------------------------------------
+  # Orchestration Layer
+  # ----------------------------------------------------------
+
+  CIN:
+    role: core_system
+    can_read_slots:
+      - memory_core           # READ-ONLY for memory retrieval
+      - state_barcode         # READ-ONLY for state snapshots
+      - temporal_ref          # READ-ONLY for temporal context
+      - physio_state          # READ-ONLY for body state
+      - matrix_state          # READ-ONLY for psychological state
+      - qualia_state          # READ-ONLY for phenomenology
+      - perception_context
+      - reasoning_context
+      - context_id
+    can_write_slots:
+      - perception_context    # WRITE: Phase 1 prompt
+      - reasoning_context     # WRITE: Phase 2 prompt
+      - context_id            # WRITE: Context ID generation
+    can_read_files:
+      - "Consciousness/**/*"            # READ-ONLY memory access
+      - "Memory_&_Soul_Passaport/**/*"  # READ-ONLY MSP access
+      - "User_profile/**/*"             # READ-ONLY persona access
+      - "orchestrator/cin.py"
+      - "specs/**/*"
+    can_write_files: []  # CIN is STRICTLY READ-ONLY for files
+    notes:
+      - "CIN builds context prompts, NEVER writes memory"
+      - "READ-ONLY access to all state for context building"
+      - "Phase 1: Rough retrieval (<100ms)"
+      - "Phase 2: Deep injection (~100ms)"
+
+  HeptStreamRAG:
+    role: core_system
+    can_read_slots:
+      - memory_core           # READ-ONLY for retrieval
+      - rag_query_context
+      - memory_matches
+    can_write_slots:
+      - rag_query_context     # WRITE: Current query
+      - memory_matches        # WRITE: Retrieved results
+    can_read_files:
+      - "Consciousness/**/*"            # READ-ONLY memory access
+      - "Memory_&_Soul_Passaport/**/*"  # READ-ONLY MSP access
+      - "services/hept_stream_rag.py"
+    can_write_files: []  # HeptRAG is STRICTLY READ-ONLY for files
+    notes:
+      - "7-dimensional memory retrieval"
+      - "READ-ONLY access to memory"
+      - "Emotion Stream uses physiological similarity"
+      - "Latency: ~200-300ms"
+
+  # ----------------------------------------------------------
+  # Behavioral Constraints
+  # ----------------------------------------------------------
+
+  PMT:
+    role: core_system
+    can_read_slots:
+      - behavior_policy
+      - persona_data
+    can_write_slots:
+      - behavior_policy
+      - persona_data
+    can_read_files:
+      - "User_profile/**/*"
+    can_write_files:
+      - "Consciousness/10_state/pmt_violations.log"
+    notes:
+      - "Manages behavioral constraints and persona"
+      - "Response weighting: Persona 40% + Physio 60%"
+
+# ============================================================
+# FILE-LEVEL PERMISSIONS
+# ============================================================
+
+files:
+
+  # ----------------------------------------------------------
+  # Memory Files (MSP Only)
+  # ----------------------------------------------------------
+
+  "Consciousness/01_Episodic_memory/episodic_index.jsonl":
+    owner: MSP
+    allowed_writers:
+      - MSP
+    allowed_readers:
+      - MSP
+      - CIN
+      - HeptStreamRAG
+    notes:
+      - "Primary episodic memory index. Only MSP can write."
+      - "CIN and HeptRAG can read for retrieval"
+
+  "Consciousness/01_Episodic_memory/episodes/**/*.json":
+    owner: MSP
+    allowed_writers:
+      - MSP
+    allowed_readers:
+      - MSP
+      - CIN
+      - HeptStreamRAG
+    notes:
+      - "Deep episode storage. Only MSP can write."
+
+  # ----------------------------------------------------------
+  # Physiological State Files
+  # ----------------------------------------------------------
+
+  "Consciousness/10_state/body_state_history.jsonl":
+    owner: PhysioController
+    allowed_writers:
+      - PhysioController
+    allowed_readers:
+      - PhysioController
+      - CIN
+    notes:
+      - "Physiological state log (30Hz)"
+      - "CIN can read for Phase 1 baseline"
+
+  "Consciousness/10_state/physio_state.json":
+    owner: PhysioController
+    allowed_writers:
+      - PhysioController
+    allowed_readers:
+      - PhysioController
+      - CIN
+      - HeptStreamRAG
+    notes:
+      - "Current physiological snapshot"
+
+  # ----------------------------------------------------------
+  # Psychological State Files
+  # ----------------------------------------------------------
+
+  "Consciousness/10_state/eva_matrix_state.json":
+    owner: EVA_Matrix
+    allowed_writers:
+      - EVA_Matrix
+    allowed_readers:
+      - EVA_Matrix
+      - CIN
+      - RMS
+      - Artifact_Qualia
+    notes:
+      - "9D psychological state snapshot"
+
+  "Consciousness/10_state/artifact_qualia_state.json":
+    owner: Artifact_Qualia
+    allowed_writers:
+      - Artifact_Qualia
+    allowed_readers:
+      - Artifact_Qualia
+      - CIN
+      - RMS
+    notes:
+      - "Phenomenological experience state"
+
+  # ----------------------------------------------------------
+  # Memory Encoding Files
+  # ----------------------------------------------------------
+
+  "Consciousness/10_state/rms_state.json":
+    owner: RMS
+    allowed_writers:
+      - RMS
+    allowed_readers:
+      - RMS
+      - MSP
+    notes:
+      - "Resonance encoding buffer"
+
+# ============================================================
+# VALIDATION RULES (EVA 8.1.0)
+# ============================================================
+
+validations:
+
+  - name: core_systems_can_create_slots
+    description: "Systems with role=core_system must be able to create slots"
+    assert: "roles['core_system'].can_create_slots == true"
+
+  - name: tools_cannot_create_slots_or_files
+    description: "Systems with role=tool cannot create slots/files"
+    assert: "roles['tool'].can_create_slots == false and roles['tool'].can_create_files == false"
+
+  - name: CIN_cannot_write_memory_files
+    description: "CIN builds prompts but CANNOT write memory files (READ-ONLY)"
+    assert: "CIN not in files['Consciousness/01_Episodic_memory/episodic_index.jsonl'].allowed_writers"
+
+  - name: HeptRAG_cannot_write_memory_files
+    description: "HeptRAG retrieves but CANNOT write memory files (READ-ONLY)"
+    assert: "HeptStreamRAG not in files['Consciousness/01_Episodic_memory/episodic_index.jsonl'].allowed_writers"
+
+  - name: MSP_owns_episodic_memory
+    description: "Only MSP can write to episodic memory"
+    assert: "MSP in files['Consciousness/01_Episodic_memory/episodic_index.jsonl'].allowed_writers"
+
+  - name: PhysioController_owns_body_state
+    description: "PhysioController owns physiological state logs"
+    assert: "PhysioController in files['Consciousness/10_state/body_state_history.jsonl'].allowed_writers"
+
+  - name: core_libraries_strict_readonly
+    description: "Systems with role=core_library cannot write to any slots or own any files"
+    assert: "roles['core_library'].can_create_slots == false and roles['core_library'].can_create_files == false"
+
+  - name: one_way_data_flow
+    description: "Orchestration layer (CIN, HeptRAG) has READ-ONLY access to memory"
+    assert: "CIN.can_write_files == [] and HeptStreamRAG.can_write_files == []"
+
+# ============================================================
+# INVARIANTS (EVA 8.1.0)
+# ============================================================
+
+invariants:
+  - "MSP is the ONLY system allowed to write episodic memory"
+  - "CIN and HeptRAG are STRICTLY READ-ONLY for all files"
+  - "PhysioController has exclusive write access to physiological state"
+  - "One-way data flow: Stimulus → Physio → Matrix → Qualia → RMS → MSP"
+  - "Core libraries are stateless (no slot/file ownership)"

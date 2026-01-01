@@ -1,0 +1,129 @@
+{
+  "timestamp": "2025-12-31T08:17:31.182366Z",
+  "receptors": {
+    "Amygdala_ESC_H01_ADRENALINE": {
+      "sensitization": 1.0,
+      "occupation_rate": 2.72268919101306e-10
+    },
+    "Prefrontal_Cortex_ESC_H01_ADRENALINE": {
+      "sensitization": 1.0,
+      "occupation_rate": 8.896098810794757e-09
+    },
+    "Amygdala_ESC_H02_CORTISOL": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Hippocampus_ESC_H02_CORTISOL": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Amygdala_ESC_H03_NORADRENALINE": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Locus_Coeruleus_ESC_H03_NORADRENALINE": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "VTA_ESC_H05_DOPAMINE": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Nucleus_Accumbens_ESC_H05_DOPAMINE": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Prefrontal_Cortex_ESC_H05_DOPAMINE": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Raphe_Nucleus_ESC_H06_SEROTONIN": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Prefrontal_Cortex_ESC_H06_SEROTONIN": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Amygdala_ESC_H06_SEROTONIN": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Hypothalamus_ESC_H09_OXYTOCIN": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Amygdala_ESC_H09_OXYTOCIN": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Nucleus_Accumbens_ESC_H09_OXYTOCIN": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Hypothalamus_ESC_H14_VASOPRESSIN": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Amygdala_ESC_H14_VASOPRESSIN": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Amygdala_ESC_H08_GABA": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Prefrontal_Cortex_ESC_H08_GABA": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Hippocampus_ESC_H08_GABA": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Hippocampus_ESC_H09_GLUTAMATE": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Prefrontal_Cortex_ESC_H09_GLUTAMATE": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Suprachiasmatic_Nucleus_ESC_H12_MELATONIN": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Pineal_Gland_ESC_H12_MELATONIN": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Basal_Forebrain_ESC_H22_ADENOSINE": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Prefrontal_Cortex_ESC_H22_ADENOSINE": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Periaqueductal_Gray_ESC_H15_ENDORPHIN": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Amygdala_ESC_H15_ENDORPHIN": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Basal_Forebrain_ESC_H16_ACETYLCHOLINE": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Prefrontal_Cortex_ESC_H16_ACETYLCHOLINE": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    },
+    "Hippocampus_ESC_H16_ACETYLCHOLINE": {
+      "sensitization": 1.0,
+      "occupation_rate": 0.0
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "episode_id": "ep_251230_a64ea900",
+  "timestamp": "2025-12-30T09:44:47.262946+00:00",
+  "interaction_mode": "casual",
+  "stakes_level": "low",
+  "situation_context": {
+    "context_id": "ctx_db09cc0f"
+  },
+  "state_snapshot": {
+    "EVA_matrix": {
+      "stress_load": 1.729500708476214e-08,
+      "social_warmth": 1.8592252535645853e-06,
+      "drive_level": 0.0,
+      "cognitive_clarity": 0.0,
+      "joy_level": 6.400000000000002e-05,
+      "primary_axis": 6.40172950070848e-05,
+      "secondary_axis": 1.8592252535645853e-06,
+      "affective_stability": 1.3121116148587498e-05,
+      "social_orientation": 1.8592252535645853e-06
+    },
+    "Hemodynamics": {
+      "heart_rate": 72.0,
+      "blood_pressure_sys": 120.0,
+      "blood_pressure_dia": 80.0
+    },
+    "Endocrine": {
+      "ESC_H01_ADRENALINE": 0.002067845145834638,
+      "ESC_H02_CORTISOL": 0.0,
+      "ESC_H03_NORADRENALINE": 0.0,
+      "ESC_H04_ALDOSTERONE": 0.0,
+      "ESC_H05_DOPAMINE": 0.0,
+      "ESC_H06_SEROTONIN": 0.0,
+      "ESC_H07_ENDORPHIN": 0.0,
+      "ESC_H08_GABA": 0.0,
+      "ESC_H09_OXYTOCIN": 0.0,
+      "ESC_H10_VASOPRESSIN": 0.0,
+      "ESC_H11_TESTOSTERONE": 0.0,
+      "ESC_H12_ESTROGEN": 0.0,
+      "ESC_H13_PROGESTERONE": 0.0,
+      "ESC_H14_INSULIN": 0.0,
+      "ESC_H15_GLUCAGON": 0.0,
+      "ESC_H16_LEPTIN": 0.0,
+      "ESC_H17_GHRELIN": 0.0,
+      "ESC_H18_THYROXINE": 0.0,
+      "ESC_H19_MELATONIN": 0.0,
+      "ESC_H20_GROWTH_HORMONE": 0.0,
+      "ESC_H21_PROLACTIN": 0.0,
+      "ESC_H22_ADENOSINE": 0.0,
+      "ESC_H23_HISTAMINE": 0.0
+    },
+    "Resonance_index": 0.5
+  },
+  "turn_1": {
+    "speaker": "USER",
+    "text": "I'm feeling really stressed and anxious about my work deadline...",
+    "summary": "I'm feeling really stressed and anxious about my work deadline..."
+  },
+  "turn_2": {
+    "speaker": "EVA",
+    "text": "Oh no, deadlines can be such buzzkills! What's making this one particularly stressful? Maybe we can brainstorm some ways to make it feel a little less overwhelming. I'm here to help if you want to bounce some ideas around!",
+    "summary": "Oh no, deadlines can be such buzzkills! What's making this one particularly stressful? Maybe we can "
+  },
+  "session_id": "test_session"
+}

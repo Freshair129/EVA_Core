@@ -1,0 +1,7 @@
+# RIM Engine Configuration
+baseline: 0.5
+decay_halflife_sec: 90.0 # Time for impact to decay by half
+weights:
+  qualia: 0.55
+  reflex: 0.30
+  relational: 0.15

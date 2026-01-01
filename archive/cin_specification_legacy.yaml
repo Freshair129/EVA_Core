@@ -1,0 +1,680 @@
+# CIN (Context Injection Node) Specification
+# Version: 8.1.0
+# Date: 2025-12-31
+
+meta:
+  component_name: "Context Injection Node (CIN)"
+  component_type: "orchestrator"
+  version: "8.1.0"
+  role: "Perception context builder for LLM Phase 1"
+  analogy: "Working memory buffer before conscious processing"
+
+# ============================================================
+# 1. OVERVIEW
+# ============================================================
+
+overview:
+  definition: |
+    CIN builds rich, multi-layered perception context that combines:
+    - User input
+    - Persona identity
+    - Recent conversation history
+    - Relevant semantic concepts
+    - Keyword-based memory recall
+    - Current body state (abstract)
+    - System rules and constraints
+
+  position_in_architecture: |
+    User Input → CIN (build context) → LLM start inference  → physio_core → CIN (build context) → LLM start reasoning → output
+
+  responsibilities:
+    - build_perception_context: "Construct formatted text context for LLM"
+    - inject_persona: "Load and format persona identity"
+    - retrieve_conversation_history: "Load N recent episodes from MSP"
+    - retrieve_semantic_memory: "Load related concepts from semantic graph"
+    - quick_recall: "Simple keyword-based memory retrieval"
+    - format_system_rules: "Inject prompt rules and constraints"
+
+  what_cin_does_not_do:
+    - "Cannot write to episodic log (READ-ONLY)"
+    - "No reasoning (only builds context)"
+    - "No decision making (passes to LLM)"
+    - "No biological state modification (only reads)"
+
+# ============================================================
+# 2. INPUT/OUTPUT
+# ============================================================
+
+input:
+  type: "CINInput"
+  fields:
+    user_input:
+      type: "string"
+      required: true
+      description: "Raw user text"
+      example: "วันนี้เครียดมาก งานเยอะอะ"
+
+    context_id:
+      type: "string"
+      required: false
+      description: "Unique context ID (auto-generated if not provided)"
+      example: "CIN_251231_1830_a7b3c9"
+
+    retrieve_history_limit:
+      type: "integer"
+      required: false
+      default: 5
+      description: "Number of recent episodes to retrieve"
+
+    retrieve_concepts_limit:
+      type: "integer"
+      required: false
+      default: 5
+      description: "Number of semantic concepts to retrieve"
+
+    include_quick_recall:
+      type: "boolean"
+      required: false
+      default: true
+      description: "Enable keyword-based quick recall"
+
+    current_body_state:
+      type: "dict"
+      required: false
+      default: null
+      description: "Current physiological state (optional, auto-fetched if null)"
+
+output:
+  type: "CINOutput"
+  fields:
+    context_id:
+      type: "string"
+      description: "Context identifier"
+      example: "CIN_251231_1830_a7b3c9"
+
+    perception_context:
+      type: "string"
+      description: "Formatted multi-section text for LLM"
+      format: "plain text with sections"
+
+    metadata:
+      type: "dict"
+      description: "Metadata for debugging/tracking"
+      fields:
+        episode_ids:
+          type: "list[string]"
+          description: "Episode IDs included in context"
+        concept_ids:
+          type: "list[string]"
+          description: "Concept IDs included in context"
+        recall_keywords:
+          type: "list[string]"
+          description: "Keywords used for recall"
+        timestamp:
+          type: "string"
+          description: "Context creation timestamp (ISO format)"
+
+# ============================================================
+# 3. CONTEXT STRUCTURE
+# ============================================================
+
+context_structure:
+  sections:
+    - section_id: 1
+      name: "header"
+      required: true
+      format: |
+        [CIN Phase 1 Context]
+        context_id: <context_id>
+      purpose: "Unique identifier for debugging and tracking"
+
+    - section_id: 2
+      name: "user_input"
+      required: true
+      format: |
+        [USER INPUT]
+        "<raw user text>"
+      purpose: "Original unmodified user message"
+      rules:
+        - "Preserve exact text (including typos, formatting)"
+        - "No sanitization"
+        - "No interpretation"
+
+    - section_id: 3
+      name: "persona_identity"
+      required: true
+      format: |
+        [PERSONA IDENTITY]
+        Name: <name>
+        Type: <type>
+        Version: <version>
+
+        Core Being:
+        - ตัวตน = <core_being>
+        - Default Emotion: <default_emotion>
+
+        Communication:
+        - Formality: <0.0-1.0> | Directness: <0.0-1.0>
+        - Language: <language_preference>
+
+        Memory Promise:
+        - "<memory_promise>"
+      purpose: "Define EVA's identity and communication style"
+      source: "Consciousness/08_User_block/Persona_01.md"
+
+    - section_id: 4
+      name: "conversation_history"
+      required: true
+      format: |
+        [CONVERSATION HISTORY]
+        (<N> Episodes ล่าสุด)
+
+        Episode 1 (ล่าสุด):
+        - episode_id: <ep_id>
+        - summary: "User: <user_text> | Eva: <eva_response>"
+        - emotion_label: "<emotion>"
+        - Resonance_index: <0.0-1.0>
+
+        Episode 2:
+        ...
+      purpose: "Recent conversation context for continuity"
+      source: "MSP Episodic Memory (via ConsciousnessManager)"
+      retrieval: "Latest N episodes (default: 5)"
+      fields:
+        episode_id: "Unique episode identifier"
+        summary: "Condensed conversation turn"
+        emotion_label: "Detected emotion (from RMS/trajectory)"
+        resonance_index: "Memory importance score (0-1)"
+
+    - section_id: 5
+      name: "semantic_memory"
+      required: false
+      format: |
+        [SEMANTIC MEMORY]
+        (Concepts เกี่ยวข้องกับ "<keywords>")
+
+        Concept 1:
+        - concept: "<concept_id>"
+        - definition: "<description>"
+        - confidence: <0.0-1.0>
+        - last_updated: "YYYY-MM-DD"
+
+        Concept 2:
+        ...
+      purpose: "Related knowledge and concepts for understanding"
+      source: "MSP Semantic Memory / Neo4j graph (optional)"
+      retrieval:
+        - "Extract keywords from user input"
+        - "Query semantic graph for related concepts"
+        - "Rank by relevance/confidence"
+
+    - section_id: 6
+      name: "quick_recall"
+      required: false
+      format: |
+        [QUICK RECALL]
+        (Keyword-based: "<keyword1>", "<keyword2>")
+
+        Memory 1:
+        - episode_tag: "<tag>"
+        - summary: "<brief summary>"
+
+        Memory 2:
+        ...
+      purpose: "Fast keyword-based memory retrieval"
+      source: "Episodic index (keyword matching)"
+      retrieval:
+        - "Extract keywords from user input"
+        - "Simple substring/tag matching in episodic index"
+        - "Return top N matches"
+      note: "Simpler than full Agentic RAG (7-stream). Used for quick context."
+
+    - section_id: 7
+      name: "current_body_state"
+      required: false
+      format: |
+        [CURRENT BODY STATE]
+        (Abstract physiological state)
+
+        State Summary: "<abstract description>"
+        - Arousal: <low|medium|high>
+        - Valence: <negative|neutral|positive>
+        - Dominant Hormones: <hormone1>, <hormone2>
+
+        Autonomic Tone:
+        - Sympathetic: <0.0-1.0>
+        - Parasympathetic: <0.0-1.0>
+      purpose: "LLM receives abstract body state (NOT raw numbers)"
+      source: "PhysioCoreAdapter.get_snapshot() → ContextBuilder.build_abstract_context()"
+      format_rules:
+        - "✅ Abstract descriptions (EVA กำลังเครียด)"
+        - "❌ NOT raw numbers (Cortisol: 0.75)"
+      new_in_8_1_0: "Follows conscious/unconscious separation design"
+
+    - section_id: 8
+      name: "prompt_rules"
+      required: true
+      format: |
+        [PROMPT RULES]
+        - LLM must not modify memory
+        - LLM must follow persona voice
+        - ห้ามเดา ห้ามมั่ว
+      purpose: "System constraints and safety rules"
+      rules:
+        - "LLM cannot write to memory directly"
+        - "Must maintain persona consistency"
+        - "No hallucination, no guessing"
+
+    - section_id: 9
+      name: "output_formatting"
+      required: true
+      format: |
+        [OUTPUT FORMATTING]
+        - แบ่งย่อหน้า (2 ประโยค/ย่อหน้า)
+        - ใช้ bullet points
+        - ตอบสั้น กระชับ
+      purpose: "Response formatting guidelines"
+      rules:
+        - "Short paragraphs (2 sentences max)"
+        - "Use bullet points for lists"
+        - "Concise, direct language"
+
+    - section_id: 10
+      name: "instruction"
+      required: true
+      format: |
+        [INSTRUCTION]
+        1. อ่าน user input
+        2. ดูบริบทจาก:
+           - Conversation history (N episodes)
+           - Semantic memory (concepts)
+           - Quick recall (keyword matches)
+           - Current body state (if provided)
+        3. ระบุ semantic signal:
+           - tags: [list of emotional/conceptual tags]
+           - concepts: [deeper psychological constructs]
+           - intensity: "low" | "medium" | "high"
+        4. ระบุ emotion_detected: primary emotion for this input
+        5. Return JSON with semantic_signal and emotion_detected
+      purpose: "Step-by-step instructions for LLM"
+      output_format:
+        type: "json"
+        schema:
+          semantic_signal:
+            tags:
+              type: "list[string]"
+              example: ["stress", "work_overload"]
+            concepts:
+              type: "list[string]"
+              example: ["acute_stress", "deadline_pressure"]
+            intensity:
+              type: "string"
+              enum: ["low", "medium", "high"]
+          emotion_detected:
+            type: "string"
+            example: "stress"
+          reasoning:
+            type: "string"
+            example: "User expresses high stress from workload"
+
+# ============================================================
+# 4. IMPLEMENTATION
+# ============================================================
+
+implementation:
+  class_name: "ContextInjectionNode"
+  file_path: "orchestrator/cin.py"
+
+  dependencies:
+    - "orchestrator.consciousness_manager.ConsciousnessManager"
+    - "orchestrator.context_builder.ContextBuilder (optional)"
+
+  initialization:
+    parameters:
+      consciousness_manager:
+        type: "ConsciousnessManager"
+        required: true
+        description: "File I/O API for Consciousness/"
+      persona_path:
+        type: "string"
+        required: true
+        description: "Path to Persona_01.md"
+        example: "Consciousness/08_User_block/Persona_01.md"
+      context_builder:
+        type: "ContextBuilder"
+        required: false
+        description: "For body state translation (numbers → abstract)"
+
+  main_method:
+    name: "build_context"
+    input: "CINInput"
+    output: "CINOutput"
+    description: "Main entry point to build perception context"
+
+  helper_methods:
+    - name: "_build_header"
+      returns: "string"
+      description: "Format header section"
+
+    - name: "_build_user_input"
+      returns: "string"
+      description: "Format user input section"
+
+    - name: "_build_persona_identity"
+      returns: "string"
+      description: "Format persona section"
+
+    - name: "_build_conversation_history"
+      returns: "string"
+      description: "Format conversation history section"
+
+    - name: "_build_semantic_memory"
+      returns: "string"
+      description: "Format semantic memory section"
+
+    - name: "_build_quick_recall"
+      returns: "string"
+      description: "Format quick recall section"
+
+    - name: "_build_body_state"
+      returns: "string"
+      description: "Format body state section"
+
+    - name: "_build_prompt_rules"
+      returns: "string"
+      description: "Format prompt rules section"
+
+    - name: "_build_output_formatting"
+      returns: "string"
+      description: "Format output formatting section"
+
+    - name: "_build_instruction"
+      returns: "string"
+      description: "Format instruction section"
+
+    - name: "_retrieve_conversation_history"
+      returns: "list[dict]"
+      description: "Retrieve recent episodes from MSP"
+
+    - name: "_retrieve_semantic_concepts"
+      returns: "list[dict]"
+      description: "Retrieve related concepts from semantic memory"
+
+    - name: "_quick_recall"
+      returns: "list[dict]"
+      description: "Quick keyword-based recall"
+
+    - name: "_extract_keywords"
+      returns: "list[string]"
+      description: "Extract keywords from text"
+
+    - name: "_fetch_body_state"
+      returns: "dict"
+      description: "Fetch current body state from Consciousness"
+
+    - name: "_load_persona"
+      returns: "dict"
+      description: "Load persona from file"
+
+    - name: "_generate_context_id"
+      returns: "string"
+      description: "Generate unique context ID"
+
+# ============================================================
+# 5. CONFIGURATION
+# ============================================================
+
+configuration:
+  config_file: "config/cin_config.yaml"
+
+  settings:
+    default_history_limit:
+      type: "integer"
+      default: 5
+      description: "Default number of episodes to retrieve"
+
+    default_concepts_limit:
+      type: "integer"
+      default: 5
+      description: "Default number of concepts to retrieve"
+
+    default_recall_limit:
+      type: "integer"
+      default: 3
+      description: "Default number of quick recall memories"
+
+    persona_path:
+      type: "string"
+      default: "Consciousness/08_User_block/Persona_01.md"
+      description: "Path to persona file"
+
+    enable_body_state:
+      type: "boolean"
+      default: true
+      description: "Include body state in context"
+
+    enable_quick_recall:
+      type: "boolean"
+      default: true
+      description: "Include quick keyword recall"
+
+    keyword_extraction:
+      method:
+        type: "string"
+        enum: ["simple", "nlp"]
+        default: "simple"
+        description: "Keyword extraction method"
+      min_keyword_length:
+        type: "integer"
+        default: 2
+        description: "Minimum keyword length"
+      max_keywords:
+        type: "integer"
+        default: 5
+        description: "Maximum keywords to extract"
+
+    semantic_retrieval:
+      method:
+        type: "string"
+        enum: ["keyword_match", "neo4j_graph"]
+        default: "keyword_match"
+        description: "Semantic retrieval method"
+      min_confidence:
+        type: "float"
+        default: 0.7
+        description: "Minimum concept confidence"
+
+# ============================================================
+# 6. USAGE EXAMPLE
+# ============================================================
+
+usage_example: |
+  from orchestrator.consciousness_manager import ConsciousnessManager
+  from orchestrator.cin_builder import CognitivePerceptionNode, CINInput
+  from orchestrator.context_builder import ContextBuilder
+
+  # Initialize
+  cm = ConsciousnessManager("E:/The Human Algorithm/T2/EVA 8.1.0/Consciousness")
+  context_builder = ContextBuilder("config/context_thresholds.yaml")
+  cin = CognitivePerceptionNode(
+      consciousness_manager=cm,
+      persona_path="Consciousness/08_User_block/Persona_01.md",
+      context_builder=context_builder
+  )
+
+  # Build context
+  cin_input = CINInput(
+      user_input="วันนี้เครียดมาก งานเยอะอะ",
+      retrieve_history_limit=5,
+      retrieve_concepts_limit=5,
+      include_quick_recall=True
+  )
+
+  cin_output = cin.build_context(cin_input)
+
+  # Send to LLM
+  from services.llm_bridge import LLMBridge
+  llm = LLMBridge()
+
+  response = llm.generate(cin_output.perception_context)
+  # LLM returns: {"semantic_signal": {...}, "emotion_detected": "stress"}
+
+# ============================================================
+# 7. INTEGRATION
+# ============================================================
+
+integration:
+  with_chunking_orchestrator: |
+    class ChunkingOrchestrator:
+        def __init__(self, config_path: str):
+            self.cm = ConsciousnessManager(...)
+            self.cin = CognitivePerceptionNode(...)
+            self.llm = LLMBridge()
+            self.chunker = SemanticChunkerV2(self.llm)
+
+        def process_input(self, user_input: str) -> str:
+            # STEP 0: Build perception context with CIN
+            cin_input = CINInput(user_input=user_input)
+            cin_output = self.cin.build_context(cin_input)
+
+            # STEP 1: Semantic chunking + analysis (with CIN context)
+            chunk_results = self.chunker.chunk_and_analyze(
+                user_input=user_input,
+                context=cin_output.perception_context  # ← CIN context injected!
+            )
+
+            # Continue with iterative chunk processing...
+
+# ============================================================
+# 8. TESTING
+# ============================================================
+
+testing:
+  unit_tests:
+    - name: "test_cin_header"
+      description: "Verify header section formatting"
+      assert:
+        - "'[CIN Phase 1 Context]' in output"
+        - "context_id in output"
+
+    - name: "test_cin_user_input"
+      description: "Verify user input section"
+      assert:
+        - "'[USER INPUT]' in output"
+        - "user text preserved exactly"
+
+    - name: "test_cin_full_context"
+      description: "Verify all sections present"
+      assert:
+        - "All 10 sections present"
+        - "Sections in correct order"
+
+    - name: "test_cin_persona_loading"
+      description: "Verify persona data loaded correctly"
+      assert:
+        - "persona['name'] == 'EVA / อีวา'"
+        - "persona['version'] == '8.1.0'"
+
+    - name: "test_cin_history_retrieval"
+      description: "Verify conversation history retrieval"
+      assert:
+        - "len(episodes) <= retrieve_history_limit"
+        - "episodes sorted by timestamp (latest first)"
+
+    - name: "test_cin_keyword_extraction"
+      description: "Verify keyword extraction"
+      input: "วันนี้เครียดมาก งานเยอะอะ"
+      assert:
+        - "'เครียด' in keywords"
+        - "'งาน' in keywords"
+
+  integration_tests:
+    - name: "test_cin_with_llm"
+      description: "Test CIN → LLM pipeline"
+      steps:
+        - "Build CIN context"
+        - "Send to LLM"
+        - "Verify LLM returns semantic_signal"
+
+    - name: "test_cin_with_orchestrator"
+      description: "Test CIN in full orchestrator pipeline"
+      steps:
+        - "ChunkingOrchestrator.process_input()"
+        - "Verify CIN context injected"
+        - "Verify chunks analyzed with context"
+
+# ============================================================
+# 9. CONTEXT ID FORMAT
+# ============================================================
+
+context_id_format:
+  pattern: "CIN_<YYMMDD>_<HHMM>_<6-char-hash>"
+  example: "CIN_251231_1830_a7b3c9"
+  components:
+    prefix:
+      value: "CIN"
+      description: "Component identifier"
+    date:
+      format: "YYMMDD"
+      example: "251231"
+      description: "Date (year-month-day)"
+    time:
+      format: "HHMM"
+      example: "1830"
+      description: "Time (24-hour)"
+    hash:
+      format: "6 chars (lowercase alphanumeric)"
+      example: "a7b3c9"
+      description: "Random suffix for uniqueness"
+
+# ============================================================
+# 10. FUTURE ENHANCEMENTS
+# ============================================================
+
+future_enhancements:
+  phase_2_medium_priority:
+    - name: "Neo4j Integration"
+      description: "Query semantic graph for related concepts"
+      status: "planned"
+
+    - name: "NLP Keyword Extraction"
+      description: "Use NLP models for better keyword extraction"
+      status: "planned"
+
+    - name: "Agentic RAG Integration"
+      description: "Replace quick recall with full 7-stream RAG"
+      status: "planned"
+
+    - name: "Persona Parsing"
+      description: "Dynamic persona loading from Persona_01.md"
+      status: "planned"
+
+  phase_3_low_priority:
+    - name: "Multi-language Support"
+      description: "Auto-detect language and adjust formatting"
+      status: "future"
+
+    - name: "Context Compression"
+      description: "LLM-based context summarization for long histories"
+      status: "future"
+
+    - name: "Adaptive Retrieval"
+      description: "Adjust retrieval limits based on input complexity"
+      status: "future"
+
+# ============================================================
+# 11. REFERENCES
+# ============================================================
+
+references:
+  memory_schemas:
+    - "Memory_&_Soul_Passaport/schema/Episodic_Memory_Schema_v2.json"
+    - "Memory_&_Soul_Passaport/schema/Semantic_Memory_Schema_v2.json"
+
+  related_specs:
+    - "Operation_System/chunking_orchestrator_spec.yaml"
+    - "Operation_System/semantic_chunker_spec.yaml"
+    - "Operation_System/context_builder_spec.yaml"
+
+  example_payload:
+    - "example_cin_phase1_payload.txt"

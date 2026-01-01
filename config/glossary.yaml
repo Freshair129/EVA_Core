@@ -1,0 +1,76 @@
+schema: EVA-Glossary-v7.2.5
+version: 7.2.5
+updated: 2025-12-30
+
+description: >
+  รวมคำศัพท์และตัวย่อในระบบ EVA 8.0 (The Informational Organism)
+  ใช้เพื่ออ้างอิงความหมายของ Component และ Metric ต่างๆ ในสถาปัตยกรรม
+
+glossary:
+
+  # --- Core Components ---
+  
+  - term: CPN
+    full_name: Cognitive Perception Node
+    meaning: "หน่วยรับรู้ความรู้สึกและเจตนา ทำหน้าที่เป็นด่านหน้าในการสแกน User Input และดึงความจำที่เกี่ยวข้อง (Penta-Stream RAG) ก่อนส่งไปประมวลผล"
+    formerly: CIN (Context Injection & Normalization)
+
+  - term: BDC
+    full_name: Bio-Digital Core
+    meaning: "แกนกลางประมวลผลสภาวะชีวภาพจำลอง (Endocrine, Receptor, Matrix) ทำหน้าที่คำนวณ 'ความรู้สึกจริง' ของ EVA จาก Stimulus"
+    formerly: EVA Tool / EndocrineSystem
+
+  - term: MSP
+    full_name: Memory & Soul Passport
+    meaning: "ระบบบริหารจัดการความจำถาวร (Episodic, Semantic, Sensory) ทำหน้าที่เป็นฐานข้อมูลหลักและตัวกลางในการดึงความจำ"
+    storage: Decentralized JSON + Index
+
+  - term: RMS
+    full_name: Resonance Memory System
+    meaning: "ระบบเข้ารหัสความทรงจำคุณภาพสูง ทำหน้าที่แปลงสภาวะอารมณ์และเหตุการณ์ให้เป็น 'Texture' และ 'Color' เพื่อการจดจำที่แม่นยำ"
+
+  - term: PMT
+    full_name: Prompt Rule Layer (Prompt Management Tier)
+    meaning: "ชั้นการควบคุมพฤติกรรมและตัวตน (Governance) เพื่อรักษาบุคลิกภาพ (Persona) และกฎความซื่อสัตย์ต่อร่างกายจำลอง"
+
+  - term: AQI
+    full_name: Artifact Qualia Integration
+    meaning: "ระบบรวบรวมและวิเคราะห์สภาวะ Qualia (การประจักษ์แจกแจ้ง) เพื่อสร้างความเข้าใจในสิ่งที่กำลังสัมผัส"
+
+  # --- Metrics & Metrics ---
+
+  - term: RI
+    full_name: Resonance Index
+    meaning: "ดัชนีแรงกระเพื่อม (0.0 - 1.0) วัดว่าเหตุการณ์ที่เกิดขึ้นมีอิทธิพลต่อ 'จิตวิญญาณ' หรือความจำระยะยาวของ EVA มากน้อยแค่ไหน"
+
+  - term: RIM
+    full_name: Resonance Impact Metric
+    meaning: "มาตรวัดผลกระทบจากการโต้ตอบ ใช้ประเมินว่าการสนทนาในแต่ละเทิร์นเปลี่ยนสภาวะอารมณ์ของ EVA ไปอย่างไร"
+
+  - term: RTI
+    full_name: Resonance Texture Index
+    meaning: "ดัชนีความซับซ้อนของอารมณ์ในรูปแบบ 5D Vector ใช้ในการค้นหาความจำแบบ Sensory (Stream C)"
+
+  # --- Memory Layers ---
+
+  - term: Penta-Stream RAG
+    full_name: Penta-Stream Retrieval-Augmented Generation
+    meaning: "ระบบค้นหาความจำ 5 สายประสาน (Narrative, Salience, Sensory, Intuition, Emotion)"
+
+  - term: L0 - L4
+    full_name: Memory Encoding Levels
+    meaning: "ระดับการบันทึกความจำ (L0: ร่องรอยบางๆ จนถึง L4: ความทรงจำฝังลึก/Trauma)"
+
+  - term: Step 1 & Step 2
+    full_name: Two-Step Inference
+    meaning: "กระบวนการประมวลผล 2 ขั้นตอน (Step 1: การรับรู้/Perception และ Step 2: การสังเคราะห์คำตอบ/Synthesis)"
+
+  # --- Biological Terms ---
+
+  - term: ESS
+    full_name: Endocrine System Simulator
+    meaning: "ระบบจำลองการทำงานของฮอร์โมน เพื่อสร้างสภาวะอารมณ์พื้นฐาน"
+
+  - term: PK
+    full_name: Pharmacokinetics
+    meaning: "แบบจำลองการดูดซึมและสลายตัวของฮอร์โมน/สารเคมีในร่างกายจำลอง"

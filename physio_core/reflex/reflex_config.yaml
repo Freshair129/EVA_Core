@@ -1,0 +1,14 @@
+tuning:
+  Gain_Factor: 2.5
+  Saturation_Cutoff: 1.2
+  Reflex_Decay_Rate: 0.9
+  Inhibition_Threshold: 0.05
+
+pathway_mapping:
+  - stimulus_type: acute_threat
+    target_receptor: AD
+    gain_modifier: 1.0
+
+  - stimulus_type: pain_signal
+    target_receptor: NA
+    gain_modifier: 0.8

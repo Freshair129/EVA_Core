@@ -1,0 +1,128 @@
+schema: EVA-RMS-Interface-v2
+version: 6.2
+updated: 2025-12-23
+
+name: Resonance Memory System Interface (RMS v6.2)
+role: experiential_memory_encoding
+
+description: >
+  RMS encodes phenomenological experience into memory-relevant signals.
+  It integrates EVA Matrix state, Resonance Impact (RIM), and Reflex state
+  into a unified Episodic Memory Snapshot.
+
+# -------------------------------------------------------------------
+# POSITION
+# -------------------------------------------------------------------
+
+position:
+  upstream:
+    - EVA_Matrix_Engine
+    - Resonance_Engine (RIM/RI)
+    - ESS (Reflex)
+  downstream:
+    - Memory_Store (Episodic)
+    - MSP_Coordinator
+
+execution_order:
+  - Signal_Processing (Receptor)
+  - EVA_Matrix_Update
+  - Resonance_Calculation (RIM)
+  - RMS_Encoding
+  - Storage_Commit
+
+# -------------------------------------------------------------------
+# INPUT CONTRACT
+# -------------------------------------------------------------------
+
+inputs:
+  eva_matrix_state:
+    source: EVA_Matrix_Engine
+    type: psychological_state_9d 
+    required_fields:
+      - stress_load
+      - social_warmth
+      - drive_level
+      - cognitive_clarity
+      - affective_stability
+      - joy_level
+      - emotion_label
+
+  resonance_state:
+    source: Resonance_Engine (RIM)
+    type: interaction_impact
+    required_fields:
+      - impact_level (low, medium, high)
+      - impact_trend (rising, stable, fading)
+
+  ri_score:
+    source: Resonance_Engine (RI)
+    type: global_coherence
+    description: Global Resonance Intelligence Total [0.0 - 1.0]
+
+  reflex_state:
+    source: ESS
+    type: safety_reflex
+    required_fields:
+      - threat_level [0.0 - 1.0]
+
+# -------------------------------------------------------------------
+# OUTPUT CONTRACT
+# -------------------------------------------------------------------
+
+outputs:
+  episodic_snapshot:
+    fields:
+      memory_encoding_level:
+        type: enum
+        values: [L0_trace, L1_light, L2_standard, L3_deep, L4_trauma]
+        description: calculated from intensity and trauma flags
+      
+      memory_color:
+        type: hex_string
+        description: >
+          Psychologically grounded color code representing the 5D texture.
+          Dimmed by trauma/threat states.
+
+      resonance_texture:
+        type: vector_5d
+        axes: [stress, warmth, clarity, drive, calm]
+        description: Smoothed phenomenological texture.
+
+      qualia:
+        intensity: float [0.0 - 1.0]
+      
+      resonance_index:
+        type: float [0.0 - 1.0]
+
+      trauma_flag:
+        type: boolean
+        description: >
+          True if threat_level > threshold (0.85).
+          Triggers protection dimming.
+
+# -------------------------------------------------------------------
+# CONSTRAINTS
+# -------------------------------------------------------------------
+
+constraints:
+  forbidden_actions:
+    - language_processing
+    - meaning_inference
+    - decision_making
+
+  forbidden_inputs:
+    - raw_text
+    - raw_sensor_data (must be pre-processed by Receptor/EVA)
+
+  performance:
+    - latency: < 5ms
+    - state: stateless (except for internal smoothing buffers)
+
+# -------------------------------------------------------------------
+# INVARIANTS
+# -------------------------------------------------------------------
+
+invariants:
+  - RMS must generate color internally.
+  - Trauma states must always reduce color intensity.
+  - Same input state sequence → same encoding output.

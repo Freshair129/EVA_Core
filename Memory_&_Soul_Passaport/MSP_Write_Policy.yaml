@@ -1,0 +1,90 @@
+schema: EVA-MSP-Write-Policy-v7.2.5
+version: 7.2.5
+updated: 2025-12-30
+
+owner: MSP
+role: >
+  Authoritative policy governing how MSP validates, writes,
+  suppresses, and promotes memory across EVA memory layers.
+  MSP is the sole writer of persistent memory.
+
+# ==========================================================
+# CORE PRINCIPLES
+# ==========================================================
+
+principles:
+  - MSP is the single authority for all memory writes.
+  - LLM output is always non-authoritative by default.
+  - Memory is written in a decentralized manner (individual JSON files).
+  - A lightweight search index (L0) is maintained for rapid RAG access.
+  - Separation of experience, hypothesis, and truth is mandatory.
+
+# ==========================================================
+# MEMORY TIERS
+# ==========================================================
+
+memory_tiers:
+
+  episodic:
+    description: >
+      Individual JSON records per interaction.
+      Contains full biological state, narrative, and crosslinks.
+    storage: "Consciousness/01_Episodic_memory/episodes/{episode_id}.json"
+
+  episodic_index:
+    description: >
+      Lightweight JSONL index for high-speed metadata querying.
+      Powers Penta-Stream RAG.
+    storage: "Consciousness/01_Episodic_memory/episodic_index.jsonl"
+
+  semantic:
+    description: >
+      Concepts and narrative connections maintained in a sidecar log or graph.
+
+  user_block:
+    description: >
+      Hard truths and identity markers confirmed by the user.
+
+# ==========================================================
+# EPISODIC WRITE POLICY (Decentralized)
+# ==========================================================
+
+episodic_write:
+
+  authority: MSP
+  default_action: dual_write (Deep Storage + Search Index)
+
+  required_fields:
+    - episode_id
+    - timestamp
+    - session_id
+    - event_label
+    - episode_tag
+    - state_snapshot
+    - turn_1
+    - turn_2
+
+  index_fields:
+    - episode_id
+    - timestamp
+    - resonance_index
+    - emotion_label
+    - event_label
+    - episode_tag
+    - tags
+    - summary_user
+    - summary_eva
+
+# ==========================================================
+# PROMOTION & RETENTION
+# ==========================================================
+
+retention_policy:
+  episodic_json: permanent (Deep Archive)
+  episodic_index: cached/current (Search Buffer)
+  semantic: decay_if_unused
+  user_block: permanent
+
+audit:
+  log_all_write_decisions: true
+  authoritative: true
