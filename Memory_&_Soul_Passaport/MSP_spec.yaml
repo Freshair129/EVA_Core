@@ -20,6 +20,26 @@ msp_architecture:
       format: "JSON + JSONL Index (Split Storage)"
       purpose: "Long-term conversation history and biological state snapshots."
       description: "Episodic_memory.jsonl,Episodic_index.json,EP_01.json"
+      episode_id_format:
+        pattern: "{PERSONA}_EP{number}"
+        examples: ["EVA_EP01", "EVA_EP79", "ALEX_EP123"]
+        persona_code:
+          max_length: 4
+          abbreviation_rule: "Airport code style (consonants first, max 4 chars)"
+          examples:
+            - name: "EVA"
+              code: "EVA"
+            - name: "Alexander"
+              code: "LXND"
+            - name: "Christopher"
+              code: "CHRS"
+            - name: "สมหญิง"
+              code: "สมหญ"
+        episode_number:
+          format: "Zero-padded, minimum 2 digits"
+          auto_increment: true
+          counter_file: "Consciousness/09_state/episode_counter.json"
+        rationale: "Human-readable IDs for easy reference in memory recall (e.g., 'at [EVA_EP79] user said they're allergic to seafood')"
       storage_optimization:
         split_strategy: "user_llm_separation"
         user_episodes:
@@ -44,6 +64,38 @@ msp_architecture:
       format: "JSONL Sidecar / MongoDB Sidecars"
       purpose: "High-fidelity vectors (Resonance Textures) and raw signal logs."
 
+    - id: SESSION_MEMORY
+      path: "Consciousness/04_Session_memory/"
+      format: "JSON"
+      purpose: "Compressed session snapshots (Core and Sphere layers)"
+      filename_format:
+        pattern: "{develop_id}_SP{sphere}C{core}_SS{session}.json"
+        examples:
+          - "THA-01-S003_SP1C1_SS1.json  # Session 1 in Core 1, Sphere 1 (clone S003)"
+          - "THA-01_SP1C1_SS6.json       # Session 6 in Core 1, Sphere 1 (original)"
+          - "THA-01-S003_SP1C2_SS1.json  # Session 1 in Core 2, Sphere 1 (clone S003)"
+        components:
+          develop_id:
+            format: "{project_id}-{subject_id}"
+            description: "Development ID + Subject ID (clone lineage indicator)"
+            examples:
+              - name: "THA-01"
+                description: "Original instance (no -S suffix)"
+              - name: "THA-01-S003"
+                description: "Clone instance (Subject 003)"
+              - name: "USA-01-S002"
+                description: "USA project clone (Subject 002)"
+            source: "orchestrator/PMT_PromptRuleLayer/Identity/soul.md (Deverlop_id field)"
+            note: "Subject ID only appears for clones. S001 = original, S002+ = clones"
+          hierarchy:
+            sphere: "SP{number} (1-indexed, starts at 1)"
+            core: "C{number} (1-indexed, starts at 1)"
+            session: "SS{number} (position in current Core, 0-7)"
+        rationale: >
+          Develop ID indicates clone lineage (original vs clone).
+          Filenames reflect compression hierarchy for easy navigation.
+          Example: "THA-01-S003_SP1C1_SS6 = Clone S003, 6th session of Core 1 in Sphere 1"
+
     - id: CONSCIOUSNESS_STATE
       path: "Consciousness/09_state/"
       format: "JSON"
@@ -57,11 +109,24 @@ msp_architecture:
 
     - id: memory_compression
       description: "ทุกๆ 8 session สกัดเป็น 1 Core ทุกๆ 8 Core สกัดเป็น 1 Sphere"
+      hierarchy:
+        session_to_core: "8 sessions → 1 Core"
+        core_to_sphere: "8 Cores → 1 Sphere"
+        total_capacity: "64 sessions per Sphere"
       Index_counters:
-        Sphere_seq: 0
-        Core_seq: 0
-        Session_seq: 0
-      last_update: "2025-11-19T11:37:30"
+        location: "Consciousness/09_state/compression_counters.json"
+        fields:
+          Session_seq: "Position in current Core (0-7, resets after each Core)"
+          Core_seq: "Number of completed Cores (0-7, resets after each Sphere)"
+          Sphere_seq: "Number of completed Spheres (cumulative)"
+          Total_sessions: "Cumulative session count (never resets)"
+      session_memory_naming:
+        enabled: true
+        format: "{develop_id}_SP{sphere}C{core}_SS{session}.json"
+        develop_id_source: "soul.md (Deverlop_id field)"
+        clone_indicator: "-S{number} suffix (only for clones, S001 original)"
+        storage: "Consciousness/04_Session_memory/"
+      last_update: "2026-01-01"
 
 # --- Retrieval Strategies (Penta-Stream RAG v8.0) ---
 

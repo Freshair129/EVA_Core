@@ -1,0 +1,47 @@
+{
+  "episode_id": "EVA_EP01",
+  "timestamp": "2026-01-01T15:42:04.098068",
+  "session_id": "ec6669a4",
+  "event_label": "greeting_expressed",
+  "episode_tag": "routine",
+  "episode_type": "interaction",
+  "compression_meta": {
+    "session_seq": 3,
+    "core_seq": 1,
+    "sphere_seq": 0
+  },
+  "situation_context": {
+    "context_id": "ctx_v8_260101_154159_f0625c44",
+    "interaction_mode": "casual",
+    "stakes_level": "low",
+    "time_pressure": "low"
+  },
+  "turn_1": {
+    "speaker": "user",
+    "raw_text": "สวัสดีค่ะ",
+    "summary": "สวัสดีค่ะ",
+    "affective_inference": {
+      "emotion_signal": "greeting",
+      "intensity": 0.0,
+      "confidence": 0.8
+    },
+    "semantic_frames": [
+      "greeting"
+    ],
+    "salience_anchor": {
+      "phrase": "สวัสดีค่ะ",
+      "Resonance_impact": 0.26
+    }
+  },
+  "state_snapshot": {
+    "EVA_matrix": {
+      "stress_load": 0.0,
+      "social_warmth": 0.7,
+      "drive_level": 0.3,
+      "cognitive_clarity": 1.0,
+      "joy_level": 0.8,
+      "emotion_label": "greeting"
+    },
+    "Resonance_index": 0.7
+  }
+}

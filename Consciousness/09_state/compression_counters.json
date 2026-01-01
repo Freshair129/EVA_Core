@@ -1,11 +1,7 @@
 {
-  "Session_seq": 3,
+  "Session_seq": 2,
   "Core_seq": 1,
   "Sphere_seq": 0,
-  "last_update": "2026-01-01T15:23:46.471838",
-  "meta": {
-    "description": "Memory compression counters for hierarchical compression",
-    "compression_rule": "8 sessions → 1 Core, 8 Cores → 1 Sphere",
-    "created": "2026-01-01T15:30:00"
-  }
+  "Total_sessions": 10,
+  "last_update": "2026-01-01T16:39:06.573963"
 }

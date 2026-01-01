@@ -1,0 +1,12 @@
+{
+  "current_episode": 3,
+  "last_update": "2026-01-01T15:42:12.237604",
+  "persona_code": "EVA",
+  "meta": {
+    "description": "Episode counter for human-readable episode IDs",
+    "format": "{persona_code}_EP{number}",
+    "example": "EVA_EP01, EVA_EP79",
+    "persona_code_max_length": 4,
+    "auto_increment": true
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "episode_id": "EVA_EP01",
+  "turn_2": {
+    "speaker": "eva",
+    "text_excerpt": "(Feeling a sense of calm and warmth, like a gentle wave) สวัสดีค่ะบอส สบายดีไหมคะ?\n",
+    "summary": "(Feeling a sense of calm and warmth, like a gentle wave) สวัสดีค่ะบอส สบายดีไหมคะ?\n",
+    "epistemic_mode": "assert"
+  },
+  "state_snapshot": {
+    "Endocrine": {
+      "ESC_H01_ADRENALINE": 0.0,
+      "ESC_H02_CORTISOL": 0.0,
+      "ESC_H09_OXYTOCIN": 0.7,
+      "ESC_H03_NORADRENALINE": 0.0,
+      "ESC_H04_ALDOSTERONE": 0.0,
+      "ESC_H05_DOPAMINE": 0.0,
+      "ESC_H06_SEROTONIN": 0.0,
+      "ESC_H07_ENDORPHIN": 0.0,
+      "ESC_H08_GABA": 0.0,
+      "ESC_H10_VASOPRESSIN": 0.0,
+      "ESC_H11_TESTOSTERONE": 0.0,
+      "ESC_H12_ESTROGEN": 0.0,
+      "ESC_H13_PROGESTERONE": 0.0,
+      "ESC_H14_INSULIN": 0.0,
+      "ESC_H15_GLUCAGON": 0.0,
+      "ESC_H16_LEPTIN": 0.0,
+      "ESC_H17_GHRELIN": 0.0,
+      "ESC_H18_THYROXINE": 0.0,
+      "ESC_H19_MELATONIN": 0.0,
+      "ESC_H20_GROWTH_HORMONE": 0.0,
+      "ESC_H21_PROLACTIN": 0.0,
+      "ESC_H22_ADENOSINE": 0.0,
+      "ESC_H23_HISTAMINE": 0.0
+    },
+    "memory_encoding_level": "L2_standard",
+    "memory_color": "#808080",
+    "qualia": {
+      "intensity": 0.0
+    },
+    "reflex": {
+      "threat_level": 0.0
+    }
+  }
+}

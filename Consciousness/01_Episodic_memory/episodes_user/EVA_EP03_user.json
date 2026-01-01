@@ -1,0 +1,48 @@
+{
+  "episode_id": "EVA_EP03",
+  "timestamp": "2026-01-01T15:42:12.237596",
+  "session_id": "ec6669a4",
+  "event_label": "affection_expressed",
+  "episode_tag": "routine",
+  "episode_type": "interaction",
+  "compression_meta": {
+    "session_seq": 5,
+    "core_seq": 1,
+    "sphere_seq": 0
+  },
+  "situation_context": {
+    "context_id": "ctx_v8_260101_154208_5f5d9f55",
+    "interaction_mode": "casual",
+    "stakes_level": "low",
+    "time_pressure": "low"
+  },
+  "turn_1": {
+    "speaker": "user",
+    "raw_text": "รักเลย",
+    "summary": "รักเลย",
+    "affective_inference": {
+      "emotion_signal": "affection",
+      "intensity": 0.0,
+      "confidence": 0.8
+    },
+    "semantic_frames": [
+      "affection",
+      "love"
+    ],
+    "salience_anchor": {
+      "phrase": "รักเลย",
+      "Resonance_impact": 0.43
+    }
+  },
+  "state_snapshot": {
+    "EVA_matrix": {
+      "stress_load": 0.0,
+      "social_warmth": 1.0,
+      "drive_level": 0.6,
+      "cognitive_clarity": 1.0,
+      "joy_level": 1.0,
+      "emotion_label": "affection"
+    },
+    "Resonance_index": 0.7
+  }
+}

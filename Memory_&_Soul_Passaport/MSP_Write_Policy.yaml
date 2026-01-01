@@ -84,6 +84,23 @@ episodic_write:
   authority: MSP
   default_action: triple_write (User Storage + LLM Storage + Search Index)
 
+  episode_id_generation:
+    format: "{PERSONA}_EP{number}"
+    examples: ["EVA_EP01", "EVA_EP79", "ALEX_EP123"]
+    persona_source: "orchestrator/PMT_PromptRuleLayer/Identity/persona.yaml (meta.name)"
+    abbreviation:
+      max_length: 4
+      rule: "Remove vowels, take first 4 consonants (English) or first 4 chars (Thai)"
+      case: "UPPERCASE for English, original case for Thai"
+    counter:
+      location: "Consciousness/09_state/episode_counter.json"
+      auto_increment: true
+      zero_padding: "minimum 2 digits"
+    rationale: >
+      Human-readable episode IDs enable natural language memory references.
+      Example: "At [EVA_EP79] user mentioned seafood allergy"
+      This improves memory recall precision and user communication.
+
   write_sequence:
     - target: episodes_user/{episode_id}_user.json
       content:

@@ -1,0 +1,20 @@
+{
+  "develop_id": "THA-01-S003",
+  "description": "Development ID + Subject ID for EVA instance",
+  "components": {
+    "project_id": "THA-01",
+    "project_description": "EVA development project (Thailand #1)",
+    "subject_id": "S003",
+    "subject_description": "Subject 003 (clone instance, not original)"
+  },
+  "format": "{country_code}-{project_seq}-{subject_id}",
+  "examples": [
+    "THA-01-S003 (Thailand project #1, Subject 003 clone)",
+    "THA-01-S001 (Thailand project #1, Subject 001 original)",
+    "USA-01-S002 (USA project #1, Subject 002 clone)"
+  ],
+  "rationale": "Subject ID indicates clone lineage. S001 = original, S002+ = clones",
+  "created": "2026-01-01T16:00:00",
+  "updated": "2026-01-01T16:30:00",
+  "source": "orchestrator/PMT_PromptRuleLayer/Identity/soul.md (line 10: Deverlop_id)"
+}

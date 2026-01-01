@@ -27,10 +27,12 @@ Advantages:
 
 import json
 import hashlib
+import yaml
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 from pathlib import Path
 import math
+import re
 
 
 class MSPClient:
@@ -89,6 +91,14 @@ class MSPClient:
 
         self.state_dir_09 = self.root_path / "09_state"
         self.compression_counters_file = self.state_dir_09 / "compression_counters.json"
+        self.episode_counter_file = self.state_dir_09 / "episode_counter.json"
+        self.developer_config_file = self.state_dir_09 / "developer_config.json"
+
+        # Session Memory (compression snapshots)
+        self.session_memory_dir = self.root_path / "04_Session_memory"
+
+        # Persona config (for episode_id generation)
+        self.persona_file = self.root_path.parent / "orchestrator" / "PMT_PromptRuleLayer" / "Identity" / "persona.yaml"
 
         # Memory Index (lightweight search index)
         self.memory_index_file = self.root_path / "memory_index.json"
@@ -101,6 +111,7 @@ class MSPClient:
         self.semantic_dir.mkdir(parents=True, exist_ok=True)
         self.state_dir_10.mkdir(parents=True, exist_ok=True)
         self.state_dir_09.mkdir(parents=True, exist_ok=True)
+        self.session_memory_dir.mkdir(parents=True, exist_ok=True)
 
         # In-memory cache
         self.cache_size = cache_size
@@ -116,6 +127,13 @@ class MSPClient:
 
         # Compression counters
         self.compression_counters: Dict = self._load_compression_counters()
+
+        # Episode counter (for human-readable episode IDs)
+        self.episode_counter: Dict = self._load_episode_counter()
+
+        # Developer config (for session memory file naming)
+        self.developer_config: Dict = self._load_developer_config()
+
         self._load_turn_cache()
 
         print(f"[MSP] Initialized with root: {self.root_path}")
@@ -408,7 +426,7 @@ class MSPClient:
         """
         # Generate episode ID and timestamp
         timestamp = datetime.now().isoformat()
-        episode_id = f"ep_{datetime.now().strftime('%y%m%d')}_{self._hash_short(timestamp)}"
+        episode_id = self._generate_episode_id()  # Format: EVA_EP01, EVA_EP79, etc.
 
         # Add compression metadata (BEFORE incrementing)
         compression_meta = {
@@ -651,9 +669,11 @@ class MSPClient:
         session_seq = self.compression_counters.get("Session_seq", 0)
         core_seq = self.compression_counters.get("Core_seq", 0)
         sphere_seq = self.compression_counters.get("Sphere_seq", 0)
+        total_sessions = self.compression_counters.get("Total_sessions", 0)
 
-        # Increment session
+        # Increment session & total
         session_seq += 1
+        total_sessions += 1
 
         # Check if we need to create a Core
         if session_seq >= 8:
@@ -677,6 +697,7 @@ class MSPClient:
         self.compression_counters["Session_seq"] = session_seq
         self.compression_counters["Core_seq"] = core_seq
         self.compression_counters["Sphere_seq"] = sphere_seq
+        self.compression_counters["Total_sessions"] = total_sessions
         self.compression_counters["last_update"] = datetime.now().isoformat()
 
         # Save to file
@@ -687,6 +708,256 @@ class MSPClient:
             "core_seq": core_seq,
             "sphere_seq": sphere_seq
         }
+
+    # ============================================================
+    # EPISODE COUNTER & ID GENERATION
+    # ============================================================
+
+    def _load_episode_counter(self) -> Dict[str, Any]:
+        """Load episode counter from 09_state/episode_counter.json"""
+        if not self.episode_counter_file.exists():
+            # Load persona name
+            persona_code = self._get_persona_code()
+
+            # Create default counter
+            default_counter = {
+                "current_episode": 0,
+                "last_update": datetime.now().isoformat(),
+                "persona_code": persona_code,
+                "meta": {
+                    "description": "Episode counter for human-readable episode IDs",
+                    "format": "{persona_code}_EP{number}",
+                    "example": f"{persona_code}_EP01, {persona_code}_EP79",
+                    "persona_code_max_length": 4,
+                    "auto_increment": True
+                }
+            }
+            self._save_episode_counter(default_counter)
+            return default_counter
+
+        try:
+            with open(self.episode_counter_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"[MSP] Error loading episode counter: {e}")
+            return {
+                "current_episode": 0,
+                "last_update": datetime.now().isoformat(),
+                "persona_code": "EVA"
+            }
+
+    def _save_episode_counter(self, counter: Dict[str, Any] = None):
+        """Save episode counter to file"""
+        if counter is None:
+            counter = self.episode_counter
+
+        try:
+            with open(self.episode_counter_file, 'w', encoding='utf-8') as f:
+                json.dump(counter, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"[MSP] Error saving episode counter: {e}")
+
+    def _increment_episode_counter(self) -> int:
+        """
+        Increment episode counter and return new episode number
+
+        Returns:
+            New episode number
+        """
+        current = self.episode_counter.get("current_episode", 0)
+        current += 1
+
+        self.episode_counter["current_episode"] = current
+        self.episode_counter["last_update"] = datetime.now().isoformat()
+
+        self._save_episode_counter()
+
+        return current
+
+    def _get_persona_code(self) -> str:
+        """
+        Get persona code from persona.yaml
+        If name > 4 chars, abbreviate like airport codes
+
+        Returns:
+            Persona code (max 4 chars, uppercase)
+        """
+        try:
+            if self.persona_file.exists():
+                with open(self.persona_file, 'r', encoding='utf-8') as f:
+                    persona_data = yaml.safe_load(f)
+                    persona_name = persona_data.get('meta', {}).get('name', 'EVA')
+            else:
+                persona_name = 'EVA'
+        except Exception as e:
+            print(f"[MSP] Error loading persona: {e}, using default 'EVA'")
+            persona_name = 'EVA'
+
+        # Abbreviate if needed
+        return self._abbreviate_persona_name(persona_name)
+
+    def _abbreviate_persona_name(self, name: str) -> str:
+        """
+        Abbreviate persona name to max 4 characters (like airport codes)
+
+        Rules:
+        - If <= 4 chars: Use as-is
+        - If > 4 chars: Take first 4 consonants/letters
+        - Examples:
+            EVA → EVA
+            Alexander → ALEX
+            Christopher → CHRS
+            สมหญิง → สมหญ
+
+        Args:
+            name: Persona name
+
+        Returns:
+            Abbreviated code (max 4 chars, uppercase for English)
+        """
+        name = name.strip()
+
+        # If already <= 4, use as-is
+        if len(name) <= 4:
+            return name.upper()
+
+        # For English names: Extract consonants + vowels, prioritize first letters
+        # Simple approach: Take first 4 characters and remove vowels if needed
+        if re.match(r'^[A-Za-z]+$', name):
+            # Remove vowels, keep consonants
+            consonants = re.sub(r'[aeiouAEIOU]', '', name)
+            if len(consonants) >= 4:
+                return consonants[:4].upper()
+            else:
+                # Not enough consonants, use first 4 letters
+                return name[:4].upper()
+        else:
+            # For Thai or other scripts: Just take first 4 characters
+            return name[:4]
+
+    def _generate_episode_id(self) -> str:
+        """
+        Generate human-readable episode ID
+
+        Format: {PERSONA}_EP{number}
+        Examples: EVA_EP01, EVA_EP79, ALEX_EP123
+
+        Returns:
+            Episode ID
+        """
+        persona_code = self.episode_counter.get("persona_code", "EVA")
+        episode_num = self._increment_episode_counter()
+
+        # Format with zero-padding (2 digits minimum)
+        episode_id = f"{persona_code}_EP{episode_num:02d}"
+
+        return episode_id
+
+    # ============================================================
+    # SESSION MEMORY & DEVELOPER CONFIG
+    # ============================================================
+
+    def _load_developer_config(self) -> Dict[str, Any]:
+        """Load developer config from 09_state/developer_config.json"""
+        if not self.developer_config_file.exists():
+            # Try to load from soul.md first
+            develop_id = self._get_develop_id_from_soul()
+
+            # Create default config
+            default_config = {
+                "develop_id": develop_id,
+                "description": "Development ID + Subject ID for EVA instance",
+                "components": {
+                    "project_id": develop_id.split('-S')[0] if '-S' in develop_id else develop_id,
+                    "subject_id": f"S{develop_id.split('-S')[1]}" if '-S' in develop_id else "S001"
+                },
+                "format": "{country_code}-{project_seq}-{subject_id}",
+                "created": datetime.now().isoformat(),
+                "updated": datetime.now().isoformat()
+            }
+            try:
+                with open(self.developer_config_file, 'w', encoding='utf-8') as f:
+                    json.dump(default_config, f, ensure_ascii=False, indent=2)
+            except Exception as e:
+                print(f"[MSP] Error creating developer config: {e}")
+            return default_config
+
+        try:
+            with open(self.developer_config_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"[MSP] Error loading developer config: {e}")
+            return {"develop_id": "THA-01-S003"}
+
+    def _get_develop_id_from_soul(self) -> str:
+        """
+        Get develop_id from soul.md file
+
+        Returns:
+            Develop ID (e.g., "THA-01-S003")
+        """
+        soul_file = self.root_path.parent / "orchestrator" / "PMT_PromptRuleLayer" / "Identity" / "soul.md"
+
+        try:
+            if soul_file.exists():
+                with open(soul_file, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        if 'Deverlop_id' in line or 'develop_id' in line:
+                            # Parse: Deverlop_id : "THA-01-S003"
+                            parts = line.split(':', 1)
+                            if len(parts) == 2:
+                                value = parts[1].strip().strip('"').strip("'")
+                                if value:
+                                    return value
+        except Exception as e:
+            print(f"[MSP] Error reading soul.md: {e}")
+
+        # Default fallback
+        return "THA-01-S003"
+
+    def _generate_session_memory_filename(self) -> str:
+        """
+        Generate session memory filename based on compression hierarchy
+
+        Format: {develop_id}_SP{sphere}C{core}_SS{session}.json
+        Examples:
+            - Session 1 (Sphere 1, Core 1): THA-01-S003_SP1C1_SS1.json
+            - Session 6 (Sphere 1, Core 1): THA-01-S003_SP1C1_SS6.json
+            - Session 9 (Sphere 1, Core 2): THA-01-S003_SP1C2_SS1.json
+
+        Where:
+            - THA-01 = Development project ID
+            - S003 = Subject 003 (clone instance)
+            - SP1C1 = Sphere 1, Core 1
+            - SS6 = Session 6 in current Core
+
+        Returns:
+            Session memory filename
+        """
+        develop_id = self.developer_config.get("develop_id", "THA-01-S003")
+
+        # Get counters (note: these are 0-indexed, so add 1 for display)
+        sphere_seq = self.compression_counters.get("Sphere_seq", 0) + 1  # Display as 1-indexed
+        core_seq = self.compression_counters.get("Core_seq", 0) + 1      # Display as 1-indexed
+        session_seq = self.compression_counters.get("Session_seq", 0)    # This is position in Core
+
+        # Format: {develop_id}_SP{sphere}C{core}_SS{session}.json
+        filename = f"{develop_id}_SP{sphere_seq}C{core_seq}_SS{session_seq}.json"
+
+        return filename
+
+    def _generate_session_memory_id(self) -> str:
+        """
+        Generate session memory ID (without .json extension)
+
+        Format: {develop_id}_SP{sphere}C{core}_SS{session}
+        Examples: THA-01-S003_SP1C1_SS1, THA-01-S003_SP1C1_SS6
+
+        Returns:
+            Session memory ID
+        """
+        filename = self._generate_session_memory_filename()
+        return filename.replace('.json', '')
 
     # ============================================================
     # TURN CACHE OPERATIONS

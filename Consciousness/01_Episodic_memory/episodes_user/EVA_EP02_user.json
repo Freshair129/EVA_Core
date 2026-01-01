@@ -1,0 +1,47 @@
+{
+  "episode_id": "EVA_EP02",
+  "timestamp": "2026-01-01T15:42:08.117741",
+  "session_id": "ec6669a4",
+  "event_label": "gratitude_expressed",
+  "episode_tag": "routine",
+  "episode_type": "interaction",
+  "compression_meta": {
+    "session_seq": 4,
+    "core_seq": 1,
+    "sphere_seq": 0
+  },
+  "situation_context": {
+    "context_id": "ctx_v8_260101_154204_23800b36",
+    "interaction_mode": "casual",
+    "stakes_level": "low",
+    "time_pressure": "low"
+  },
+  "turn_1": {
+    "speaker": "user",
+    "raw_text": "ขอบคุณมากนะคะ",
+    "summary": "ขอบคุณมากนะคะ",
+    "affective_inference": {
+      "emotion_signal": "gratitude",
+      "intensity": 0.0,
+      "confidence": 0.8
+    },
+    "semantic_frames": [
+      "gratitude"
+    ],
+    "salience_anchor": {
+      "phrase": "ขอบคุณมากนะคะ",
+      "Resonance_impact": 0.26
+    }
+  },
+  "state_snapshot": {
+    "EVA_matrix": {
+      "stress_load": 0.0,
+      "social_warmth": 0.8,
+      "drive_level": 0.2,
+      "cognitive_clarity": 1.0,
+      "joy_level": 0.9,
+      "emotion_label": "gratitude"
+    },
+    "Resonance_index": 0.7
+  }
+}
