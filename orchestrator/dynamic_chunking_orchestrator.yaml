@@ -1,0 +1,16 @@
+parameters:
+  chunking:
+    semantic_boundary_regex: "[。？！?.!\\n]"
+    max_chunk_size: 200
+  ri_calibration:
+    default_step_latency_ms: 200
+  rim_weights:
+    terminal_anchor_multiplier: 1.5
+
+terminal_anchors:
+  - "คะ"
+  - "นะ"
+  - "จ้ะ"
+  - "ครับ"
+  - "?"
+  - "!"

@@ -508,8 +508,8 @@ Now that you have felt the body's response and recalled relevant memories:
         keywords = [w for w in words if len(w) > 2]
         return keywords[:5]  # Top 5 keywords
 
-    def _format_memory_echoes(self, memory_matches: List[Dict[str, Any]]) -> Dict[str, List[Dict]]:
-        """Format memory matches by stream"""
+    def _format_memory_echoes(self, memory_matches: List[Any]) -> Dict[str, List[Dict]]:
+        """Format memory matches by stream (handles both dicts and MemoryMatch objects)"""
         echoes_by_stream = {
             "narrative": [],
             "salience": [],
@@ -521,9 +521,20 @@ Now that you have felt the body's response and recalled relevant memories:
         }
 
         for match in memory_matches:
-            stream = match.get("stream", "unknown")
+            # Handle both dict and object (dataclass)
+            if hasattr(match, "stream"):
+                stream = match.stream
+                # Convert dataclass to dict for consistent downstream usage
+                from dataclasses import asdict
+                match_dict = asdict(match)
+            elif isinstance(match, dict):
+                stream = match.get("stream", "unknown")
+                match_dict = match
+            else:
+                continue
+
             if stream in echoes_by_stream:
-                echoes_by_stream[stream].append(match)
+                echoes_by_stream[stream].append(match_dict)
 
         return echoes_by_stream
 

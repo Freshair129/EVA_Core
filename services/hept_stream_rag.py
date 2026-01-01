@@ -585,9 +585,16 @@ if __name__ == "__main__":
     print("Hept-Stream RAG - EVA 8.1.0")
     print("=" * 60)
 
-    # Initialize RAG (without MSP client for test)
+    # Initialize RAG with real Local MSP client
+    try:
+        from services.msp_client import MSPClient
+    except ImportError:
+        from msp_client import MSPClient
+    
+    msp = MSPClient()
+    
     rag = HeptStreamRAG(
-        msp_client=None,
+        msp_client=msp,
         vector_bridge=None,
         decay_halflife_days=30.0,
         max_results_per_stream=3

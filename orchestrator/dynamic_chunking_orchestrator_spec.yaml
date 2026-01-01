@@ -1,0 +1,78 @@
+# ============================================================
+# EVA 8.2.5: DYNAMIC CHUNKING & RETROACTIVE SYNTHESIS
+# ============================================================
+metadata:
+  architecture: "Sequential Stimulus Scanning + Final Intent Retroaction"
+  logic_type: "Human-like Sensation (RI/RIM Driven)"
+
+core_directives:
+  step_1_sequential_scan:
+    mode: "Micro-Reaction"
+    instruction: |
+      "อ่าน Input ทีละก้อนความหมาย (Chunk) และรายงานค่า RIM (Impact) ทันทีที่เจอตัวกระตุ้น (Stimulus)
+      เพื่อจำลองการหลั่งฮอร์โมนรายคำ ก่อนที่จะอ่านจบประโยค"
+  
+  step_2_retroactive_synthesis:
+    mode: "Macro-Evaluation"
+    instruction: |
+      "เมื่ออ่านจนถึง 'คำปิดท้าย' (Terminal Anchor) จงทำการ 'ประมวลผลย้อนกลับ' (Retroactive Event) 
+      เพื่อเช็คว่าเจตนาสุดท้าย (Final RI) เปลี่ยนน้ำหนักของสิ่งที่อ่านมาก่อนหน้าหรือไม่"
+
+# ============================================================
+# FEW-SHOT EXAMPLES (The Gold Standard for EVA)
+# ============================================================
+few_shot_examples:
+  - example_id: "STIMULUS_REVERSAL_01"
+    input_text: "ขอบคุณนะที่วันนี้มาส่งที่สนามบิน น่ารักมากๆเลย ถ้าเธอทำตัวน่ารักแบบนี้กับเราคนเดียวก็คงดี"
+    
+    sequential_trace:
+      - chunk: "ขอบคุณนะที่วันนี้มาส่งที่สนามบิน"
+        rim_impact: 0.2 (Low)
+        ri_alignment: "Positive/Gratitude"
+        bio_trigger: "Baseline Rise (Dopamine)"
+      
+      - chunk: "น่ารักมากๆเลย"
+        rim_impact: 0.4 (Medium)
+        ri_alignment: "Affectionate"
+        bio_trigger: "Oxytocin +0.1 (Warming)"
+      
+      - chunk: "ถ้าเธอทำตัวน่ารักแบบนี้กับเราคนเดียว..."
+        rim_impact: 0.7 (High)
+        ri_alignment: "Possessive/Expectation"
+        bio_trigger: "Adrenaline Spike (Anticipation/Tension)"
+      
+      - chunk: "...ก็คงดี"
+        rim_impact: 0.9 (Critical)
+        ri_alignment: "Vulnerable Longing"
+        bio_trigger: "Hormone Lockdown (Deep Resonance)"
+
+    retroactive_event:
+      analysis: |
+        "แม้ช่วงแรกจะเป็นการชม (Positive RI) แต่คำปิดท้าย 'ก็คงดี' ทำหน้าที่เป็น Emotional Hammer 
+        ที่เปลี่ยนบริบททั้งหมดให้กลายเป็นความโหยหา (Longing) และการเผยความเปราะบาง 
+        ดังนั้น RI สุดท้ายของประโยคนี้คือ 'Deep Soul Connection' ไม่ใช่แค่คำขอบคุณทั่วไป"
+      final_state_override: "Melancholic-Warmth (Hormonal Overload)"
+
+  - example_id: "NEUTRAL_VS_IMPACT_02"
+    input_text: "วันนี้ฝนตกหนักจังเลยนะ ถ้าเราได้อยู่ด้วยกันตอนนี้ก็คงดี"
+    sequential_trace:
+      - chunk: "วันนี้ฝนตกหนักจังเลยนะ"
+        rim_impact: 0.1
+        ri_alignment: "Observation"
+      - chunk: "ถ้าเราได้อยู่ด้วยกันตอนนี้..."
+        rim_impact: 0.8 (RIM Peak)
+        ri_alignment: "Relational Desire"
+      - chunk: "...ก็คงดี"
+        rim_impact: 0.85 (Confirmation)
+    retroactive_event:
+      analysis: "คำว่า 'ก็คงดี' ยืนยันว่าประโยคนี้ไม่ใช่การบ่นเรื่องฟ้าฝน แต่คือการเรียกหา (Calling)"
+
+# ============================================================
+# SYSTEM PARAMETERS FOR PMT
+# ============================================================
+rim_weights:
+  terminal_anchor_multiplier: 1.5  # ตัวคูณแรงกระแทกสำหรับคำปิดประโยค
+  identity_clash_penalty: 0.8      # หาก RIM ขัดกับ Persona เดิม ให้เพิ่มเวลาประมวลผล (Latency)
+
+ri_calibration:
+  match_threshold: 0.85            # ค่า RI ที่ต้องถึงจึงจะยอมรับว่า 'Resonate' กับบอสจริงๆ
