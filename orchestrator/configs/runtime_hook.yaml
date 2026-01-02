@@ -1,0 +1,34 @@
+# Orchestrator Runtime Hookup Configuration
+# Version: 8.1.0
+# Date: 2026-01-03
+# Description: Main entry point and lifecycle hooks for the EVA Executive Layer.
+
+runtime_hook:
+  component: "MainOrchestrator"
+  module_path: "orchestrator.main_orchestrator"
+  class_name: "EVAOrchestrator"
+  
+  # Initialization arguments
+  initialization:
+    args:
+      config_path: "orchestrator/configs/Orchestrator_configs.yaml"
+      llm_bridge: "HOOK:LLM Bridge"
+      msp_client: "HOOK:MSP Client"
+    
+  # Component lifecycle hooks
+  lifecycle:
+    on_startup: "bootstrap()"
+    on_shutdown: "cleanup()"
+  
+  # Orchestrator bindings (Self-binding for systemic lifecycle)
+  orchestrator_bindings:
+    - trigger: "on_user_input"
+      action: "run_cycle"
+      mapping:
+        input: "user_message"
+        output: "final_response"
+    
+  # Resource dependencies
+  resources:
+    spec_path: "orchestrator/docs/Dual_Phase_Orchestrator_spec.yaml"
+    dual_phase_engine: "orchestrator/dual_phase_engine.py"
