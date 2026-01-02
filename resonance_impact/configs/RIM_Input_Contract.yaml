@@ -1,51 +1,400 @@
-# Resonance Impact (RIM) Input Contract
+# Resonance Impact Module (RIM) Input Contract
 # Version: 8.1.0
 # Date: 2026-01-03
-# Description: Specifies the required inputs for analyzing semantic impact.
+# Status: Aligned with EVA 8.1.0 Implementation
 
 schema: EVA-RIM-Input-Contract-v8.1
 version: 8.1.0
 updated: 2026-01-03
 
 # ============================================================
-# INPUT SPECIFICATION
+# CONTRACT SCOPE
 # ============================================================
-inputs:
-  stimulus_data:
-    type: "Dict[str, Any]"
-    required: true
-    source: "Main_Orchestrator"
-    contract_path: "contract/upstream/Orchestrator_Contract/Input_from_Orchestrator_Contract.yaml"
-    description: "The incoming stimulus or event to analyze."
-    properties:
-      text: {type: "string", description: "The content of the stimulus."}
-      tags: {type: "List[str]", description: "Associated keywords or tags."}
-      source: {type: "string", description: "Source of the stimulus (e.g., 'user', 'system')."}
+description: >
+  Input contract for Resonance Impact Module (RIM) in EVA 8.1.0.
+  RIM evaluates the experiential impact of interaction on EVA's
+  biological and psychic substrate.
 
-  semantic_matches:
-    type: "List[Dict[str, Any]]"
-    required: true
-    source: "Resonance_Index"
-    contract_path: "contract/upstream/ResonanceIndex_Contract/Input_from_ResonanceIndex_Contract.yaml"
-    description: "Retrieved memories related to the stimulus (from RI or RAG)."
-    properties:
-      text: {type: "string"}
-      ri_score: {type: "float"}
-      metadata: {type: "Dict[str, Any]"}
+  RIM calculates impact from changes (deltas) in:
+  1. Qualia (phenomenological experience)
+  2. Reflex (biological reflexes)
+  3. RI (cognitive resonance)
+  4. Time (temporal decay)
 
-  biocognitive_baseline:
-    type: "Dict[str, float]"
-    required: false
-    description: "The baseline or previous psychological state."
-    properties:
-      stress: {type: "float"}
-      momentum: {type: "float"}
-      alertness: {type: "float"}
+# ============================================================
+# MAIN API SIGNATURE
+# ============================================================
+api_signature: |
+  def evaluate(
+      self,
+      qualia_delta: Dict[str, float],
+      reflex_delta: Dict[str, float],
+      ri_delta: float,
+      time_delta_sec: float
+  ) -> Dict[str, Any]:
+
+# ============================================================
+# 1. QUALIA DELTA INPUT
+# ============================================================
+qualia_delta:
+  type: "Dict[str, float]"
+  required: true
+  description: "Changes in phenomenological experience (from Artifact_Qualia)"
+  source: "Artifact_Qualia.integrate() - delta between current and previous QualiaSnapshot"
+
+  properties:
+    intensity_delta:
+      type: "float"
+      range: [-1.0, 1.0]
+      description: "Change in experiential intensity"
+      calculation: "current.intensity - previous.intensity"
+
+    coherence_delta:
+      type: "float"
+      range: [-1.0, 1.0]
+      description: "Change in internal coherence"
+      calculation: "current.coherence - previous.coherence"
+
+    depth_delta:
+      type: "float"
+      range: [-1.0, 1.0]
+      description: "Change in experiential depth"
+      calculation: "current.depth - previous.depth"
+
+  note: >
+    Larger absolute values indicate greater experiential change.
+    RIM uses mean(|intensity_delta|, |coherence_delta|, |depth_delta|)
+    as qualia magnitude.
+
+  example:
+    intensity_delta: 0.15
+    coherence_delta: -0.23
+    depth_delta: 0.08
+
+# ============================================================
+# 2. REFLEX DELTA INPUT
+# ============================================================
+reflex_delta:
+  type: "Dict[str, float]"
+  required: true
+  description: "Changes in biological reflex responses (from FastReflexEngine)"
+  source: "FastReflexEngine - delta between current and previous reflex_vector"
+
+  properties:
+    # Reflex vector components (example keys)
+    freeze_delta:
+      type: "float"
+      range: [-1.0, 1.0]
+      description: "Change in freeze reflex intensity"
+
+    flee_delta:
+      type: "float"
+      range: [-1.0, 1.0]
+      description: "Change in flee reflex intensity"
+
+    fight_delta:
+      type: "float"
+      range: [-1.0, 1.0]
+      description: "Change in fight reflex intensity"
+
+    approach_delta:
+      type: "float"
+      range: [-1.0, 1.0]
+      description: "Change in approach reflex intensity"
+
+  note: >
+    Can contain any reflex dimensions from FastReflexEngine.
+    RIM uses mean(|reflex_delta[k]| for all k) as reflex magnitude.
+
+  example:
+    freeze_delta: 0.12
+    flee_delta: -0.05
+    fight_delta: 0.08
+    approach_delta: -0.15
+
+# ============================================================
+# 3. RI DELTA INPUT
+# ============================================================
+ri_delta:
+  type: "float"
+  required: true
+  range: [-1.0, 1.0]
+  description: "Change in Resonance Index (cognitive resonance)"
+  source: "RI Engine - current RI_total - previous RI_total"
+
+  calculation: "current_RI_total - previous_RI_total"
+
+  meaning: >
+    Positive: Cognitive resonance increasing (better alignment)
+    Negative: Cognitive resonance decreasing (misalignment)
+    Magnitude: Strength of relational impact
+
+  example: 0.18
+
+# ============================================================
+# 4. TIME DELTA INPUT
+# ============================================================
+time_delta_sec:
+  type: "float"
+  required: true
+  range: [0.0, ∞]
+  unit: "seconds"
+  description: "Time elapsed since last RIM evaluation"
+  source: "System timer or orchestrator"
+
+  purpose: >
+    Used for temporal decay calculation.
+    Recent events have higher impact than older ones.
+
+  decay_formula: "time_factor = exp(-time_delta_sec / tau)"
+  tau_value: "decay_halflife / 0.693 (from config)"
+  default_halflife: "10.0 seconds"
+
+  example: 2.5
+
+# ============================================================
+# COMPLETE INPUT EXAMPLE
+# ============================================================
+complete_example:
+  description: "Full input for RIM.evaluate() method"
+
+  qualia_delta:
+    intensity_delta: 0.15
+    coherence_delta: -0.23
+    depth_delta: 0.08
+
+  reflex_delta:
+    freeze_delta: 0.12
+    flee_delta: -0.05
+    fight_delta: 0.08
+    approach_delta: -0.15
+
+  ri_delta: 0.18
+
+  time_delta_sec: 2.5
+
+# ============================================================
+# CALCULATION LOGIC (for reference)
+# ============================================================
+calculation_logic:
+  description: "How RIM impact is calculated from inputs"
+
+  step_1_magnitudes:
+    qualia_magnitude: "mean(|intensity_delta|, |coherence_delta|, |depth_delta|)"
+    reflex_magnitude: "mean(|freeze_delta|, |flee_delta|, |fight_delta|, |approach_delta|)"
+    relational_magnitude: "|ri_delta|"
+
+  step_2_temporal_decay:
+    formula: "time_factor = exp(-time_delta_sec / tau)"
+    tau: "decay_halflife / 0.693"
+    default_halflife: "10.0 seconds"
+    clamp: "[0.2, 1.0]"
+
+  step_3_weighted_impact:
+    formula: |
+      rim_raw = (
+          qualia_mag * weights["qualia"] +
+          reflex_mag * weights["reflex"] +
+          relational_mag * weights["relational"]
+      ) * time_factor
+
+    default_weights:
+      qualia: 0.40
+      reflex: 0.35
+      relational: 0.25
+
+    clamp: "[0.0, 1.0]"
+
+  step_4_confidence:
+    formula: "confidence = 0.4 + (qualia_mag * 0.6) + (reflex_mag * 0.4)"
+    range: [0.0, 1.0]
+    clamp: true
+
+  step_5_semantic_mapping:
+    impact_level:
+      high: "rim_value > 0.60"
+      medium: "rim_value > 0.25"
+      low: "rim_value <= 0.25"
+
+    impact_trend:
+      rising: "rim_value - last_rim_value > 0.05"
+      fading: "rim_value - last_rim_value < -0.05"
+      stable: "otherwise"
+
+    affected_domains:
+      emotional: "qualia_mag > 0.25"
+      identity: "reflex_mag > 0.25"
+      relational: "relational_mag > 0.20"
+      ambient: "default if no other domains"
 
 # ============================================================
 # VALIDATION RULES
 # ============================================================
-validation_rules:
-  - "stimulus_data.text is required for semantic impact analysis."
-  - "semantic_matches can be empty but must be a list."
-  - "impact results must be normalized to a standard qualitative scale."
+validation:
+  qualia_delta:
+    - "Must be Dict[str, float]"
+    - "All values must be in range [-1.0, 1.0]"
+    - "Can be empty dict (defaults to magnitude 0.0)"
+
+  reflex_delta:
+    - "Must be Dict[str, float]"
+    - "All values must be in range [-1.0, 1.0]"
+    - "Can be empty dict (defaults to magnitude 0.0)"
+
+  ri_delta:
+    - "Must be float in range [-1.0, 1.0]"
+
+  time_delta_sec:
+    - "Must be non-negative float"
+    - "Typically < 60 seconds (conversation context)"
+
+# ============================================================
+# UPSTREAM SOURCES
+# ============================================================
+upstream_sources:
+  qualia_delta:
+    source: "Artifact_Qualia"
+    method: "integrate()"
+    calculation: |
+      current_qualia = Artifact_Qualia.integrate(eva_state, rim_semantic)
+      qualia_delta = {
+          "intensity_delta": current_qualia.intensity - previous_qualia.intensity,
+          "coherence_delta": current_qualia.coherence - previous_qualia.coherence,
+          "depth_delta": current_qualia.depth - previous_qualia.depth
+      }
+
+  reflex_delta:
+    source: "FastReflexEngine"
+    method: "get_reflex_vector()"
+    calculation: |
+      current_reflex = FastReflexEngine.get_reflex_vector()
+      reflex_delta = {
+          k: current_reflex[k] - previous_reflex[k]
+          for k in current_reflex.keys()
+      }
+
+  ri_delta:
+    source: "RI Engine"
+    method: "compute_RI()"
+    calculation: "current_RI_total - previous_RI_total"
+
+  time_delta_sec:
+    source: "System timer or orchestrator"
+    calculation: "time.time() - last_evaluation_time"
+
+# ============================================================
+# OUTPUT STRUCTURE (for reference)
+# ============================================================
+output_structure:
+  description: "RIM.evaluate() returns RIMResult dataclass"
+
+  dataclass_location: "resonance_impact/rim_engine.py (lines 7-15)"
+
+  fields:
+    rim_value:
+      type: "float"
+      range: [0.0, 1.0]
+      description: "Overall experiential impact magnitude"
+
+    confidence:
+      type: "float"
+      range: [0.0, 1.0]
+      description: "Confidence in impact estimate"
+
+    components:
+      type: "Dict[str, float]"
+      description: "Breakdown of impact sources"
+      properties:
+        qualia: "Qualia magnitude contribution"
+        reflex: "Reflex magnitude contribution"
+        relational: "Relational magnitude contribution"
+        temporal: "Temporal decay factor"
+
+    impact_level:
+      type: "string"
+      enum: ["low", "medium", "high"]
+      description: "Qualitative impact level"
+
+    impact_trend:
+      type: "string"
+      enum: ["rising", "stable", "fading"]
+      description: "Direction of impact over time"
+
+    affected_domains:
+      type: "List[str]"
+      description: "Domains affected by this event"
+      possible_values: ["emotional", "identity", "relational", "ambient"]
+
+  example:
+    rim_value: 0.67
+    confidence: 0.82
+    components:
+      qualia: 0.15
+      reflex: 0.09
+      relational: 0.18
+      temporal: 0.85
+    impact_level: "high"
+    impact_trend: "rising"
+    affected_domains: ["emotional", "relational"]
+
+# ============================================================
+# DOWNSTREAM USAGE
+# ============================================================
+downstream_usage:
+  description: "RIM output is used by downstream modules"
+
+  destinations:
+    - module: "Artifact_Qualia"
+      usage: "rim_semantic parameter (impact_level, impact_trend, affected_domains)"
+      purpose: "Modulate phenomenological experience based on semantic impact"
+
+    - module: "RMS (Resonance Memory System)"
+      usage: "Impact weighting for memory encoding"
+      purpose: "High-impact events get stronger memory encoding"
+
+    - module: "MSP (Memory & Soul Passport)"
+      usage: "Memory salience and priority"
+      purpose: "High-impact episodes more likely to be remembered"
+
+# ============================================================
+# USAGE NOTES
+# ============================================================
+usage_notes:
+  delta_calculation:
+    note: "All deltas must be calculated from previous state"
+    importance: "Without previous state, all deltas should be 0.0"
+    bootstrap: "On first turn, previous state = current state (delta = 0.0)"
+
+  temporal_decay:
+    note: "Impact decays exponentially with time"
+    typical_range: "time_delta_sec usually 0.1-5.0 seconds in conversation"
+    long_gaps: "If time_delta_sec > 60s, consider resetting baseline"
+
+  empty_deltas:
+    qualia_delta: "Empty dict → qualia_magnitude = 0.0"
+    reflex_delta: "Empty dict → reflex_magnitude = 0.0"
+
+  state_persistence:
+    internal_state: "_last_rim_value stored for trend calculation"
+    methods:
+      - "get_full_state() → returns {last_rim_value}"
+      - "load_state(state_dict) → restores from persistence"
+
+# ============================================================
+# CONTRACT METADATA
+# ============================================================
+metadata:
+  contract_type: "INPUT"
+  eva_version: "8.1.0"
+  module_location: "resonance_impact/rim_engine.py"
+  api_signature: "def evaluate(self, qualia_delta, reflex_delta, ri_delta, time_delta_sec)"
+
+  contract_status: "ALIGNED_WITH_IMPLEMENTATION"
+  last_validated: "2026-01-03"
+  breaking_changes_from_previous: "Complete rewrite - old contract did not match implementation"
+
+  related_contracts:
+    - "RIM_Output_Contract.yaml"
+    - "RIM_Interface.yaml"
+    - "Artifact_Qualia_Output_Contract.yaml"
+    - "RI_Output_Contract.yaml"

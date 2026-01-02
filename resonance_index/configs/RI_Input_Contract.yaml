@@ -1,52 +1,416 @@
-# Resonance Index (RI) Input Contract
+# Resonance Index (RI) Engine Input Contract
 # Version: 8.1.0
 # Date: 2026-01-03
-# Description: Specifies the required inputs for calculating the Resonance Index.
+# Status: Aligned with EVA 8.1.0 Implementation
 
 schema: EVA-RI-Input-Contract-v8.1
 version: 8.1.0
 updated: 2026-01-03
 
 # ============================================================
-# INPUT SPECIFICATION
+# CONTRACT SCOPE
+# ============================================================
+description: >
+  Input contract for Resonance Index (RI) Engine in EVA 8.1.0.
+  RI calculates cognitive resonance across emotional, intentional,
+  semantic, and contextual layers.
+
+  RI = (ER × 0.25) + (IF × 0.30) + (SR × 0.30) + (CR × 0.15)
+
+  Where:
+  - ER = Emotional Resonance (user ↔ EVA emotion match)
+  - IF = Intent Fit (dialogue intent ↔ cognitive state)
+  - SR = Semantic Resonance (LLM summary ↔ episodic memory)
+  - CR = Contextual Resonance (social flow + personalization)
+
+# ============================================================
+# MAIN INPUT STRUCTURE
 # ============================================================
 inputs:
-  memory_data:
-    type: "Dict[str, Any]"
-    required: true
-    source: "Hept_Stream_RAG"
-    contract_path: "contract/upstream/HeptStreamRAG_Contract/Input_from_HeptStreamRAG_Contract.yaml"
-    description: "The memory node or data structure to evaluate for resonance."
-    properties:
-      text: {type: "string", description: "The content of the memory."}
-      timestamp: {type: "string", description: "When the memory was recorded."}
-      tags: {type: "List[str]", description: "Associated keywords or tags."}
-      metadata: {type: "Dict[str, Any]", description: "Additional contextual data."}
+  type: "Dict[str, Any]"
+  required: true
+  description: "Composite input dictionary containing all RI calculation parameters"
 
-  context_anchors:
-    type: "Dict[str, Any]"
-    required: true
-    source: "CIN"
-    contract_path: "contract/upstream/CIN_Contract/Input_from_CIN_Contract.yaml"
-    description: "Current cognitive and environmental context anchors."
-    properties:
-      current_input: {type: "string", description: "The latest user input."}
-      active_personas: {type: "List[str]", description: "Currently active identity fragments."}
-      temporal_context: {type: "string", description: "Current time and session duration."}
+  fields:
+    # ================================================
+    # 1. EMOTIONAL RESONANCE (ER) INPUTS
+    # ================================================
+    user_emotion:
+      type: "Dict[str, float]"
+      required: true
+      description: "User's emotional state (from perception/analysis)"
 
-  physiological_state:
-    type: "Dict[str, float]"
-    required: false
-    description: "Current autonomic and endocrine signals from physio_core."
-    properties:
-      cortisol: {type: "float", range: [0.0, 1.0]}
-      adrenaline: {type: "float", range: [0.0, 1.0]}
-      ans_balance: {type: "float", range: [-1.0, 1.0], description: "Sympathetic vs Parasympathetic balance."}
+      properties:
+        arousal:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "ระดับความตื่นตัว (activation level)"
+          source: "User input analysis or perception layer"
+
+        valence:
+          type: "float"
+          range: [-1.0, 1.0]
+          description: "ความรู้สึกเชิงบวก/ลบ (positive/negative affect)"
+          source: "User input sentiment analysis"
+
+        tension:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "ความตึงเครียด (tension/stress)"
+          source: "User input analysis"
+
+      example:
+        arousal: 0.7
+        valence: -0.3
+        tension: 0.6
+
+    llm_emotion_estimate:
+      type: "Dict[str, float]"
+      required: true
+      description: "EVA's expected emotional state (from EVA Matrix or LLM estimation)"
+
+      properties:
+        arousal:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "EVA's activation level"
+          source: "EVA Matrix or LLM emotion estimate"
+
+        valence:
+          type: "float"
+          range: [-1.0, 1.0]
+          description: "EVA's affective valence"
+          source: "EVA Matrix or LLM emotion estimate"
+
+        tension:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "EVA's internal tension"
+          source: "EVA Matrix stress axis"
+
+      example:
+        arousal: 0.5
+        valence: 0.2
+        tension: 0.4
+
+    # ================================================
+    # 2. INTENT FIT (IF) INPUTS
+    # ================================================
+    intent:
+      type: "string"
+      required: true
+      description: "User's dialogue intent category"
+      enum:
+        - "DEFINE"      # Seeking definition/clarification
+        - "EXPLAIN"     # Requesting explanation
+        - "ANALYZE"     # Requesting analysis
+        - "REASSURE"    # Seeking reassurance/comfort
+        - "SAFETY"      # Safety-seeking behavior
+        - "OTHER"       # General conversation
+      source: "Intent classification from user input"
+
+      example: "REASSURE"
+
+    clarity:
+      type: "float"
+      required: true
+      range: [0.0, 1.0]
+      description: "EVA's cognitive clarity (from EVA Matrix)"
+      source: "EVA Matrix axes_9d.clarity"
+      note: "Higher clarity → better for DEFINE/EXPLAIN/ANALYZE intents"
+
+      example: 0.6
+
+    tension:
+      type: "float"
+      required: true
+      range: [0.0, 1.0]
+      description: "EVA's internal tension (from EVA Matrix)"
+      source: "EVA Matrix axes_9d.stress"
+      note: "Lower tension → better for REASSURE/SAFETY intents"
+
+      example: 0.4
+
+    # ================================================
+    # 3. SEMANTIC RESONANCE (SR) INPUTS
+    # ================================================
+    llm_summary_vector:
+      type: "List[float]"
+      required: true
+      description: "Embedding vector of LLM's summary/response"
+      source: "LLM summary embedding (e.g., from Gemini/OpenAI)"
+      dimensions: "Variable (typically 768 or 1536 dimensions)"
+
+      validation:
+        - "Must be non-empty"
+        - "All elements must be floats"
+        - "Must match dimensions of episodic_context_vector"
+
+      example: [0.23, -0.15, 0.67, ..., 0.42]  # 768-dim vector
+
+    episodic_context_vector:
+      type: "List[float]"
+      required: true
+      description: "Embedding vector from episodic memory context"
+      source: "MSP episodic memory retrieval (averaged or concatenated)"
+      dimensions: "Variable (must match llm_summary_vector)"
+
+      validation:
+        - "Must be non-empty"
+        - "All elements must be floats"
+        - "Must match dimensions of llm_summary_vector"
+
+      example: [0.19, -0.22, 0.71, ..., 0.38]  # 768-dim vector
+
+    # ================================================
+    # 4. CONTEXTUAL RESONANCE (CR) INPUTS
+    # ================================================
+    flow_score:
+      type: "float"
+      required: true
+      range: [0.0, 1.0]
+      description: "Conversational flow quality score"
+      source: "Flow analyzer or CIN"
+      meaning: >
+        How natural/smooth the conversation feels.
+        High = coherent, flowing conversation.
+        Low = disjointed, awkward interaction.
+
+      calculation_hints:
+        - "Turn-taking smoothness"
+        - "Topic continuity"
+        - "Response latency"
+        - "Coherence with previous turns"
+
+      example: 0.75
+
+    personalization_score:
+      type: "float"
+      required: true
+      range: [0.0, 1.0]
+      description: "Personalization quality score"
+      source: "Persona alignment analyzer or CIN"
+      meaning: >
+        How well EVA's response matches user's preferences/history.
+        High = highly personalized, user-specific.
+        Low = generic, impersonal.
+
+      calculation_hints:
+        - "Persona consistency"
+        - "Memory reference accuracy"
+        - "User preference alignment"
+        - "Relationship depth"
+
+      example: 0.60
+
+# ============================================================
+# COMPLETE INPUT EXAMPLE
+# ============================================================
+complete_example:
+  description: "Full input dictionary for compute_RI() method"
+
+  inputs:
+    user_emotion:
+      arousal: 0.7
+      valence: -0.3
+      tension: 0.6
+
+    llm_emotion_estimate:
+      arousal: 0.5
+      valence: 0.2
+      tension: 0.4
+
+    intent: "REASSURE"
+    clarity: 0.6
+    tension: 0.4
+
+    llm_summary_vector: [0.23, -0.15, 0.67, 0.89, -0.42, ...]  # 768-dim
+    episodic_context_vector: [0.19, -0.22, 0.71, 0.85, -0.38, ...]  # 768-dim
+
+    flow_score: 0.75
+    personalization_score: 0.60
+
+# ============================================================
+# CALCULATION LOGIC (for reference)
+# ============================================================
+calculation_logic:
+  description: "How RI components are calculated from inputs"
+
+  ER_calculation:
+    formula: "1.0 - mean(|user.arousal - eva.arousal|, |user.valence - eva.valence|, |user.tension - eva.tension|)"
+    description: "Emotional Resonance: Match between user and EVA's emotional state"
+    range: [0.0, 1.0]
+
+  IF_calculation:
+    formula: |
+      IF INTENT in ["DEFINE", "EXPLAIN", "ANALYZE"]:
+          return clarity
+      ELIF INTENT in ["REASSURE", "SAFETY"]:
+          return 1.0 - tension
+      ELSE:
+          return (clarity + (1.0 - tension)) / 2.0
+    description: "Intent Fit: How well dialogue intent aligns with cognitive state"
+    range: [0.0, 1.0]
+
+  SR_calculation:
+    formula: "cosine_similarity(llm_summary_vector, episodic_context_vector)"
+    description: "Semantic Resonance: Cosine similarity between LLM summary and episodic memory"
+    range: [0.0, 1.0]
+
+  CR_calculation:
+    formula: "flow_score * 0.6 + personalization_score * 0.4"
+    description: "Contextual Resonance: Social and conversational flow"
+    range: [0.0, 1.0]
+
+  RI_total_calculation:
+    formula: "ER * 0.25 + IF * 0.30 + SR * 0.30 + CR * 0.15"
+    description: "Total Cognitive Resonance (weighted sum)"
+    range: [0.0, 1.0]
+    weights:
+      ER: 0.25  # Emotional Resonance
+      IF: 0.30  # Intent Fit
+      SR: 0.30  # Semantic Resonance
+      CR: 0.15  # Contextual Resonance
 
 # ============================================================
 # VALIDATION RULES
 # ============================================================
-validation_rules:
-  - "memory_data must contain at least 'text' or 'tags' for comparison."
-  - "context_anchors must not be empty."
-  - "Missing physiological_state will result in a default neutral weight (0.5)."
+validation:
+  user_emotion:
+    - "Must contain arousal, valence, tension"
+    - "arousal in [0.0, 1.0]"
+    - "valence in [-1.0, 1.0]"
+    - "tension in [0.0, 1.0]"
+
+  llm_emotion_estimate:
+    - "Must contain arousal, valence, tension"
+    - "arousal in [0.0, 1.0]"
+    - "valence in [-1.0, 1.0]"
+    - "tension in [0.0, 1.0]"
+
+  intent:
+    - "Must be one of: DEFINE, EXPLAIN, ANALYZE, REASSURE, SAFETY, OTHER"
+
+  clarity:
+    - "Must be float in [0.0, 1.0]"
+
+  tension:
+    - "Must be float in [0.0, 1.0]"
+
+  llm_summary_vector:
+    - "Must be non-empty list of floats"
+    - "Must have same dimensions as episodic_context_vector"
+
+  episodic_context_vector:
+    - "Must be non-empty list of floats"
+    - "Must have same dimensions as llm_summary_vector"
+
+  flow_score:
+    - "Must be float in [0.0, 1.0]"
+
+  personalization_score:
+    - "Must be float in [0.0, 1.0]"
+
+# ============================================================
+# USAGE NOTES
+# ============================================================
+usage_notes:
+  vector_dimensions:
+    note: "llm_summary_vector and episodic_context_vector must have same dimensions"
+    common_dimensions:
+      - "OpenAI ada-002: 1536 dimensions"
+      - "Sentence-BERT: 768 dimensions"
+      - "Universal Sentence Encoder: 512 dimensions"
+    handling: "If dimensions mismatch, SR returns 0.0"
+
+  missing_fields:
+    note: "All fields are required for accurate RI calculation"
+    fallback_behavior: |
+      If any field is missing:
+      - user_emotion: Defaults to {arousal: 0.0, valence: 0.0, tension: 0.0}
+      - llm_emotion_estimate: Defaults to {arousal: 0.0, valence: 0.0, tension: 0.0}
+      - intent: Defaults to "OTHER"
+      - clarity: Defaults to 0.5
+      - tension: Defaults to 0.5
+      - llm_summary_vector: Returns SR = 0.0
+      - episodic_context_vector: Returns SR = 0.0
+      - flow_score: Defaults to 0.5
+      - personalization_score: Defaults to 0.5
+
+  performance:
+    vector_operations: "Cosine similarity is O(n) where n = vector dimensions"
+    typical_latency: "< 5ms for 768-dim vectors"
+
+# ============================================================
+# UPSTREAM SOURCES
+# ============================================================
+upstream_sources:
+  user_emotion:
+    primary: "Perception Layer (user input analysis)"
+    fallback: "Manual annotation or default values"
+
+  llm_emotion_estimate:
+    primary: "EVA Matrix axes_9d (mapped to arousal/valence/tension)"
+    alternative: "LLM self-assessment"
+
+  intent:
+    primary: "Intent classifier (LLM or rule-based)"
+    fallback: "OTHER"
+
+  clarity:
+    source: "EVA Matrix axes_9d.clarity"
+    ref: "eva_matrix/configs/EVA_Matrix_Output_Contract.yaml"
+
+  tension:
+    source: "EVA Matrix axes_9d.stress"
+    ref: "eva_matrix/configs/EVA_Matrix_Output_Contract.yaml"
+
+  llm_summary_vector:
+    source: "LLM embedding API (Gemini, OpenAI, etc.)"
+    processing: "Embed LLM's summary/response text"
+
+  episodic_context_vector:
+    source: "MSP episodic memory retrieval"
+    processing: "Average or concatenate episode embeddings"
+
+  flow_score:
+    source: "CIN or conversation flow analyzer"
+    calculation: "Turn coherence + topic continuity + timing"
+
+  personalization_score:
+    source: "CIN or persona alignment analyzer"
+    calculation: "Persona consistency + memory usage + preference match"
+
+# ============================================================
+# DOWNSTREAM USAGE
+# ============================================================
+downstream_usage:
+  description: "RI output is used by downstream modules"
+
+  destinations:
+    - module: "MSP (Memory & Soul Passport)"
+      usage: "Memory salience weighting (high RI → higher memory priority)"
+
+    - module: "CIN (Context Injection Node)"
+      usage: "Context quality assessment"
+
+    - module: "RIM (Resonance Impact Module)"
+      usage: "ri_delta calculation for impact evaluation"
+
+# ============================================================
+# CONTRACT METADATA
+# ============================================================
+metadata:
+  contract_type: "INPUT"
+  eva_version: "8.1.0"
+  module_location: "resonance_index/ri_engine.py"
+  api_signature: "def compute_RI(self, inputs: Dict[str, Any]) -> Dict[str, float]"
+
+  contract_status: "ALIGNED_WITH_IMPLEMENTATION"
+  last_validated: "2026-01-03"
+  breaking_changes_from_previous: "Complete rewrite - old contract did not match implementation"
+
+  related_contracts:
+    - "RI_Output_Contract.yaml"
+    - "RI_Interface.yaml"
+    - "EVA_Matrix_Output_Contract.yaml"
