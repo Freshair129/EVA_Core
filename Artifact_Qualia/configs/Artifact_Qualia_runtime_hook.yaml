@@ -1,0 +1,29 @@
+# Artifact Qualia Runtime Hookup Configuration
+# Version: 8.1.0
+# Date: 2026-01-03
+# Description: Integration of the Phenomenological experience generator.
+
+runtime_hook:
+  component: "ArtifactQualia"
+  module_path: "Artifact_Qualia.Artifact_Qualia"
+  class_name: "ArtifactQualiaCore"
+  
+  # Initialization
+  initialization:
+    args:
+      config_path: "Artifact_Qualia/configs/Artifact_Qualia_Interface.yaml"
+    
+  # Orchestrator bindings
+  orchestrator_bindings:
+    - trigger: "after:EVAMatrix.process_signals"
+      action: "integrate"
+      mapping:
+        input:
+          eva_state: "matrix_output.full_state"
+          rim_semantic: "rim_output.semantic_signal"
+        output: "qualia_output.snapshot"
+
+  # Resources
+  resources:
+    configs: "Artifact_Qualia/configs/"
+    contract: "Artifact_Qualia/configs/Artifact_Qualia_Output_Contract.yaml"

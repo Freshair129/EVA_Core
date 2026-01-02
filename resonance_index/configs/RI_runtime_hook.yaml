@@ -1,0 +1,28 @@
+# Resonance Index (RI) Runtime Hookup Configuration
+# Version: 8.1.0
+# Date: 2026-01-03
+# Description: Integration of the RI calculation engine.
+
+runtime_hook:
+  component: "RIEngine"
+  module_path: "resonance_index.ri_engine"
+  class_name: "RIEngine"
+  
+  # Initialization
+  initialization:
+    args:
+      config: "resonance_index/configs/RI_Input_Contract.yaml"
+    
+  # Orchestrator bindings
+  orchestrator_bindings:
+    - trigger: "on:Memory_Scoring_Request"
+      action: "calculate_score"
+      mapping:
+        input:
+          memory: "candidate_node"
+          context: "context.anchors"
+        output: "ri_output.score"
+
+  # Resources
+  resources:
+    configs: "resonance_index/configs/"

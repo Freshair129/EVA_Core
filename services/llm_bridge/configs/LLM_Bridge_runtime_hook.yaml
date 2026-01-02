@@ -1,0 +1,33 @@
+# LLM Bridge Runtime Hookup Configuration
+# Version: 8.1.0
+# Date: 2026-01-03
+# Description: Integration of the Gemini/Ollama API bridge.
+
+runtime_hook:
+  component: "LLMBridge"
+  module_path: "services.llm_bridge"
+  class_name: "LLMBridge"
+  
+  # Initialization
+  initialization:
+    args:
+      config_path: "services/llm_bridge/configs/LLM_Bridge_configs.yaml"
+    
+  # Orchestrator bindings
+  orchestrator_bindings:
+    - trigger: "on:Phase_1 (Perception)"
+      action: "generate_response" # For intent extraction
+      mapping:
+        input: "user_input"
+        output: "phase_1_output.extraction"
+    
+    - trigger: "on:Phase_2 (Reasoning)"
+      action: "generate_response"
+      mapping:
+        input: "context.full_trace"
+        output: "phase_2_output.response"
+
+  # Resources
+  resources:
+    configs: "services/llm_bridge/configs/"
+    contract: "services/llm_bridge/configs/LLM_Bridge_Output_Contract.yaml"

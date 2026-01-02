@@ -1,0 +1,29 @@
+# Resonance Memory System (RMS) Runtime Hookup Configuration
+# Version: 8.1.0
+# Date: 2026-01-03
+# Description: Integration of the Emotional Texture Encoding into the memory chain.
+
+runtime_hook:
+  component: "RMSSystem"
+  module_path: "Resonance_Memory_System.rms_v6"
+  class_name: "RMSSystem"
+  
+  # Initialization
+  initialization:
+    args:
+      config_path: "Resonance_Memory_System/configs/RMS_configs.yaml"
+    
+  # Orchestrator bindings
+  orchestrator_bindings:
+    - trigger: "before:MSP.commit_episode"
+      action: "encode_texture"
+      mapping:
+        input:
+          qualia: "qualia_output.snapshot"
+          physio: "physio_output.current_state"
+        output: "rms_output.encoded_texture"
+
+  # Resources
+  resources:
+    configs: "Resonance_Memory_System/configs/"
+    contract: "Resonance_Memory_System/configs/RMS_Output_Contract.yaml"

@@ -1,0 +1,41 @@
+# Physio Core Runtime Hookup Configuration
+# Version: 8.1.0
+# Date: 2026-01-03
+# Description: Integration of the Biological Core (Soma) into the Executive loop.
+
+runtime_hook:
+  component: "PhysioController"
+  module_path: "physio_core.physio_controller"
+  class_name: "PhysioController"
+  
+  # Initialization
+  initialization:
+    args:
+      config_path: "physio_core/configs/PhysioController_configs.yaml"
+      msp: "HOOK:MSP Client"
+    
+  # Component lifecycle hooks
+  lifecycle:
+    on_startup: "bootstrap()"
+    on_shutdown: "shutdown()"
+  
+  # Orchestrator bindings
+  orchestrator_bindings:
+    - trigger: "on:The_Gap (Phase 1 End)"
+      action: "step"
+      mapping:
+        input:
+          dt: "dt_delta"
+          stimulus: "phase_1_output.stimulus_vector"
+        output: "physio_output.current_state"
+    
+    - trigger: "on:Heartbeat"
+      action: "step"
+      mapping:
+        input: {dt: 0.033} # 30Hz simulation step
+        output: "telemetry.physio_stream"
+
+  # Resource dependencies
+  resources:
+    configs: "physio_core/configs/"
+    contract: "physio_core/contract/PhysioController_Output_Contract.yaml"

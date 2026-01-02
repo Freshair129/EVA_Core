@@ -1,0 +1,28 @@
+# Resonance Impact (RIM) Runtime Hookup Configuration
+# Version: 8.1.0
+# Date: 2026-01-03
+# Description: Integration of the RIM analysis engine.
+
+runtime_hook:
+  component: "RIMEngine"
+  module_path: "resonance_impact.RIM_v2"
+  class_name: "RIMEngine"
+  
+  # Initialization
+  initialization:
+    args:
+      config: "resonance_impact/configs/RIM_Input_Contract.yaml"
+    
+  # Orchestrator bindings
+  orchestrator_bindings:
+    - trigger: "on:The_Gap (Phase 2 Start)"
+      action: "analyze_impact"
+      mapping:
+        input:
+          stimulus: "phase_1_output.stimulus_vector"
+          matches: "context.memory_matches"
+        output: "rim_output.semantic_signal"
+
+  # Resources
+  resources:
+    configs: "resonance_impact/configs/"
