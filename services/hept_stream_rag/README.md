@@ -1,7 +1,7 @@
 # Hept Stream RAG
 ## Component ID: SYS-HSR-8.1
 
-The **Hept Stream RAG** (Retrieval-Augmented Generation) system manages the seven semantic streams of EVA's long-term memory.
+The **Hept Stream RAG** (Retrieval-Augmented Generation) system manages the seven semantic streams of the llm's long-term memory.
 
 ### 📁 Directory Structure
 

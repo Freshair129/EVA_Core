@@ -8,69 +8,84 @@ import json
 from datetime import datetime, timezone
 from typing import Dict, Any
 
-# Import stateless calculator from lib
-try:
-    from eva_matrix import EVAMatrixEngine as MatrixCalculator
-except ImportError:
-    # Fallback if lib structure is different
-    import sys
-    lib_path = Path(__file__).parent.parent.parent / "lib" / "lib-eva-matrix"
-    sys.path.insert(0, str(lib_path))
-    from eva_matrix import EVAMatrixEngine as MatrixCalculator
-
 
 class EVAMatrixSystem:
     """
     Psyche Core System.
     Owns continuous emotional state (axes_9d) and momentum.
-    
-    This is a SYSTEM, not a library:
+
+    This is a SYSTEM with internal state management:
     - Maintains continuous state across turns
     - Persists state to disk
     - Owns the matrix_state slot
-    
-    Uses lib-eva-matrix as a stateless calculator.
+    - Uses internal calculation logic
     """
-    
+
     def __init__(self, base_path: Path = None, msp=None):
         self.base_path = base_path or Path(".")
         self.msp = msp
         self.state_file = self.base_path / "Consciousness/10_state/eva_matrix_state.json"
-        
-        # Stateless calculator (from lib)
-        self.calculator = MatrixCalculator()
-        
+
         # Owned state (system authority)
         self.axes_9d = {}
         self.momentum = {}
         self.emotion_label = "Neutral"
-        
+
         self._load_state()
         print(f"[EVA Matrix System] Initialized (Psyche Core)")
     
     def process_signals(self, signals: Dict[str, float]) -> Dict[str, Any]:
         """
         Process neural signals and update psyche state.
-        
+
         Args:
             signals: Neural signals from receptor layer
-            
+
         Returns:
             Dict containing axes_9d, emotion_label, etc.
         """
-        # Use calculator to compute new state
-        result = self.calculator.process_signals(signals)
-        
+        # Use internal calculation method
+        result = self._calculate_state_transition(signals)
+
         # Update owned state
         self.axes_9d = result.get("axes_9d", {})
         self.emotion_label = result.get("emotion_label", "Neutral")
-        
-        # Update momentum if calculator provides it
-        if hasattr(self.calculator, 'momentum'):
-            self.momentum = self.calculator.momentum
-        
+        self.momentum = result.get("momentum", {})
+
         self._save_state()
         return result
+
+    def _calculate_state_transition(self, signals: Dict[str, float]) -> Dict[str, Any]:
+        """
+        Internal state transition calculation.
+        Uses simplified logic without external library dependency.
+
+        Args:
+            signals: Neural signals from receptor layer
+
+        Returns:
+            Dict containing updated axes_9d, emotion_label, momentum
+        """
+        # Simplified state calculation
+        # For now, maintain current state with minor updates
+        # TODO: Implement full 9D matrix transformation logic when needed
+
+        # Update axes_9d based on signals (simplified)
+        updated_axes = self.axes_9d.copy()
+
+        # Basic emotion classification based on signals
+        emotion = "Neutral"
+        if signals:
+            # Simple heuristic: classify based on dominant signal
+            max_signal = max(signals.items(), key=lambda x: abs(x[1]), default=("neutral", 0))
+            if max_signal[1] > 0.7:
+                emotion = max_signal[0].title()
+
+        return {
+            "axes_9d": updated_axes,
+            "emotion_label": emotion,
+            "momentum": self.momentum
+        }
     
     def get_full_state(self) -> Dict[str, Any]:
         """Return complete psyche state."""

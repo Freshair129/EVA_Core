@@ -1,0 +1,47 @@
+# Resonance Impact (RIM) Input Contract
+# Version: 8.1.0
+# Date: 2026-01-03
+# Description: Specifies the required inputs for analyzing semantic impact.
+
+schema: EVA-RIM-Input-Contract-v8.1
+version: 8.1.0
+updated: 2026-01-03
+
+# ============================================================
+# INPUT SPECIFICATION
+# ============================================================
+inputs:
+  stimulus_data:
+    type: "Dict[str, Any]"
+    required: true
+    description: "The incoming stimulus or event to analyze."
+    properties:
+      text: {type: "string", description: "The content of the stimulus."}
+      tags: {type: "List[str]", description: "Associated keywords or tags."}
+      source: {type: "string", description: "Source of the stimulus (e.g., 'user', 'system')."}
+
+  semantic_matches:
+    type: "List[Dict[str, Any]]"
+    required: true
+    description: "Retrieved memories related to the stimulus (from RI or RAG)."
+    properties:
+      text: {type: "string"}
+      ri_score: {type: "float"}
+      metadata: {type: "Dict[str, Any]"}
+
+  biocognitive_baseline:
+    type: "Dict[str, float]"
+    required: false
+    description: "The baseline or previous psychological state."
+    properties:
+      stress: {type: "float"}
+      momentum: {type: "float"}
+      alertness: {type: "float"}
+
+# ============================================================
+# VALIDATION RULES
+# ============================================================
+validation_rules:
+  - "stimulus_data.text is required for semantic impact analysis."
+  - "semantic_matches can be empty but must be a list."
+  - "impact results must be normalized to a standard qualitative scale."

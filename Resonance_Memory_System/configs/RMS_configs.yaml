@@ -1,0 +1,40 @@
+# Resonance Memory System (RMS) Configuration (SSOT)
+# Version: 8.1.0
+# Date: 2026-01-03
+# Description: Encoding parameters and resonance thresholds for RMS.
+
+schema: EVA-RMS-Configs-v8.1
+version: 8.1.0
+updated: 2026-01-03
+
+# ============================================================
+# ENCODING SETTINGS
+# ============================================================
+encoding:
+  texture_dimensions: 5
+  trauma_threshold: 0.85
+  decay_rate: 0.05
+  core_color_mapping:
+    joy: "#FFD700"
+    stress: "#FF4500"
+    warmth: "#FF69B4"
+    clarity: "#00BFFF"
+    neutral: "#808080"
+
+# ============================================================
+# RESONANCE THRESHOLDS
+# ============================================================
+thresholds:
+  high_resonance: 0.85
+  medium_resonance: 0.65
+  low_resonance: 0.40
+  semantic_match_weight: 0.6
+  texture_match_weight: 0.4
+
+# ============================================================
+# PERSISTENCE OVERRIDES
+# ============================================================
+persistence:
+  auto_encode_on_response: true
+  enable_texture_vectors: true
+  vector_engine: "local_faiss"

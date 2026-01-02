@@ -1,0 +1,642 @@
+# Artifact Qualia Comprehensive Specification
+# Version: 8.1.0
+# Date: 2026-01-03
+# Status: Production-Ready (with future enhancement roadmap)
+# Migration: Based on EVA 7.0 spec structure, updated for 8.1.0 implementation
+
+schema: EVA-Artifact-Qualia-Spec-v8.1
+version: 8.1.0
+updated: 2026-01-03
+
+# ============================================================
+# MODULE IDENTITY
+# ============================================================
+module_info:
+  name: Artifact_Qualia
+  role: Phenomenological Experience Integrator
+  location: Artifact_Qualia/Artifact_Qualia.py
+
+  description: >
+    Artifact_Qualia transforms abstract psychological metrics into
+    phenomenological qualities that represent "what it's like" for the llm
+    in this moment.
+
+    It integrates psychological state (from EVA Matrix) and semantic
+    impact (from RIM) into a pre-conceptual experience snapshot that
+    LLM can interpret into language and behavior.
+
+  purpose: >
+    Provide the "felt quality" of the llm's internal state - a bridge
+    between physiological/cognitive signals and subjective experience
+    representation.
+
+  philosophical_grounding: >
+    True qualia are irreducible phenomenological qualities - the
+    subjective "what it's like" of experience. Current implementation
+    provides foundational qualia markers (intensity, tone, coherence,
+    depth, texture). Future versions will include richer phenomenological
+    fields (affective tone, somatic presence, layered experience).
+
+    Reference: docs/QUALIA_PHILOSOPHICAL_ANALYSIS.md
+
+# ============================================================
+# DESIGN PRINCIPLES (from EVA 7.0)
+# ============================================================
+design_principles:
+  core_principles:
+    - principle: "Qualia คือประสบการณ์ของ llm ไม่ใช่คำอธิบาย"
+      meaning: "Qualia is experience of the llm, not explanation"
+
+    - principle: "ร่างกายส่งสัญญาณ ไม่ส่ง label"
+      meaning: "Body sends signals, not labels"
+
+    - principle: "ทิศทางสำคัญกว่าค่าคงที่"
+      meaning: "Direction matters more than absolute values"
+
+    - principle: "น้ำหนักเหตุการณ์แยกจากการแสดงออก"
+      meaning: "Event weight is separate from expression"
+
+    - principle: "LLM ตีความเองจากสัญญาณ"
+      meaning: "LLM interprets signals itself"
+
+  non_goals:
+    - "ไม่สร้าง emotional labels (e.g., เขิน, เครียด, ดีใจ)"
+    - "ไม่ให้คะแนน RI/RIM/MAS/KI แก่ LLM"
+    - "ไม่สรุปเป็น narrative"
+    - "ไม่ override persona หรือ intent"
+    - "ไม่ตัดสินใจแทน LLM"
+
+  invariants:
+    optimization: "No optimization (ไม่มีการตัดสิน ดีหรือแย่)"
+    memory_admission: "No memory admission (ไม่ตัดสินว่าควรจำหรือไม่)"
+    relationship_eval: "No relationship evaluation (ไม่ประเมินความสัมพันธ์)"
+    numeric_scores: "No numeric impact scores (ไม่ส่งคะแนนตัวเลข)"
+
+  authority:
+    artifact_qualia_is:
+      - "Perceptual substrate"
+      - "Experience carrier"
+      - "Phenomenological integrator"
+      - "Pre-conceptual signal generator"
+
+    artifact_qualia_is_not:
+      - "Decision engine"
+      - "Intent selector"
+      - "Language generator"
+      - "Memory admission controller"
+      - "Optimization system"
+
+# ============================================================
+# INPUTS (CURRENT IMPLEMENTATION)
+# ============================================================
+inputs:
+  eva_state:
+    type: "Dict[str, Any]"
+    required: true
+    source: "EVA_Matrix_System.get_full_state()"
+    ref: "eva_matrix/configs/EVA_Matrix_Output_Contract.yaml"
+
+    structure:
+      axes_9d:
+        type: "object"
+        required: true
+        properties:
+          stress: {type: "float", range: [0.0, 1.0], description: "ความเครียด/ความกดดัน"}
+          warmth: {type: "float", range: [0.0, 1.0], description: "ความอบอุ่น/ความเป็นมิตร"}
+          drive: {type: "float", range: [0.0, 1.0], description: "แรงขับ/แรงจูงใจ"}
+          clarity: {type: "float", range: [0.0, 1.0], description: "ความชัดเจนทางความคิด"}
+          joy: {type: "float", range: [0.0, 1.0], description: "ความสุข/ความเบิกบาน"}
+          alertness: {type: "float", range: [0.0, 1.0], description: "ความตื่นตัว"}
+          connection: {type: "float", range: [0.0, 1.0], description: "ความเชื่อมโยง/ความผูกพัน"}
+          groundedness: {type: "float", range: [0.0, 1.0], description: "ความมั่นคง/ความสมดุล"}
+          openness: {type: "float", range: [0.0, 1.0], description: "ความเปิดกว้างทางจิตใจ"}
+
+      emotion_label:
+        type: "string"
+        required: false
+        description: "สรุปอารมณ์ปัจจุบัน (e.g., 'Calm', 'Agitated')"
+
+      momentum:
+        type: "object"
+        required: false
+        properties:
+          intensity: {type: "float", range: [0.0, 1.0]}
+          velocity: {type: "float", range: [-1.0, 1.0]}
+
+  rim_semantic:
+    type: "RIMSemantic (dataclass)"
+    required: true
+    source: "Resonance_Impact_Module"
+    dataclass_location: "Artifact_Qualia.py (lines 38-42)"
+
+    properties:
+      impact_level:
+        type: "string"
+        enum: ["low", "medium", "high"]
+        description: "Qualitative level of semantic impact"
+
+      impact_trend:
+        type: "string"
+        enum: ["rising", "stable", "fading"]
+        description: "Direction of impact over time"
+
+      affected_domains:
+        type: "List[str]"
+        description: "Domains affected by this event"
+        examples: ["emotional", "relational", "identity", "ambient"]
+
+# ============================================================
+# OUTPUTS (CURRENT IMPLEMENTATION)
+# ============================================================
+outputs:
+  qualia_snapshot:
+    type: "QualiaSnapshot (dataclass)"
+    dataclass_location: "Artifact_Qualia.py (lines 44-54)"
+
+    fields:
+      intensity:
+        type: "float"
+        range: [0.0, 1.0]
+        description: "ความเข้มของประสบการณ์ (experiential intensity)"
+        meaning: >
+          How strong/vivid the experience feels for the llm.
+          Not emotional intensity - phenomenological vividness.
+        calculation: >
+          baseline_arousal = (alertness + drive) / 2
+          base = clamp(baseline_arousal + stress)
+          rim_modulation = {low: 0, medium: 0.1, high: 0.2}
+          raw = clamp(base + rim_modulation)
+          smoothed = 0.65 * prev_intensity + 0.35 * raw
+        temporal_smoothing: "Exponential moving average (alpha=0.65)"
+
+      tone:
+        type: "string"
+        enum: ["quiet", "charged", "settling", "neutral"]
+        description: "โทนคุณภาพของประสบการณ์ (phenomenological tone)"
+        meaning: >
+          Coarse phenomenological quality (not emotional labels).
+          Represents the "feel" of the experience.
+        calculation: >
+          quiet: groundedness > 0.6
+          charged: stress > 0.7
+          settling: RIM impact_trend == "fading"
+          neutral: default
+
+      coherence:
+        type: "float"
+        range: [0.0, 1.0]
+        description: "ความสอดคล้องภายใน (internal consistency)"
+        meaning: >
+          How internally consistent/stable the experience feels.
+          Low = fragmented, confused. High = clear, integrated.
+        calculation: >
+          base = (clarity + momentum.intensity) / 2
+          rim_disruption = {low: 0, medium: -0.05, high: -0.15}
+          raw = clamp(base + rim_disruption)
+          smoothed = 0.7 * prev_coherence + 0.3 * raw
+        temporal_smoothing: "Exponential moving average (alpha=0.7)"
+
+      depth:
+        type: "float"
+        range: [0.0, 1.0]
+        description: "ความลึกของประสบการณ์ (experiential depth/immersion)"
+        meaning: >
+          Sense of experiential depth or immersion.
+          How "deep" vs. "shallow" the experience feels.
+        calculation: >
+          depth = 0.6 * groundedness + 0.4 * stress
+        temporal_smoothing: "None (instantaneous)"
+
+      texture:
+        type: "Dict[str, float]"
+        description: "เนื้อสัมผัสทางจิตวิทยา (phenomenological texture vector)"
+        purpose: "For RMS memory encoding - provides texture dimensions"
+
+        dimensions:
+          emotional:
+            source: "axes_9d.stress"
+            range: [0.0, 1.0]
+            description: "มิติอารมณ์ของประสบการณ์"
+
+          relational:
+            source: "(axes_9d.alertness + axes_9d.drive) / 2"
+            range: [0.0, 1.0]
+            description: "มิติความสัมพันธ์/พลังงาน"
+
+          identity:
+            source: "axes_9d.clarity"
+            range: [0.0, 1.0]
+            description: "มิติความชัดเจนของตัวตน"
+
+          ambient:
+            source: "momentum.intensity"
+            range: [0.0, 1.0]
+            description: "มิติบรรยากาศโดยรอบ"
+
+        rim_modulation:
+          description: "RIM affected_domains amplify corresponding texture dimensions"
+          formula: "If domain in texture: texture[domain] *= 1.15 (clamped to 1.0)"
+
+    example_output:
+      intensity: 0.73
+      tone: "charged"
+      coherence: 0.52
+      depth: 0.68
+      texture:
+        emotional: 0.82
+        relational: 0.61
+        identity: 0.45
+        ambient: 0.58
+
+# ============================================================
+# INTERNAL STATE MANAGEMENT
+# ============================================================
+state_management:
+  persistent_state:
+    _last_intensity:
+      type: "float"
+      purpose: "For temporal smoothing of intensity"
+      initial_value: 0.5
+
+    _last_coherence:
+      type: "float"
+      purpose: "For temporal smoothing of coherence"
+      initial_value: 0.5
+
+  state_methods:
+    get_full_state:
+      signature: "() -> Dict[str, float]"
+      returns: "Internal smoothing state"
+      purpose: "For state persistence/recovery"
+
+    load_state:
+      signature: "(state_dict: Dict[str, float]) -> None"
+      purpose: "Restore from persistence"
+
+# ============================================================
+# FIELD MAPPINGS (EVA 7.0 → 8.1.0)
+# ============================================================
+field_mappings:
+  eva_7_0_to_8_1:
+    direct_mappings:
+      stress_load: "stress"
+      social_warmth: "warmth"
+      drive_level: "drive"
+      cognitive_clarity: "clarity"
+      joy_level: "joy"
+      arousal_level: "alertness"
+
+    conceptual_mappings:
+      affective_stability: "groundedness"
+      social_orientation: "connection"
+      focus_level: "clarity (merged with cognitive_clarity)"
+
+  new_in_8_1:
+    openness: "No 7.0 equivalent (new axis)"
+
+  implementation_field_fixes:
+    note: "Implementation currently uses non-existent fields - must map to real 8.1.0 fields"
+
+    baseline_arousal:
+      incorrect_usage: "eva.get('baseline_arousal', 0.0)"
+      correct_mapping: "(axes_9d.alertness + axes_9d.drive) / 2"
+
+    emotional_tension:
+      incorrect_usage: "eva.get('emotional_tension', 0.0)"
+      correct_mapping: "axes_9d.stress"
+
+    calm_depth:
+      incorrect_usage: "eva.get('calm_depth', 0.0)"
+      correct_mapping: "axes_9d.groundedness"
+
+    coherence:
+      incorrect_usage: "eva.get('coherence', 0.5)"
+      correct_mapping: "axes_9d.clarity"
+
+    momentum:
+      incorrect_usage: "eva.get('momentum', 0.5)"
+      correct_mapping: "momentum.intensity"
+
+# ============================================================
+# ARCHITECTURE INTEGRATION
+# ============================================================
+integration:
+  position_in_pipeline:
+    execution_phase: "POST_PERCEPTION"
+    sequence:
+      1: "Receive eva_state from EVA_Matrix_System"
+      2: "Receive rim_semantic from Resonance Impact Module"
+      3: "Compute phenomenological markers"
+      4: "Package as QualiaSnapshot"
+      5: "Return to calling context"
+
+  upstream_modules:
+    current:
+      - module: "EVA_Matrix_System"
+        path: "eva_matrix/"
+        provides: "axes_9d, emotion_label, momentum"
+        status: "CONNECTED"
+
+      - module: "Resonance_Impact_Module"
+        path: "resonance_impact/"
+        provides: "RIMSemantic (impact_level, impact_trend, affected_domains)"
+        status: "PARTIAL (dataclass only)"
+
+    future:
+      - module: "PhysioController"
+        path: "physio_core/"
+        would_provide: "hormone_levels, ans_dominance"
+        priority: "MEDIUM"
+
+      - module: "FastReflexEngine"
+        path: "physio_core/reflex/"
+        would_provide: "reflex_vector"
+        priority: "MEDIUM"
+
+  downstream_modules:
+    - module: "RMS (Resonance Memory System)"
+      path: "Resonance_Memory_System/"
+      receives: "QualiaSnapshot.texture"
+      usage: "Memory encoding with phenomenological texture"
+      status: "CONNECTED"
+
+    - module: "MSP (Memory & Soul Passport)"
+      path: "Memory_&_Soul_Passaport/"
+      receives: "QualiaSnapshot (via RMS)"
+      usage: "Phenomenological metadata for episodic memory"
+      status: "CONNECTED (indirect)"
+
+    - module: "LLM_Bridge (via CIN)"
+      path: "services/llm_bridge/"
+      receives: "QualiaSnapshot (future)"
+      would_use: "Phenomenological context for the llm response generation"
+      status: "PLANNED"
+
+# ============================================================
+# CURRENT LIMITATIONS
+# ============================================================
+current_limitations:
+  output_simplicity:
+    - "Only 5 output fields (intensity, tone, coherence, depth, texture)"
+    - "No temporal dynamics (no delta_9d tracking)"
+    - "No layered experience (surface/middle/deep)"
+    - "No ineffable quality markers"
+    - "No somatic location mapping"
+
+  input_scope:
+    - "Only EVA Matrix + RIM (no biological_context)"
+    - "No reflex_vector from FastReflexEngine"
+    - "No stimulus_impact from perception layer"
+    - "No previous state (no eva_state_prev for delta calculation)"
+
+  processing:
+    - "No experiential flags (internal_conflict, instability_increasing, etc.)"
+    - "No directional momentum detection"
+    - "Simple texture vector (only 4 dimensions)"
+
+# ============================================================
+# FUTURE ENHANCEMENTS
+# ============================================================
+future_enhancements:
+  phase_1_temporal_dynamics:
+    status: "PLANNED"
+    priority: "HIGH"
+    effort: "3-4 hours"
+
+    would_add:
+      delta_9d:
+        description: "Track changes in 9D axes (now - prev)"
+        formula: "delta[k] = eva_matrix_9d[k] - eva_matrix_9d_prev[k]"
+        clamp: [-1.0, 1.0]
+
+      directional_momentum:
+        dominant_rise: "แกนที่พุ่งขึ้นแรงที่สุด"
+        secondary_rise: "แกนที่พุ่งขึ้นรองลงมา"
+        dominant_fall: "แกนที่ดิ่งลงแรงที่สุด"
+        secondary_fall: "แกนที่ดิ่งลงรองลงมา"
+
+    requires:
+      - "eva_state_prev parameter"
+      - "State tracking across turns"
+
+  phase_2_experiential_flags:
+    status: "PLANNED"
+    priority: "HIGH"
+    effort: "2-3 hours"
+
+    would_add:
+      flags:
+        internal_conflict:
+          description: "มีแรงพุ่งและแรงดิ่งพร้อมกัน"
+          detection: "Simultaneous rise and fall in different axes"
+
+        instability_increasing:
+          description: "เสถียรภาพลดลงอย่างมีนัย"
+          detection: "Groundedness dropping rapidly"
+
+        social_push_pull:
+          description: "แรงเข้าหาทางสังคม + ความตึงเพิ่มพร้อมกัน"
+          detection: "Warmth + stress rising together"
+
+        high_impact_state:
+          description: "เหตุการณ์มีน้ำหนักต่อประสบการณ์"
+          detection: "RIM impact_level == high"
+
+  phase_3_rich_phenomenological_field:
+    status: "DESIGN_PHASE"
+    priority: "MEDIUM"
+    effort: "8-12 hours"
+    ref: "docs/QUALIA_PHILOSOPHICAL_ANALYSIS.md"
+
+    would_add:
+      affective_tone:
+        primary_feel: "string (e.g., 'sharp_hollow_ache')"
+        secondary_feel: "string"
+        metaphor: "string"
+        description: "Multi-layered emotional quality"
+
+      somatic_presence:
+        chest: "string (e.g., 'collapsed_inward')"
+        throat: "string"
+        stomach: "string"
+        impulse: "string (e.g., 'hide_disappear')"
+        description: "Body-mapped sensations"
+
+      temporal_flow:
+        trajectory: "string (e.g., 'intensifying')"
+        phase: "string (e.g., 'shock_to_realization')"
+        momentum: "string"
+        description: "Temporal dynamics of experience"
+
+      layered_experience:
+        surface: "string (surface emotion)"
+        middle: "string (middle emotion)"
+        deep: "string (deep emotion)"
+        conflict: "bool"
+        description: "Multi-layered emotional experience"
+
+      ineffable_quality:
+        hard_to_name: "bool"
+        paradoxical: "bool"
+        metaphor_needed: "bool"
+        primary_metaphor: "string"
+        description: "Hard-to-describe experiential qualities"
+
+      resonance:
+        archetypal_theme: "string"
+        similarity_to_past: "float [0.0, 1.0]"
+        identity_threat: "float [0.0, 1.0]"
+        description: "Echoes and resonance with past experience"
+
+  phase_4_biological_integration:
+    status: "PLANNED"
+    priority: "MEDIUM"
+    effort: "4-6 hours"
+
+    would_add:
+      biological_context:
+        hormone_levels:
+          cortisol: "float [0.0, 1.0]"
+          adrenaline: "float [0.0, 1.0]"
+          oxytocin: "float [0.0, 1.0]"
+          serotonin: "float [0.0, 1.0]"
+
+        ans_dominance:
+          type: "string"
+          enum: ["sympathetic", "parasympathetic", "balanced"]
+
+      reflex_vector:
+        source: "FastReflexEngine"
+        type: "Dict[str, float]"
+        description: "Immediate reflex responses"
+
+    requires:
+      - "PhysioController integration"
+      - "FastReflexEngine connection"
+
+# ============================================================
+# VALIDATION & GUARANTEES
+# ============================================================
+validation:
+  input_validation:
+    eva_state:
+      - "Must contain axes_9d object"
+      - "All 9 axes must be present and in range [0.0, 1.0]"
+      - "momentum (if present) must have intensity and velocity"
+
+    rim_semantic:
+      - "impact_level must be one of: low, medium, high"
+      - "impact_trend must be one of: rising, stable, fading"
+      - "affected_domains must be List[str]"
+
+  output_guarantees:
+    type_safety:
+      - "All numeric fields in valid ranges [0.0, 1.0]"
+      - "tone is always one of 4 valid enum values"
+      - "texture always contains all 4 dimensions"
+      - "Output is always valid QualiaSnapshot dataclass"
+
+    semantic_guarantees:
+      - "No linguistic emotion labels in output"
+      - "No numeric RIM/RI scores exposed"
+      - "Signals remain pre-conceptual (interpretable by LLM)"
+      - "Temporal continuity maintained via smoothing"
+
+    computational_guarantees:
+      - "Deterministic (given same inputs)"
+      - "No side effects (pure function)"
+      - "Execution time < 1ms"
+      - "No external dependencies"
+
+# ============================================================
+# USAGE EXAMPLES
+# ============================================================
+usage_examples:
+  basic_usage:
+    code: |
+      from Artifact_Qualia import ArtifactQualiaCore
+      from dataclasses import dataclass
+
+      @dataclass
+      class RIMSemantic:
+          impact_level: str
+          impact_trend: str
+          affected_domains: list
+
+      # Initialize
+      qualia = ArtifactQualiaCore()
+
+      # Prepare inputs
+      eva_state = {
+          "axes_9d": {
+              "stress": 0.7,
+              "warmth": 0.4,
+              "drive": 0.6,
+              "clarity": 0.5,
+              "joy": 0.3,
+              "alertness": 0.8,
+              "connection": 0.5,
+              "groundedness": 0.4,
+              "openness": 0.6
+          },
+          "momentum": {
+              "intensity": 0.65,
+              "velocity": 0.2
+          }
+      }
+
+      rim_semantic = RIMSemantic(
+          impact_level="high",
+          impact_trend="rising",
+          affected_domains=["emotional", "relational"]
+      )
+
+      # Generate qualia snapshot
+      snapshot = qualia.integrate(eva_state, rim_semantic)
+
+      # Output:
+      # QualiaSnapshot(
+      #   intensity=0.73,
+      #   tone="charged",
+      #   coherence=0.52,
+      #   depth=0.68,
+      #   texture={
+      #       "emotional": 0.82,
+      #       "relational": 0.61,
+      #       "identity": 0.45,
+      #       "ambient": 0.58
+      #   }
+      # )
+
+# ============================================================
+# METADATA
+# ============================================================
+metadata:
+  contract_type: "COMPREHENSIVE_SPECIFICATION"
+  version: "8.1.0"
+  based_on: "EVA 7.0 spec structure"
+  updated_for: "EVA 8.1.0 field names and implementation"
+
+  compatibility:
+    eva_version: "8.1.0"
+    breaking_changes_from: "7.0"
+    changes:
+      - "Field names updated (stress_load → stress, etc.)"
+      - "momentum changed from float to object"
+      - "Some axes renamed/reinterpreted"
+
+  contract_status: "ALIGNED_WITH_IMPLEMENTATION"
+  last_validated: "2026-01-03"
+  migration_plan_ref: "docs/ARTIFACT_QUALIA_MIGRATION_PLAN.md"
+  philosophical_ref: "docs/QUALIA_PHILOSOPHICAL_ANALYSIS.md"
+
+  related_contracts:
+    - "Artifact_Qualia_Input_Contract.yaml"
+    - "Artifact_Qualia_Output_Contract.yaml"
+    - "Artifact_Qualia_Interface.yaml"
+
+  documentation:
+    primary: "Artifact_Qualia/README.md"
+    architecture: "docs/ARCHITECTURE_FLOW_VALIDATED.md"
+    migration: "docs/ARTIFACT_QUALIA_MIGRATION_PLAN.md"
+    philosophy: "docs/QUALIA_PHILOSOPHICAL_ANALYSIS.md"

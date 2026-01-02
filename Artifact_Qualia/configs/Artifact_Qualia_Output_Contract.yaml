@@ -1,17 +1,338 @@
-schema: EVA-Artifact-Qualia-Output-Contract-v1
-version: 1.0
-updated: 2026-01-02
+# Artifact Qualia Output Contract
+# Version: 8.1.0
+# Date: 2026-01-03
+# Status: Aligned with EVA 8.1.0 Implementation
 
-module: Artifact Qualia
+schema: EVA-Artifact-Qualia-Output-Contract-v8.1
+version: 8.1.0
+updated: 2026-01-03
+
+# ============================================================
+# OUTPUT IDENTITY
+# ============================================================
+module: Artifact_Qualia
 role: output_registry
+output_type: "QualiaSnapshot"
 
+description: >
+  Phenomenological experience snapshot representing "what it's like"
+  for EVA in this moment. Non-linguistic, pre-conceptual experience markers.
+
+# ============================================================
+# OUTPUT STRUCTURE
+# ============================================================
+qualia_snapshot:
+  type: "dataclass"
+  dataclass_name: "QualiaSnapshot"
+  dataclass_location: "Artifact_Qualia.py (lines 44-54)"
+
+  fields:
+    intensity:
+      type: "float"
+      range: [0.0, 1.0]
+      description: "ความเข้มของประสบการณ์ (experiential intensity)"
+      meaning: >
+        How strong/vivid the experience feels.
+        Not the same as emotion intensity - this is phenomenological vividness.
+      calculation: "Computed from EVA stress + alertness + drive, modulated by RIM impact"
+      temporal_smoothing: "Smoothed with alpha=0.65 from previous intensity"
+
+    tone:
+      type: "string"
+      enum: ["quiet", "charged", "settling", "neutral"]
+      description: "โทนคุณภาพของประสบการณ์ (phenomenological tone)"
+      meaning: >
+        Coarse phenomenological quality (not emotional labels).
+        Represents the "feel" of the experience.
+      calculation: |
+        - quiet: groundedness > 0.6
+        - charged: stress > 0.7
+        - settling: RIM impact_trend == "fading"
+        - neutral: default
+
+    coherence:
+      type: "float"
+      range: [0.0, 1.0]
+      description: "ความสอดคล้องภายใน (internal consistency)"
+      meaning: >
+        How internally consistent/stable the experience feels.
+        Low = fragmented, confused. High = clear, integrated.
+      calculation: "Computed from EVA clarity + momentum, disrupted by RIM impact_level"
+      temporal_smoothing: "Smoothed with alpha=0.7 from previous coherence"
+
+    depth:
+      type: "float"
+      range: [0.0, 1.0]
+      description: "ความลึกของประสบการณ์ (experiential depth/immersion)"
+      meaning: >
+        Sense of experiential depth or immersion.
+        How "deep" vs. "shallow" the experience feels.
+      calculation: "Weighted combination of groundedness (60%) + stress (40%)"
+      temporal_smoothing: "None (instantaneous)"
+
+    texture:
+      type: "object"
+      description: "เนื้อสัมผัสทางจิตวิทยา (phenomenological texture vector)"
+      purpose: "For RMS memory encoding - provides texture dimensions for memory"
+
+      fields:
+        emotional:
+          type: "float"
+          range: [0.0, 1.0]
+          source: "EVA axes.stress"
+          description: "มิติอารมณ์ของประสบการณ์"
+
+        relational:
+          type: "float"
+          range: [0.0, 1.0]
+          source: "Calculated: (axes.alertness + axes.drive) / 2"
+          description: "มิติความสัมพันธ์/พลังงาน"
+
+        identity:
+          type: "float"
+          range: [0.0, 1.0]
+          source: "EVA axes.clarity"
+          description: "มิติความชัดเจนของตัวตน"
+
+        ambient:
+          type: "float"
+          range: [0.0, 1.0]
+          source: "EVA momentum.intensity"
+          description: "มิติบรรยากาศโดยรอบ"
+
+      modulation:
+        description: "RIM affected_domains amplify corresponding texture dimensions"
+        formula: "If domain in texture: texture[domain] *= 1.15 (clamped to 1.0)"
+
+  example:
+    intensity: 0.73
+    tone: "charged"
+    coherence: 0.52
+    depth: 0.68
+    texture:
+      emotional: 0.82
+      relational: 0.61
+      identity: 0.45
+      ambient: 0.58
+
+# ============================================================
+# DOWNSTREAM DESTINATIONS
+# ============================================================
 destinations:
-  - module: LLM_Bridge
-    contract_path: contract/downstream/LLM_Bridge_Contract/
-    output_fields:
-      - artifact_qualia_packet
+  primary:
+    - module: "RMS (Resonance Memory System)"
+      path: "Resonance_Memory_System/"
+      contract_path: "contract/upstream/Artifact_Qualia_Contract/"
+      receives: "Complete QualiaSnapshot"
+      uses:
+        - "texture vector for memory encoding"
+        - "intensity for salience weighting"
+        - "coherence for memory fragmentation detection"
+      status: "CONNECTED"
 
+    - module: "MSP (Memory & Soul Passport)"
+      path: "Memory_&_Soul_Passaport/"
+      receives: "QualiaSnapshot (via RMS encoding)"
+      uses: "Phenomenological metadata for episodic memory"
+      status: "CONNECTED (indirect via RMS)"
+
+  secondary:
+    - module: "LLM_Bridge"
+      path: "services/llm_bridge/"
+      receives: "QualiaSnapshot (future: via CIN)"
+      would_use: "Phenomenological context for response generation"
+      status: "NOT_YET_CONNECTED"
+      priority: "HIGH"
+
+    - module: "Context Injection Node (CIN)"
+      path: "orchestrator/cin/"
+      would_receive: "QualiaSnapshot as phenomenological context"
+      would_use: "Inject experiential grounding into LLM prompt"
+      status: "PLANNED"
+      priority: "HIGH"
+
+# ============================================================
+# OUTPUT GUARANTEES
+# ============================================================
 guarantees:
-  - No linguistic labels are generated in the output
-  - Signals remain within normalized ranges
-  - Temporal continuity is maintained via delta calculations
+  type_safety:
+    - "All numeric fields in valid ranges [0.0, 1.0]"
+    - "tone is always one of 4 valid enum values"
+    - "texture always contains all 4 dimensions"
+    - "Output is always valid QualiaSnapshot dataclass"
+
+  semantic_guarantees:
+    - "No linguistic emotion labels in output"
+    - "No numeric RIM/RI scores exposed"
+    - "Signals remain pre-conceptual (interpretable by LLM)"
+    - "Temporal continuity maintained via smoothing"
+
+  computational_guarantees:
+    - "Computation is deterministic (given same inputs)"
+    - "No side effects (pure function)"
+    - "Execution time < 1ms (fast)"
+    - "No external dependencies"
+
+# ============================================================
+# TEMPORAL BEHAVIOR
+# ============================================================
+temporal_behavior:
+  smoothing:
+    intensity:
+      algorithm: "Exponential moving average"
+      alpha: 0.65
+      formula: "intensity = 0.65 * prev_intensity + 0.35 * raw_intensity"
+      purpose: "Prevent jarring jumps in experiential intensity"
+
+    coherence:
+      algorithm: "Exponential moving average"
+      alpha: 0.7
+      formula: "coherence = 0.7 * prev_coherence + 0.3 * raw_coherence"
+      purpose: "Smooth transitions in internal consistency"
+
+    depth:
+      smoothing: "None (instantaneous response to groundedness/stress)"
+
+    tone:
+      smoothing: "None (discrete state transition)"
+
+  state_persistence:
+    internal_state:
+      - _last_intensity: "Stored for next computation"
+      - _last_coherence: "Stored for next computation"
+
+    state_methods:
+      - "get_full_state() → returns internal smoothing state"
+      - "load_state(dict) → restores smoothing state from persistence"
+
+# ============================================================
+# USAGE CONSTRAINTS
+# ============================================================
+usage_constraints:
+  description: "Constraints on how output should be interpreted/used"
+
+  interpretation_rules:
+    allow_emotion_labels: false
+    allow_indirect_expression: true
+    prefer_tone_shift_over_explicit_statement: true
+
+  notes:
+    - "QualiaSnapshot is experiential substrate, not decision"
+    - "LLM interprets signals into language/behavior"
+    - "No optimization or judgment in qualia itself"
+    - "Phenomenology before semantics"
+
+# ============================================================
+# INTEGRATION NOTES
+# ============================================================
+integration_notes:
+  rms_integration:
+    usage: "RMS.process() receives QualiaSnapshot.texture"
+    transformation: "texture → resonance_textures in memory encoding"
+    importance: "Provides phenomenological dimensions for memory"
+
+  future_llm_integration:
+    planned_usage: |
+      CIN would inject QualiaSnapshot into LLM context like:
+
+      "Internal felt state:
+       - Experience intensity: moderate-high
+       - Phenomenological tone: charged
+       - Internal coherence: fragmenting
+       - Depth of immersion: moderate
+       - Texture: high emotional, moderate relational"
+
+    benefit: "Gives LLM experiential grounding for response"
+
+  current_limitations:
+    - "Only 5 output fields (simple qualia)"
+    - "No temporal dynamics (no delta tracking)"
+    - "No layered experience (surface/middle/deep)"
+    - "No ineffable quality markers"
+    - "No somatic location mapping"
+
+# ============================================================
+# FUTURE ENHANCEMENTS
+# ============================================================
+future_output_extensions:
+  rich_phenomenological_field:
+    status: "DESIGN_PHASE"
+    would_add:
+      affective_tone:
+        primary_feel: "string (e.g., 'sharp_hollow_ache')"
+        secondary_feel: "string"
+        metaphor: "string"
+
+      somatic_presence:
+        chest: "string (e.g., 'collapsed_inward')"
+        throat: "string"
+        stomach: "string"
+        impulse: "string (e.g., 'hide_disappear')"
+
+      temporal_flow:
+        trajectory: "string (e.g., 'intensifying')"
+        phase: "string (e.g., 'shock_to_realization')"
+        momentum: "string"
+
+      layered_experience:
+        surface: "string (surface emotion)"
+        middle: "string (middle emotion)"
+        deep: "string (deep emotion)"
+        conflict: "bool"
+
+      ineffable_quality:
+        hard_to_name: "bool"
+        paradoxical: "bool"
+        metaphor_needed: "bool"
+        primary_metaphor: "string"
+
+      resonance:
+        archetypal_theme: "string"
+        similarity_to_past: "float"
+        identity_threat: "float"
+
+    priority: "MEDIUM (research needed)"
+    ref: "docs/QUALIA_PHILOSOPHICAL_ANALYSIS.md"
+
+# ============================================================
+# VALIDATION SCHEMA
+# ============================================================
+validation_schema:
+  qualia_snapshot:
+    required_fields:
+      - intensity
+      - tone
+      - coherence
+      - depth
+      - texture
+
+    type_checks:
+      intensity: "0.0 <= value <= 1.0"
+      tone: "value in ['quiet', 'charged', 'settling', 'neutral']"
+      coherence: "0.0 <= value <= 1.0"
+      depth: "0.0 <= value <= 1.0"
+      texture: "dict with keys: emotional, relational, identity, ambient"
+
+    texture_validation:
+      - "texture.emotional: 0.0 <= value <= 1.0"
+      - "texture.relational: 0.0 <= value <= 1.0"
+      - "texture.identity: 0.0 <= value <= 1.0"
+      - "texture.ambient: 0.0 <= value <= 1.0"
+
+# ============================================================
+# CONTRACT METADATA
+# ============================================================
+metadata:
+  contract_type: "OUTPUT"
+  data_format: "Python dataclass"
+  serialization: "JSON-compatible dict"
+
+  compatibility:
+    eva_version: "8.1.0"
+    downstream_contracts:
+      - "RMS v6 (texture vector compatible)"
+      - "MSP episodic schema (via RMS)"
+
+  contract_status: "ALIGNED_WITH_IMPLEMENTATION"
+  last_validated: "2026-01-03"
+  breaking_changes_from_7_0: "None (output structure unchanged)"

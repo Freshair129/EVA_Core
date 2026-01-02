@@ -1,7 +1,7 @@
 # LLM Bridge
 ## Component ID: SYS-LB-8.1
 
-The **LLM Bridge** is the interface between EVA's internal cognitive systems and the Big Conscious (Gemini).
+The **LLM Bridge** is the interface between the llm's internal cognitive systems and the Big Conscious (Gemini).
 
 ### 📁 Directory Structure
 

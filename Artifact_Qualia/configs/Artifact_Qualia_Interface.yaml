@@ -1,49 +1,333 @@
-schema: EVA-Artifact-Qualia-Interface-v1
-version: 1.0
-updated: 2026-01-02
+# Artifact Qualia Interface Specification
+# Version: 8.1.0
+# Date: 2026-01-03
+# Status: Aligned with EVA 8.1.0 Implementation
 
-name: Artifact Qualia
-role: Aggregate internal physiological and cognitive signals into a unified experiential packet for the LLM.
+schema: EVA-Artifact-Qualia-Interface-v8.1
+version: 8.1.0
+updated: 2026-01-03
+
+# ============================================================
+# MODULE IDENTITY
+# ============================================================
+name: Artifact_Qualia
+role: Phenomenological Experience Integrator
 
 description: >
-  Artifact_Qualia serves as the 'internal experienced reality' of EVA. 
-  It translates biological signals, emotional vectors, and system pressures into a 
-  unified signal packet that the LLM interprets as subjective experience.
+  Artifact_Qualia integrates psychological state (from EVA Matrix) and
+  semantic impact (from RIM) into a phenomenological experience snapshot.
 
+  It provides the "felt quality" of the llm's internal state,
+  creating a bridge between physiological/cognitive signals and
+  subjective experience representation.
+
+purpose: >
+  Transform abstract psychological metrics into phenomenological qualities
+  that represent "what it's like" for the llm in this moment.
+
+  Outputs are non-linguistic, pre-conceptual experience markers
+  that LLM can interpret into language and behavior.
+
+# ============================================================
+# DESIGN PRINCIPLES (from EVA 7.0)
+# ============================================================
+principles:
+  - "Qualia คือประสบการณ์ของ llm ไม่ใช่คำอธิบาย"
+  - "ร่างกายส่งสัญญาณ ไม่ส่ง label"
+  - "ทิศทางสำคัญกว่าค่าคงที่"
+  - "น้ำหนักเหตุการณ์แยกจากการแสดงออก"
+  - "LLM ตีความเองจากสัญญาณ"
+
+non_goals:
+  - "ไม่สร้าง emotional labels (เช่น เขิน, เครียด, ดีใจ)"
+  - "ไม่ให้คะแนน RI/RIM/MAS/KI แก่ LLM"
+  - "ไม่สรุปเป็น narrative"
+  - "ไม่ override persona หรือ intent"
+  - "ไม่ตัดสินใจแทน LLM"
+
+invariants:
+  - "No optimization (ไม่มีการตัดสิน ดีหรือแย่)"
+  - "No memory admission (ไม่ตัดสินว่าควรจำหรือไม่)"
+  - "No relationship evaluation (ไม่ประเมินความสัมพันธ์)"
+  - "No numeric impact scores (ไม่ส่งคะแนนตัวเลข)"
+
+# ============================================================
+# POSITION IN ARCHITECTURE
+# ============================================================
 position:
-  upstream:
-    - IRE (Internal Reflex Engine)
-    - EVA Matrix
-    - RIM (Resonance Impact)
-    - GKS (Genesis Knowledge System)
-    - MSP (Memory & Soul Passport)
-  downstream:
-    - LLM (Conscious Mind)
+  upstream_modules:
+    current:
+      - module: "EVA_Matrix_System"
+        path: "eva_matrix/"
+        provides: "axes_9d, emotion_label, momentum"
+        status: "IMPLEMENTED"
 
+      - module: "Resonance_Impact_Module"
+        path: "resonance_impact/"
+        provides: "impact_level, impact_trend, affected_domains"
+        status: "PARTIAL (RIMSemantic dataclass only)"
+
+    future:
+      - module: "PhysioController"
+        path: "physio_core/"
+        would_provide: "hormone_levels, ans_dominance"
+        status: "NOT_YET_CONNECTED"
+        priority: "MEDIUM"
+
+      - module: "FastReflexEngine"
+        path: "physio_core/reflex/"
+        would_provide: "reflex_vector"
+        status: "NOT_YET_CONNECTED"
+        priority: "MEDIUM"
+
+      - module: "Perception_Layer"
+        path: "TBD"
+        would_provide: "stimulus_impact"
+        status: "NOT_IMPLEMENTED"
+        priority: "LOW"
+
+  downstream_modules:
+    - module: "RMS (Resonance Memory System)"
+      path: "Resonance_Memory_System/"
+      receives: "QualiaSnapshot (especially texture vector)"
+      purpose: "Memory encoding with phenomenological texture"
+      status: "CONNECTED"
+
+    - module: "LLM_Bridge"
+      path: "services/llm_bridge/"
+      receives: "QualiaSnapshot (via context injection)"
+      purpose: "Phenomenological context for LLM response generation"
+      status: "PARTIAL (via CIN)"
+
+    - module: "MSP (Memory & Soul Passport)"
+      path: "Memory_&_Soul_Passaport/"
+      receives: "QualiaSnapshot (via RMS)"
+      purpose: "Phenomenological metadata for episodic memory"
+      status: "CONNECTED"
+
+# ============================================================
+# EXECUTION ORDER
+# ============================================================
 execution_order:
-  - Aggregate inputs from all sub-systems
-  - Calculate directional momentum (deltas)
-  - Evaluate experiential flags
-  - Package into Artifact Qualia Packet
+  phase: "POST_PERCEPTION"
+  sequence:
+    1. "Receive eva_state from EVA_Matrix_System"
+    2. "Receive rim_semantic from Resonance Impact Module"
+    3. "Compute phenomenological intensity"
+    4. "Compute coherence (internal consistency)"
+    5. "Compute depth (experiential immersion)"
+    6. "Derive tone (non-emotional quality)"
+    7. "Build texture vector (for RMS)"
+    8. "Package as QualiaSnapshot"
+    9. "Return to calling context"
 
-inputs:
-  reflex_vector:
-    source: IRE
-    type: map<string, float>
-  eva_matrix_9d:
-    source: EVA Matrix
-    type: vector
-  rim_signal:
-    source: RIM
-    type: object
-  knowledge_impact:
-    source: K_Impact
-    type: object
-  memory_admission:
-    source: MAS
-    type: object
+  timing_constraints:
+    - "Must execute AFTER EVA Matrix state update"
+    - "Must execute BEFORE memory encoding (RMS)"
+    - "Non-blocking (does not halt pipeline)"
 
-outputs:
-  artifact_qualia_packet:
-    type: object
-    description: Pure experiential signal without linguistic labels.
+# ============================================================
+# CURRENT IMPLEMENTATION (v8.1.0)
+# ============================================================
+current_implementation:
+  inputs:
+    eva_state:
+      type: "Dict[str, Any]"
+      source: "EVA_Matrix_System.get_full_state()"
+      required: true
+
+    rim_semantic:
+      type: "RIMSemantic"
+      source: "Resonance_Impact_Module (dataclass)"
+      required: true
+
+  outputs:
+    qualia_snapshot:
+      type: "QualiaSnapshot"
+      dataclass: true
+      fields:
+        - intensity: "float [0.0, 1.0]"
+        - tone: "string (quiet|charged|settling|neutral)"
+        - coherence: "float [0.0, 1.0]"
+        - depth: "float [0.0, 1.0]"
+        - texture: "Dict[str, float]"
+
+  api_signature: |
+    def integrate(
+        self,
+        eva_state: Dict[str, float],
+        rim_semantic: RIMSemantic
+    ) -> QualiaSnapshot
+
+  state_management:
+    persistent_state:
+      - _last_intensity: "float (for temporal smoothing)"
+      - _last_coherence: "float (for temporal smoothing)"
+
+    state_methods:
+      - get_full_state(): "Returns internal state"
+      - load_state(state_dict): "Loads state from persistence"
+
+# ============================================================
+# DATA FLOW
+# ============================================================
+data_flow:
+  input_flow:
+    eva_matrix:
+      - "EVA_Matrix_System.process_signals() → axes_9d"
+      - "EVA_Matrix_System.get_full_state() → {axes_9d, momentum, emotion_label}"
+      - "Passed to Artifact_Qualia.integrate()"
+
+    rim:
+      - "Resonance_Impact_Module → RIMSemantic"
+      - "RIMSemantic(impact_level, impact_trend, affected_domains)"
+      - "Passed to Artifact_Qualia.integrate()"
+
+  output_flow:
+    to_rms:
+      - "QualiaSnapshot.texture → RMS.process()"
+      - "RMS uses texture for memory encoding"
+
+    to_msp:
+      - "QualiaSnapshot → (via RMS) → MSP episodic memory"
+      - "Stored as phenomenological metadata"
+
+    to_llm:
+      - "QualiaSnapshot → (future) → CIN → LLM context"
+      - "Provides experiential grounding for response"
+
+# ============================================================
+# FIELD MAPPINGS (EVA 7.0 → 8.1.0)
+# ============================================================
+field_mappings:
+  eva_7_0_to_8_1:
+    stress_load: "stress"
+    social_warmth: "warmth"
+    drive_level: "drive"
+    cognitive_clarity: "clarity"
+    joy_level: "joy"
+    arousal_level: "alertness"
+    affective_stability: "groundedness"
+    social_orientation: "connection"
+    focus_level: "clarity (merged)"
+
+  deprecated_fields:
+    # These don't exist in EVA 8.1.0 but implementation tries to access them
+    baseline_arousal: "CALCULATED: (alertness + drive) / 2"
+    emotional_tension: "MAPPED: stress"
+    calm_depth: "MAPPED: groundedness"
+    coherence: "MAPPED: clarity"
+    momentum: "OBJECT: momentum.intensity"
+
+# ============================================================
+# FUTURE ENHANCEMENTS (from EVA 7.0 spec)
+# ============================================================
+future_enhancements:
+  temporal_dynamics:
+    status: "NOT_IMPLEMENTED"
+    would_add:
+      - "delta_9d: Track changes in axes over time"
+      - "directional_momentum: Detect rising/falling axes"
+      - "dominant_rise/fall: Identify strongest changes"
+    priority: "HIGH"
+    effort: "3-4 hours"
+
+  experiential_flags:
+    status: "NOT_IMPLEMENTED"
+    would_add:
+      - "internal_conflict: Simultaneous rise and fall"
+      - "instability_increasing: Groundedness dropping"
+      - "social_push_pull: Warmth + stress rising together"
+      - "high_impact_state: RIM impact_level == high"
+    priority: "HIGH"
+    effort: "2-3 hours"
+
+  rich_phenomenological_field:
+    status: "DESIGN_PHASE"
+    would_add:
+      - "affective_tone: Multi-layered emotional quality"
+      - "somatic_presence: Body-mapped sensations"
+      - "temporal_flow: Trajectory and momentum"
+      - "layered_experience: Surface/middle/deep conflicts"
+      - "ineffable_markers: Hard-to-name qualities"
+      - "contextual_resonance: Echoes from past episodes"
+    priority: "MEDIUM (research needed)"
+    effort: "8-12 hours"
+    ref: "docs/QUALIA_PHILOSOPHICAL_ANALYSIS.md"
+
+# ============================================================
+# INTEGRATION STATUS
+# ============================================================
+integration_status:
+  current_state:
+    implementation: "WORKING"
+    contract_alignment: "ALIGNED (as of 2026-01-03)"
+    upstream_connections: "PARTIAL (EVA Matrix only)"
+    downstream_connections: "WORKING (RMS, MSP)"
+
+  blockers:
+    - "Resonance Impact Module incomplete (only RIMSemantic dataclass)"
+    - "PhysioController not yet connected"
+    - "No temporal state tracking (no eva_state_prev)"
+    - "Field access patterns use non-existent fields (needs fix)"
+
+  next_steps:
+    immediate:
+      - "Fix field access patterns in Artifact_Qualia.py"
+      - "Test with real EVA Matrix output"
+      - "Validate RIMSemantic integration"
+
+    short_term:
+      - "Implement temporal dynamics (delta_9d)"
+      - "Add experiential flags"
+      - "Connect PhysioController biological signals"
+
+    long_term:
+      - "Design rich phenomenological field"
+      - "Implement multi-layered qualia"
+      - "Add ineffable quality markers"
+
+# ============================================================
+# COMPATIBILITY
+# ============================================================
+compatibility:
+  eva_version: "8.1.0"
+  breaking_changes_from:
+    version: "7.0"
+    changes:
+      - "Field names changed (stress_load → stress, etc.)"
+      - "9D axes structure unchanged (still 9 dimensions)"
+      - "Some axes renamed/reinterpreted"
+      - "momentum changed from float to object"
+
+  backward_compatibility: "NONE (requires migration)"
+  forward_compatibility: "PLANNED (future inputs optional)"
+
+# ============================================================
+# METADATA
+# ============================================================
+metadata:
+  module_type: "STATEFUL_PROCESSOR"
+  execution_mode: "SYNCHRONOUS"
+  side_effects: "NONE (pure integration)"
+
+  authority:
+    artifact_qualia_is:
+      - "Perceptual substrate"
+      - "Experience carrier"
+      - "Phenomenological integrator"
+
+    artifact_qualia_is_not:
+      - "Decision engine"
+      - "Intent selector"
+      - "Language generator"
+      - "Memory admission controller"
+
+  visibility:
+    llm_can_see: true
+    llm_can_modify: false
+    other_modules_can_modify: false
+
+  contract_status: "ALIGNED_WITH_IMPLEMENTATION"
+  last_validated: "2026-01-03"
+  validated_by: "System Integration Team"

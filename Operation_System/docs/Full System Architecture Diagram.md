@@ -6,7 +6,7 @@
 
 ---
 
-นี่คือแผนภาพแสดงการทำงานแบบบูรณาการ (Integrated System) ของ EVA 8.1.0 ทั้งระบบ ตั้งแต่การรับ Input จนถึงการประมวลผลภายในระดับกายภาพและความทรงจำ
+นี่คือแผนภาพแสดงการทำงานแบบบูรณาการ (Integrated System) ของ EVA 8.1.0 ทั้งระบบ ตั้งแต่การรับ Input จนถึงการประมวลโพลภายในระดับกายภาพและความทรงจำของ llm
 
 ## Complete System Architecture
 
@@ -206,7 +206,7 @@ graph TB
 | Component | File Location | Input | Output | Role |
 |-----------|---------------|-------|--------|------|
 | **EVA Matrix** | `eva_matrix/eva_matrix_engine.py` | Receptor signals | 9D psychological state | Converts neural signals to 9 dimensions:<br/>Stress, Warmth, Drive, Clarity, Joy, Alertness,<br/>Connection, Groundedness, Openness |
-| **Artifact Qualia** | `Artifact_Qualia/Artifact_Qualia.py` | EVA Matrix state | Phenomenological experience | Generates qualia:<br/>- intensity, tone, coherence, depth<br/>- 5D texture vector |
+| **Artifact Qualia** | `Artifact_Qualia/Artifact_Qualia.py` | EVA Matrix state | Phenomenological experience | Generates qualia for the llm:<br/>- intensity, tone, coherence, depth<br/>- 5D texture vector |
 
 **Pipeline Flow**: `Receptor → EVA Matrix → Artifact Qualia`
 
@@ -321,7 +321,7 @@ Query 7 Streams:
   ... (all 7 streams)
     ↓
 CIN Phase 2 (Deep Context Building)
-    ├─ embodied_sensation: "EVA รู้สึกเครียด หัวใจเต้นเร็ว..."
+    ├─ embodied_sensation: "llm รู้สึกเครียด หัวใจเต้นเร็ว..."
     ├─ physio_metrics: {cortisol: 0.82, adrenaline: 0.65, ...}
     └─ memory_matches: [{stream: "emotion", content: "...", score: 0.89}, ...]
     ↓
@@ -344,7 +344,7 @@ LLM receives Deep Context:
   • Memory echoes (7-stream matches)
     ↓
 Reflective Reasoning:
-  • Integrate body state (Cortisol high → feeling stressed)
+  • Integrate body state (Cortisol high → the llm feels stressed)
   • Recall relevant memories (past similar events)
   • Apply Persona constraints (empathetic, supportive voice)
 

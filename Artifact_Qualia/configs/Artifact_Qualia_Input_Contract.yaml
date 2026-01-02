@@ -1,49 +1,248 @@
 # Artifact Qualia Input Contract
-# Version: 1.0.0
-# Date: 2026-01-02
-# Status: GKS (Genesis Knowledge System) Standardized
+# Version: 8.1.0
+# Date: 2026-01-03
+# Status: Aligned with EVA 8.1.0 Implementation
 
-schema: Artifact-Qualia-Input-Contract-v1
-
-# ============================================================
-# 1. PSYCHOLOGICAL DIMENSIONS (FROM EVA Matrix (Psychological State Matrix))
-# ============================================================
-psychological_state:
-  axes_9d:
-    type: "object"
-    required: true
-    ref: "EVA_Matrix_Output_Contract.yaml"
+schema: Artifact-Qualia-Input-Contract-v8.1
+version: 8.1.0
+updated: 2026-01-03
 
 # ============================================================
-# 2. BIOLOGICAL SIGNALS (FROM RECEPTOR/PHYSIO)
+# CONTRACT SCOPE
 # ============================================================
-biological_context:
-  hormone_levels:
-    type: "object"
-    required: true
-    properties:
-      cortisol: { type: "float" }
-      adrenaline: { type: "float" }
-      oxytocin: { type: "float" }
-  
-  ans_dominance:
-    type: "string"
-    enum: [sympathetic, parasympathetic, balanced]
-    description: "ANS (Autonomic Nervous System) Dominance State"
+description: >
+  Input contract for Artifact_Qualia in EVA 8.1.0.
+  This reflects the ACTUAL implementation, not aspirational features.
+
+  Current implementation accepts 2 parameters only:
+  1. eva_state (from EVA Matrix)
+  2. rim_semantic (from Resonance Impact Module)
 
 # ============================================================
-# 3. STIMULUS IMPACT (FROM PERCEPTION)
+# 1. EVA STATE (FROM EVA MATRIX)
 # ============================================================
-stimulus_impact:
-  intensity:
-    type: "float"
-    range: [0.0, 1.0]
-  valence:
-    type: "float"
-    range: [-1.0, 1.0]
+eva_state:
+  type: "object"
+  required: true
+  source: "EVA_Matrix_System"
+  ref: "eva_matrix/configs/EVA_Matrix_Output_Contract.yaml"
+
+  description: >
+    Psychological state output from EVA Matrix System.
+    Contains 9D emotional axes and metadata.
+
+  structure:
+    axes_9d:
+      type: "object"
+      required: true
+      description: "9-dimensional emotional state"
+      properties:
+        stress:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "ความเครียด/ความกดดัน"
+
+        warmth:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "ความอบอุ่น/ความเป็นมิตร"
+
+        drive:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "แรงขับ/แรงจูงใจ"
+
+        clarity:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "ความชัดเจนทางความคิด"
+
+        joy:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "ความสุข/ความเบิกบาน"
+
+        alertness:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "ความตื่นตัว"
+
+        connection:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "ความเชื่อมโยง/ความผูกพัน"
+
+        groundedness:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "ความมั่นคง/ความสมดุล"
+
+        openness:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "ความเปิดกว้างทางจิตใจ"
+
+    emotion_label:
+      type: "string"
+      required: false
+      description: "สรุปอารมณ์ปัจจุบัน (e.g., 'Calm', 'Agitated')"
+
+    momentum:
+      type: "object"
+      required: false
+      description: "แรงเฉื่อยของอารมณ์"
+      properties:
+        intensity:
+          type: "float"
+          range: [0.0, 1.0]
+        velocity:
+          type: "float"
+          range: [-1.0, 1.0]
+
+  # Field mapping for implementation
+  field_mapping:
+    note: "Implementation currently expects flat structure, not nested"
+    expected_access_pattern: |
+      axes = eva_state.get("axes_9d", {})
+      stress = axes.get("stress", 0.0)
+
+      momentum_obj = eva_state.get("momentum", {})
+      momentum_intensity = momentum_obj.get("intensity", 0.5)
 
 # ============================================================
-# 4. CONSTRAINTS
+# 2. RIM SEMANTIC (FROM RESONANCE IMPACT MODULE)
 # ============================================================
-constraints:
-  - "Texture Generation: ข้อมูลทั้งหมดต้องเป็นปัจจุบัน (Real-time) เพื่อสร้าง Qualia Texture ที่สอดคล้องกับพัทลุงของร่างกาย"
+rim_semantic:
+  type: "object"
+  required: true
+  source: "Resonance_Impact_Module"
+  description: >
+    Semantic impact signal from RIM (not numeric scores).
+    Represents qualitative impact of events on psychological state.
+
+  dataclass: "RIMSemantic"
+  dataclass_location: "Artifact_Qualia.py (lines 38-42)"
+
+  properties:
+    impact_level:
+      type: "string"
+      required: true
+      enum: ["low", "medium", "high"]
+      description: "Qualitative level of impact"
+
+    impact_trend:
+      type: "string"
+      required: true
+      enum: ["rising", "stable", "fading"]
+      description: "Direction of impact over time"
+
+    affected_domains:
+      type: "array"
+      required: true
+      items:
+        type: "string"
+      description: "Domains affected by this event"
+      examples: ["emotional", "relational", "identity", "ambient"]
+
+  example:
+    impact_level: "high"
+    impact_trend: "rising"
+    affected_domains: ["emotional", "relational"]
+
+# ============================================================
+# 3. IMPLEMENTATION NOTES
+# ============================================================
+implementation_notes:
+  current_signature: |
+    def integrate(
+        self,
+        eva_state: Dict[str, float],
+        rim_semantic: RIMSemantic
+    ) -> QualiaSnapshot
+
+  field_access_patterns:
+    # Internal calculations use these field mappings
+    baseline_arousal_calc: "(axes.alertness + axes.drive) / 2"
+    emotional_tension_calc: "axes.stress"
+    calm_depth_calc: "axes.groundedness"
+    coherence_calc: "axes.clarity"
+    momentum_calc: "momentum.intensity"
+
+  breaking_changes_from_7_0:
+    - "EVA 7.0 used: stress_load, social_warmth, drive_level, etc."
+    - "EVA 8.1.0 uses: stress, warmth, drive, etc. (shorter names)"
+    - "affective_stability → groundedness"
+    - "arousal_level → alertness"
+    - "social_orientation → connection"
+
+# ============================================================
+# 4. FUTURE INPUTS (NOT YET IMPLEMENTED)
+# ============================================================
+future_inputs:
+  note: "These inputs are in the aspirational design but not currently implemented"
+
+  biological_context:
+    status: "NOT_IMPLEMENTED"
+    would_contain:
+      hormone_levels: "cortisol, adrenaline, oxytocin, etc."
+      ans_dominance: "sympathetic | parasympathetic | balanced"
+    upstream_source: "PhysioController"
+    priority: "MEDIUM"
+
+  stimulus_impact:
+    status: "NOT_IMPLEMENTED"
+    would_contain:
+      intensity: "float [0.0, 1.0]"
+      valence: "float [-1.0, 1.0]"
+    upstream_source: "Perception_Layer"
+    priority: "LOW"
+
+  reflex_vector:
+    status: "NOT_IMPLEMENTED"
+    would_contain: "map<string, float> from IRE/FastReflexEngine"
+    upstream_source: "FastReflexEngine"
+    priority: "MEDIUM"
+
+  eva_state_prev:
+    status: "NOT_IMPLEMENTED"
+    would_contain: "Previous turn's EVA state for delta calculation"
+    enables: "Temporal dynamics, directional momentum"
+    priority: "HIGH"
+
+# ============================================================
+# 5. VALIDATION RULES
+# ============================================================
+validation:
+  eva_state:
+    - "Must contain axes_9d object"
+    - "All 9 axes must be present and in range [0.0, 1.0]"
+    - "momentum (if present) must have intensity and velocity"
+
+  rim_semantic:
+    - "impact_level must be one of: low, medium, high"
+    - "impact_trend must be one of: rising, stable, fading"
+    - "affected_domains must be array of strings"
+
+# ============================================================
+# 6. CONTRACT GUARANTEES
+# ============================================================
+guarantees:
+  - "All numeric values normalized to [0.0, 1.0] or [-1.0, 1.0]"
+  - "EVA Matrix axes_9d always contains all 9 dimensions"
+  - "RIM semantic uses qualitative labels, not numeric scores"
+  - "No linguistic emotion labels in input (only in eva_state.emotion_label)"
+
+# ============================================================
+# 7. CONTRACT METADATA
+# ============================================================
+metadata:
+  compatibility:
+    eva_version: "8.1.0"
+    breaking_changes_from: "7.0"
+
+  upstream_modules:
+    - "EVA_Matrix_System (eva_matrix/)"
+    - "Resonance_Impact_Module (resonance_impact/)"
+
+  contract_status: "ALIGNED_WITH_IMPLEMENTATION"
+  last_validated: "2026-01-03"

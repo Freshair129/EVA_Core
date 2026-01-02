@@ -1,0 +1,37 @@
+# Hept Stream RAG Configuration (SSOT)
+# Version: 8.1.0
+# Date: 2026-01-03
+# Description: Retrieval parameters and stream weights for 7-D RAG.
+
+schema: EVA-Hept-Stream-RAG-Configs-v8.1
+version: 8.1.0
+updated: 2026-01-03
+
+# ============================================================
+# RETRIEVAL WEIGHTS
+# ============================================================
+stream_weights:
+  narrative: 1.0     # Sequential continuity
+  salience: 1.2      # High-impact events
+  sensory: 0.8       # Qualia texture match
+  intuition: 0.7     # Semantic graph patterns
+  emotion: 1.5       # Physio-congruent (Current Body State)
+  temporal: 0.6      # Recency bias
+  reflection: 0.9    # Meta-cognitive insights
+
+# ============================================================
+# SEARCH PARAMETERS
+# ============================================================
+search_settings:
+  global_top_k: 10
+  vector_similarity_threshold: 0.75
+  temporal_decay_factor: 0.1
+  emotion_congruence_threshold: 0.70
+
+# ============================================================
+# VECTOR DB SETTINGS
+# ============================================================
+vector_db:
+  local_faiss_path: "Consciousness/02_Semantic_memory/faiss_index"
+  embedding_model: "text-embedding-3-small"
+  dimensions: 1536

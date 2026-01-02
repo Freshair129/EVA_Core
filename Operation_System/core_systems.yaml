@@ -26,8 +26,6 @@ core_systems:
       Handles Episodic, Semantic, and Sensory memory with physiological signatures.
     owns_slots:
       - memory_core
-      - state_barcode
-      - resonance_log
       - temporal_ref
     main_files:
       - path: Consciousness/01_Episodic_memory/episodes/
