@@ -1,0 +1,33 @@
+# CIN (Context Injection Node) Interface
+# Version: 1.0.0
+# Description: Public API Specification for the Context Injection Node.
+
+schema: EVA-CIN-Interface-v1
+name: Context_Injection_Node
+role: Orchestration & Context Builder
+
+description: >
+  Dual-phase context orchestrator. 
+  Phase 1: Builds 'Perception' prompt (Lightweight).
+  Phase 2: Builds 'Reasoning' prompt (Deep Context via RAG & Matrix).
+
+position:
+  upstream:
+    - PhysioController
+    - MSP (Memory)
+    - PMT (Identity)
+  downstream:
+    - Orchestrator (LLM)
+
+methods:
+  - name: build_phase_1_context
+    input: "User Input (String)"
+    output: "Phase 1 Prompt (String)"
+  
+  - name: build_phase_2_context
+    input: "Stimulus Vector (Object) + Tags (List)"
+    output: "Phase 2 Prompt (String)"
+
+constraints:
+  - "Must use Read-Only access for memory."
+  - "Phase 1 latency < 100ms."

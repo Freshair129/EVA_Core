@@ -1,0 +1,61 @@
+# EVA Matrix System Specification
+# Version: 8.1.0
+# Status: GKS (Genesis Knowledge System) Standardized
+# Date: 2026-01-02
+
+meta:
+  component_name: "EVA Matrix"
+  component_id: "SYS-EVAMATRIX-8.1"
+  type: "Core System (Stateful)"
+  role: "Psyche Core: Manages continuous psychological state and emotional momentum."
+  analogy: "The Limbic Orchestrator (ศูนย์บัญชาการอารมณ์และความรู้สึกแฝง)"
+
+# ============================================================
+# 1. ARCHITECTURAL POSITION
+# ============================================================
+architecture:
+  layer: "Consciousness / Psyche Layer"
+  upstream_dependencies:
+    - component: "PhysioController"
+      data: "Neural signals (hormones, ANS (Autonomic Nervous System) state)"
+  downstream_consumers:
+    - component: "CIN (Context Injection Node)"
+      usage: "Injects 9D state into LLM (Large Language Model) prompts"
+    - component: "Artifact Qualia"
+      usage: "Uses 9D state to generate phenomenology texture"
+    - component: "RMS (Resonance Memory System)"
+      usage: "Uses 9D state for affective indexing of episodes"
+
+# ============================================================
+# 2. SYSTEM FUNCTIONS (CAPABILITIES)
+# ============================================================
+functions:
+  - id: "FN-MAT-UPDATE"
+    name: "process_signals"
+    description: "Update the internal 9D state based on physiological stimulus."
+    complexity: "O(1)"
+  
+  - id: "FN-MAT-STATE"
+    name: "get_full_state"
+    description: "Retrieve the current continuous psychological state."
+  
+  - id: "FN-MAT-PERSIST"
+    name: "_save_state / _load_state"
+    description: "Handles internal persistence to ensure emotional continuity across reboots."
+
+# ============================================================
+# 3. TECHNICAL INVARIANTS
+# ============================================================
+invariants:
+  - "Continuous State: สภาวะอารมณ์ต้องไม่ Reset เมื่อเริ่มเทิร์นใหม่ (Emotional Continuity)"
+  - "Body Dominance: การเปลี่ยนแปลงของ Matrix ต้องถูกกระตุ้นโดยสัญญาณร่างกายเท่านั้น (Physiological Primacy)"
+  - "Normalization: ค่าแกนทั้ง 9 และ Momentum ต้องอยู่ในช่วง [0, 1] เสมอ"
+  - "Persistence Authority: ไฟล์ `eva_matrix_state.json` คือแหล่งข้อมูลเดียวที่เชื่อถือได้ (Single Source of Truth)"
+
+# ============================================================
+# 4. ERROR HANDLING
+# ============================================================
+error_policy:
+  missing_input: "Use last known state with 5% decay towards baseline."
+  persistence_failure: "Keep state in volatile memory and log critical warning."
+  invalid_values: "Clamp to [0, 1] range and signal data integrity error."

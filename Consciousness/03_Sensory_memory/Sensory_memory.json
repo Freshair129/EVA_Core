@@ -129,6 +129,30 @@
       "qualia": {
         "intensity": 0.0
       }
+    },
+    {
+      "sensory_id": "sen_260101_4ce0a01b",
+      "episode_id": "EVA_EP01",
+      "timestamp": "2026-01-01T15:42:04.112072",
+      "qualia": {
+        "intensity": 0.0
+      }
+    },
+    {
+      "sensory_id": "sen_260101_9066ea91",
+      "episode_id": "EVA_EP02",
+      "timestamp": "2026-01-01T15:42:08.145878",
+      "qualia": {
+        "intensity": 0.0
+      }
+    },
+    {
+      "sensory_id": "sen_260101_77a98fc3",
+      "episode_id": "EVA_EP03",
+      "timestamp": "2026-01-01T15:42:12.256461",
+      "qualia": {
+        "intensity": 0.0
+      }
     }
   ]
 }

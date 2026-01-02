@@ -1,0 +1,21 @@
+schema: EVA-RIM-Output-Contract-v1
+version: 1.0
+updated: 2026-01-02
+
+module: Resonance Impact
+role: output_registry
+
+destinations:
+  - module: PhysioController
+    contract_path: contract/downstream/PhysioController_Contract/
+    output_fields:
+      - physiological_multiplier
+  
+  - module: Receptor
+    contract_path: contract/downstream/Receptor_Contract/
+    output_fields:
+      - cognitive_weight_offset
+
+guarantees:
+  - Impact values are always positive
+  - Response follows a defined non-linear curve based on resonance depth

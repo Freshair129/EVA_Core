@@ -1,0 +1,23 @@
+schema: EVA-PhysioController-Output-Contract-v1
+version: 1.0
+updated: 2026-01-02
+
+module: PhysioController
+role: output_registry
+
+destinations:
+  - module: EVA Matrix
+    contract_path: contract/downstream/EVA_Matrix_Contract/
+    output_fields:
+      - autonomic_state
+      - endocrine_levels
+  
+  - module: MSP
+    contract_path: contract/downstream/MSP_Contract/
+    output_fields:
+      - physiological_snapshot
+      - hormone_history
+
+guarantees:
+  - Physiological states are updated at 30Hz or higher
+  - All values are normalized between 0.0 and 1.0 where applicable

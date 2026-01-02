@@ -1,0 +1,44 @@
+schema: EVA-RIM-Interface-v1
+version: 1.0
+updated: 2026-01-02
+
+name: Resonance Impact (RIM)
+role: Calculate the impact of resonance on physiological and cognitive systems.
+
+description: >
+  The Resonance Impact module determines how the resonance index (alignment with self) 
+  modifies biological responses and cognitive weightings.
+
+position:
+  upstream:
+    - RI (Resonance Index)
+  downstream:
+    - PhysioController
+    - Receptor
+
+execution_order:
+  - Receive Resonance Index
+  - Apply impact curve
+  - Calculate modification multipliers
+  - Return Impact values
+
+inputs:
+  resonance_index:
+    source: RI
+    type: float
+    required_fields:
+      - score
+
+outputs:
+  resonance_impact:
+    type: object
+    fields:
+      - physiological_multiplier
+      - cognitive_weight_offset
+
+constraints:
+  performance:
+    - latency: < 30ms
+
+invariants:
+  - physiological_multiplier must be > 0.0

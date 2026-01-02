@@ -1,0 +1,56 @@
+# Output to RMS Contract
+# Component: EVA Matrix -> RMS Integration
+# Version: 1.0.0
+# Description: Defines the strict payload schema EVA Matrix sends OUT to RMS for memory encoding.
+
+schema: EVA-Output-to-RMS-Contract-v1.1 (Aligned with EVA_Matrix_State_Schema_01.json)
+
+required_outputs:
+  eva_matrix_state:
+    type: "object"
+    description: "The authoritative 9-dimensional psychological state vector."
+    required: true
+    properties:
+      axes_9d:
+        stress:       { type: "float", range: [0.0, 1.0] }
+        warmth:       { type: "float", range: [0.0, 1.0] }
+        drive:        { type: "float", range: [0.0, 1.0] }
+        clarity:      { type: "float", range: [0.0, 1.0] }
+        joy:          { type: "float", range: [0.0, 1.0] }
+        alertness:    { type: "float", range: [0.0, 1.0] }
+        connection:   { type: "float", range: [0.0, 1.0] }
+        groundedness: { type: "float", range: [0.0, 1.0] }
+        openness:     { type: "float", range: [0.0, 1.0] }
+      
+      metadata:
+        emotion_label: { type: "string", example: "Optimistic Curiosity" }
+      
+      identifiers:
+        episodic_id: { type: "string" }
+        turn_id:     { type: "string" }
+        context_id:  { type: "string" }
+
+  resonance_state:
+    type: "object"
+    required: true
+    properties:
+      impact_level: { type: "float" }
+      impact_trend: { type: "enum", values: ["rising", "stable", "falling"] }
+
+  reflex_state:
+    type: "object"
+    required: true
+    properties:
+      threat_level: { type: "float", range: [0.0, 1.0] }
+
+  qualia_state:
+    type: "object"
+    required: true
+    properties:
+      intensity: { type: "float", range: [0.0, 1.0] }
+      texture_5d: { type: "vector_5d" }
+      emotion_texture_5d: { type: "vector_5d" }
+
+data_integrity:
+  - "All float values must be normalized between 0.0 and 1.0 unless otherwise specified."
+  - "System must guarantee 'identifiers' match the current active session."

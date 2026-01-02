@@ -1,0 +1,134 @@
+{
+  "metric_name": "ESC_H01_ADRENALINE",
+  "category": "physiological_stream",
+  "buffer": {
+    "size": 900,
+    "circular": true,
+    "entries": [
+      {
+        "timestamp": 1767357758.4699159,
+        "value": 10.0
+      },
+      {
+        "timestamp": 1767357758.5029187,
+        "value": 10.1
+      },
+      {
+        "timestamp": 1767357758.5359197,
+        "value": 10.2
+      },
+      {
+        "timestamp": 1767357758.5689204,
+        "value": 10.3
+      },
+      {
+        "timestamp": 1767357758.601921,
+        "value": 10.4
+      },
+      {
+        "timestamp": 1767357758.6349218,
+        "value": 10.5
+      },
+      {
+        "timestamp": 1767357758.6679225,
+        "value": 10.6
+      },
+      {
+        "timestamp": 1767357758.7009232,
+        "value": 10.7
+      },
+      {
+        "timestamp": 1767357758.7339234,
+        "value": 10.8
+      },
+      {
+        "timestamp": 1767357758.7669246,
+        "value": 10.9
+      },
+      {
+        "timestamp": 1767357758.7999253,
+        "value": 11.0
+      },
+      {
+        "timestamp": 1767357758.8329258,
+        "value": 11.1
+      },
+      {
+        "timestamp": 1767357758.8659263,
+        "value": 11.2
+      },
+      {
+        "timestamp": 1767357758.898927,
+        "value": 11.3
+      },
+      {
+        "timestamp": 1767357758.9319277,
+        "value": 11.4
+      },
+      {
+        "timestamp": 1767357758.9649284,
+        "value": 11.5
+      },
+      {
+        "timestamp": 1767357758.997929,
+        "value": 11.6
+      },
+      {
+        "timestamp": 1767357759.0309298,
+        "value": 11.7
+      },
+      {
+        "timestamp": 1767357759.0639305,
+        "value": 11.8
+      },
+      {
+        "timestamp": 1767357759.0969312,
+        "value": 11.9
+      },
+      {
+        "timestamp": 1767357759.129932,
+        "value": 12.0
+      },
+      {
+        "timestamp": 1767357759.1629324,
+        "value": 12.1
+      },
+      {
+        "timestamp": 1767357759.195933,
+        "value": 12.2
+      },
+      {
+        "timestamp": 1767357759.2289336,
+        "value": 12.3
+      },
+      {
+        "timestamp": 1767357759.261934,
+        "value": 12.4
+      },
+      {
+        "timestamp": 1767357759.2949364,
+        "value": 12.5
+      },
+      {
+        "timestamp": 1767357759.3279371,
+        "value": 12.6
+      },
+      {
+        "timestamp": 1767357759.3609378,
+        "value": 12.7
+      },
+      {
+        "timestamp": 1767357759.3939383,
+        "value": 12.8
+      },
+      {
+        "timestamp": 1767357759.426939,
+        "value": 12.9
+      }
+    ]
+  },
+  "metadata": {
+    "update_frequency": "30 Hz",
+    "last_update": "2026-01-02T19:42:38Z"
+  }
+}

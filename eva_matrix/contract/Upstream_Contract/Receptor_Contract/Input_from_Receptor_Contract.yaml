@@ -1,0 +1,22 @@
+# Input from Receptor Contract
+# Component: Receptor Layer -> EVA Matrix
+# Version: 1.0.0
+# Description: Specifies the raw neural signals (hormonal mapping) EVA Matrix expects.
+
+schema: EVA-Input-from-Receptor-Contract-v1.0
+
+required_inputs:
+  neural_signals:
+    type: "dict"
+    description: "Normalized signals derived from simulated blood stream hormone levels."
+    required: true
+    properties:
+      cortisol_signal:   { type: "float", range: [0.0, 1.0] }
+      adrenaline_signal: { type: "float", range: [0.0, 1.0] }
+      oxytocin_signal:   { type: "float", range: [0.0, 1.0] }
+      dopamine_signal:   { type: "float", range: [0.0, 1.0] }
+      serotonin_signal:  { type: "float", range: [0.0, 1.0] }
+
+data_integrity:
+  - "Signals represent 'Receptor Saturation' not absolute mmol/L values."
+  - "Values are pre-normalized [0.0, 1.0] by the Receptor Engine."

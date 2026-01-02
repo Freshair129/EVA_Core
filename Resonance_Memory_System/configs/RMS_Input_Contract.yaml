@@ -1,0 +1,17 @@
+schema: EVA-RMS-Input-Contract-v1
+version: 1.0
+updated: 2026-01-02
+
+module: Resonance Memory System
+role: input_registry
+
+sources:
+  - module: EVA Matrix
+    contract_path: contract/upstream/EVA_Matrix_Contract/
+    required_fields:
+      - emotion_vector
+      - current_resonance
+
+validation:
+  required_sources:
+    - EVA Matrix

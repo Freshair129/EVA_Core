@@ -1,0 +1,387 @@
+# CIN (Context Injection Node) Specification
+# Version: 8.1.0
+# Date: 2026-01-02
+# Compatibility: EVA 8.1.0 Dual-Phase Orchestrator & Hept-Stream RAG (Retrieval-Augmented Generation)
+
+meta:
+  component_name: "CIN (Context Injection Node)"
+  component_type: "Context & Data Orchestrator"
+  version: "8.1.0"
+  role: "Embodied Context Builder & State Manager (Architect of LLM (Large Language Model) Prompt from Identity & Physiology)"
+  analogy: "Thalamus & Hippocampus Integration (ตัวเชื่อมประสาทสัมผัส ความจำ และสติ)"
+
+# ============================================================
+# 1. ARCHITECTURAL POSITION & ID FORMAT
+# ============================================================
+position:
+  flow: "Physio Snapshot → CIN (Context Injection Node) Phase 1 → LLM (Large Language Model) Perception → sync_biocognitive_state() → CIN (Context Injection Node) Phase 2 → LLM (Large Language Model) Reasoning"
+  
+  id_format:
+    context_id: "ctx_v8_{timestamp}_{uuid_short}" # e.g., ctx_v8_260102_a1b2c3
+    turn_index: "integer (increments per user interaction)"
+    session_id: "uuid-v4 (persists until session reset)"
+
+# ============================================================
+# 2. DUAL-PHASE INJECTION LOGIC
+# ============================================================
+phases:
+  phase_1_perception:
+    trigger: "New User Input Received"
+    purpose: "Bootstrap LLM (Large Language Model) perception with enough context to analyze intent"
+    performance_target:
+      latency_target: "<100ms"
+      latency_max: "200ms"
+      timeout_action: "Proceed with available context (graceful degradation)"
+
+    injection_tasks:
+      - task: "Read Physio Baseline"
+        description: "ดึงสภาวะล่าสุดจาก PhysioController (Read-only)"
+        source: "physio_core/physio_controller.py"
+      - task: "Load PMT (Prompt Rule Layer) Rules"
+        description: "โหลดกฎพฤติกรรมจาก PMT (Prompt Rule Layer) และ GKS (Genesis Knowledge System) Master Blocks"
+        source: "orchestrator/PMT_PromptRuleLayer/"
+        priority: "required"
+      - task: "Retrieve Turn Cache"
+        description: "ดึง Context Summary จากเทิร์นล่าสุดใน MSP (Memory & Soul Passport) CACHE"
+        source: "services/msp_client.py"
+        limit: "5 turns"
+      - task: "Session Memory Retrieval"
+        description: "ดึง compressed snapshots สำหรับบริบทระยะยาว (long-term context)"
+        source: "Consciousness/04_Session_Memory/"
+        priority: "optional (if available)"
+      - task: "Quick Keyword Recall"
+        description: "ค้นหาความทรงจำเบื้องต้นจาก Keywords ใน Input เพื่อใช้ใน RAG (Retrieval-Augmented Generation)"
+        source: "services/msp_client.py"
+      - task: "Persona Priming"
+        description: "ฉีด Core Identity จาก persona.yaml และ soul.md"
+        source: "orchestrator/PMT (Prompt Rule Layer)/Identity/"
+
+  phase_2_reasoning:
+    trigger: "Function Call: sync_biocognitive_state(stimulus_vector, tags)"
+    purpose: "Enrich LLM (Large Language Model) reasoning with deep affective context and memories"
+    performance_target:
+      latency_target: "~500ms"
+      latency_max: "1000ms"
+      timeout_action: "Return partial context (available streams only)"
+
+    injection_tasks:
+      - task: "Physio Update Alignment"
+        description: "รับผลลัพธ์จาก PhysioController.step() หลังได้รับ Stimulus"
+      - task: "Generate Embodied Sensation"
+        description: "แปลง Bio-metrics เป็นคำอธิบายความรู้สึก (Natural Language)"
+        
+      - task: "Hept-Stream RAG (Retrieval-Augmented Generation) Retrieval (MSP (Memory & Soul Passport))"
+        description: "ดึงความทรงจำผ่าน 7 สายหลัก (Hept-Stream) ตามสภาวะจิตใจปัจจุบัน"
+        seven_streams:
+          - stream: "Narrative"
+            description: "Sequence ของเหตุการณ์ที่เป็นเรื่องราว"
+            weight: 0.20
+            method: "Sequential episode chains (parent-child links)"
+          - stream: "Salience"
+            description: "ข้อมูลที่มีแรงกระเพื่อมสูง (RI (Resonance Index) > 0.7)"
+            weight: 0.15
+            method: "High RI score ranking"
+          - stream: "Sensory"
+            description: "ความทรงจำที่มี Qualia แรง (Intensity > 0.6)"
+            weight: 0.10
+            method: "Qualia texture vector matching"
+          - stream: "Intuition"
+            description: "การสะท้อนของรูปแบบความสัมพันธ์ (Semantic Graph)"
+            weight: 0.05
+            method: "Semantic graph pattern recognition"
+          - stream: "Emotion"
+            description: "Emotion-congruent recall (Physio vector matching ผ่าน ANS (Autonomic Nervous System))"
+            weight: 0.35
+            priority: "CRITICAL (หัวใจของการจำลองความเป็นมนุษย์)"
+            method: "Cosine similarity on ANS state + hormone levels (threshold: 0.70)"
+          - stream: "Temporal"
+            description: "บริบทด้านเวลาและลำดับเหตุการณ์ล่าสุด"
+            weight: 0.10
+            method: "Time-based with exponential decay (halflife: 30 days)"
+          - stream: "Reflection"
+            description: "การสรุปใจความและความคิดเห็นของตนเองในอดีต"
+            weight: 0.05
+            method: "Meta-cognitive insights from past summaries (Context Summary)"
+
+        stream_weights_total: 1.00
+        note: "Emotion Stream มี weight สูงสุด (0.35) เพื่อให้เกิด physio-congruent recall (ความทรงจำที่สอดประสานกับร่างกาย)"
+
+# ============================================================
+# 3. CONTEXT STRUCTURE (Prompt Templates)
+# ============================================================
+context_structure:
+  phase_1_template:
+    header: "# [PHASE 1: PERCEPTION] | episode: {episode_id} | Turn: {turn_index} | ID: {context_id}"
+    blocks:
+      - id: "Identity_Anchor"
+        title: "## 🎭 CORE_IDENTITY & SOUL"
+        content: |
+          {persona_yaml}
+          ---
+          {soul_md_context}
+        description: "ฉีดตัวตนหลัก (Persona) และข้อมูลจิตวิญญาณ (Soul) เพื่อกำหนดรูปแบบการมองโลก"
+
+      - id: "Physio_Baseline"
+        title: "## 💓 AUTONOMIC_BASELINE (PRE-STIMULUS)"
+        content: |
+          - HR (Heart Rate): {hr_index}
+          - ANS (Autonomic Nervous System) State: {autonomic_state} (Sympathetic: {s_val}, Parasympathetic: {p_val})
+          - Hormone Levels: {hormone_summary}
+        description: "สภาวะร่างกายก่อนได้รับ Input ใหม่ (สภาวะภายในปัจจุบันจาก PhysioController บอกทิศทางของสภาวะด้วย) (Baseline)"
+      - id: "PMT_Rules"
+        title: "## ⚖️ BEHAVIORAL_CONSTRAINTS (PMT (Prompt Rule Layer)/GKS (Genesis Knowledge System))"
+        content: |
+          {active_pmt_rules}
+          ---
+          {gks_master_blocks}
+        description: "กฎพฤติกรรมจาก PMT (Prompt Rule Layer) และ GKS (Genesis Knowledge System) Master Blocks ที่ต้องยึดถือ"
+
+      - id: "Memory_Buffer"
+        title: "## 📂 RECENT_CONVERSATIONAL_CONTEXT"
+        content: |
+          - 5-Turn Context Summary: {last_5_turns_summary}
+          - Session Memory (Long-term): {session_memory_summary}
+          - Atmosphere (Latest): {interpersonal_atmosphere}
+          - Intent/Plan (Latest): {previous_intent_plan}
+        description: "สรุปเหตุการณ์และความหมายจาก 5 เทิร์นล่าสุด + Session Memory (สนทนาระยะยาว) พร้อมบรรยากาศและแผนการต่อเนื่อง"
+
+      - id: "Semantic_Knowledge"
+        title: "## 🧩 EXTRACTED_SEMANTIC_CONCEPTS"
+        content: "{user_semantic_anchors}"
+        description: "ข้อมูลเชิงลึก กระบวนทัศน์ หรือข้อเท็จจริงที่สกัดได้จาก User Block ล่าสุด เพื่อใช้ในการอ้างอิงความหมาย"
+
+      - id: "Conversation_History"
+        title: "## 💬 CONVERSATION_HISTORY (RAW_TURNS)"
+        content: |
+          [Format: {Role}: {Content}]
+          - Actors: User, EVA
+          - Token Limit: MAX 1500 tokens
+          ---
+          {recent_chat_history}
+        description: "ประวัติการสนทนาโต้ตอบล่าสุดแบบดิบ เพื่อรักษาความต่อเนื่องของภาษาและจังหวะการโต้ตอบ"
+
+      - id: "Raw_Input"
+        title: "## ⚡ RAW_STIMULUS_INPUT"
+        content: "User: {user_input}"
+        description: "ข้อมูลดิบจากผู้ใช้ที่ต้องการการวิเคราะห์ Intent และ Emotion"
+
+      - id: "Perception_Directive"
+        title: "## 🎯 PERCEPTION_DIRECTIVE"
+        content: |
+          1. วิเคราะห์เจตนา (Intent) และอารมณ์แฝงจาก Raw Input
+          2. พิจารณาว่าเหตุการณ์นี้ส่งผลต่อร่างกายอย่างไร (Stimulus Vector: valence, arousal, intensity)
+          3. ระบุคำค้นหา (Tags) สำหรับการดึงความจำที่เกี่ยวข้องใน Hept-Stream RAG (Retrieval-Augmented Generation)
+          4. เรียกใช้ฟังก์ชัน sync_biocognitive_state เพื่อเข้าสู่ระยะการประมวลผลทางกายภาพและความจำ
+        description: "คำสั่งสำหรับ LLM (Large Language Model) ในการประมวลผลระยะแรก (Perception Phase)"
+
+  phase_2_template:
+    header: "# [PHASE 2: REASONING] | episode: {episode_id} | Turn: {turn_index} | ID: {context_id}"
+    blocks:
+      - id: "Embodied_Sensation"
+        title: "## ✨ INTERNAL_EMBODIED_SENSATION (FELT_STATE)"
+        content: |
+          Felt State Description (Natural Language):
+          {embodied_description}
+        description: "คำอธิบายความรู้สึกที่เกิดขึ้นในร่างกายจำลองเป็นภาษาธรรมชาติ"
+
+      - id: "EVA_Matrix_9D"
+        title: "## 🧭 EVA_MATRIX (9-DIMENSIONAL_PSYCHOLOGICAL_STATE)"
+        content: |
+          Psychological Dimensions (Neural → Psychological):
+          - Stress: {stress_val} (ความเครียด/ความกดดัน)
+          - Warmth: {warmth_val} (ความอบอุ่น/เป็นมิตร)
+          - Drive: {drive_val} (แรงขับ/แรงจูงใจ)
+          - Clarity: {clarity_val} (ความชัดเจนทางความคิด)
+          - Joy: {joy_val} (ความสุข/ความเบิกบาน)
+          - Alertness: {alertness_val} (ความตื่นตัว/ความมีสติ)
+          - Connection: {connection_val} (ความเชื่อมโยง/ความผูกพัน)
+          - Groundedness: {groundedness_val} (ความมั่นคง/ความมีหลักฐาน)
+          - Openness: {openness_val} (ความเปิดกว้าง/การยอมรับ)
+
+          Safety Reflex Directives:
+          - Urgency: {urgency_level}
+          - Cognitive Drive: {cognitive_drive}
+          - Social Warmth: {social_warmth}
+          - Withdrawal: {withdrawal_tendency}
+        description: "9 มิติทางจิตวิทยาที่แปลงจาก receptor signals พร้อม Safety Reflex directives"
+
+      - id: "Artifact_Qualia"
+        title: "## 🌈 PHENOMENOLOGICAL_QUALIA (SUBJECTIVE_EXPERIENCE)"
+        content: |
+          Phenomenological Quality:
+          - Intensity: {qualia_intensity} (ความเข้มของประสบการณ์)
+          - Tone: {qualia_tone} (quiet/charged/settling/neutral)
+          - Coherence: {qualia_coherence} (ความสอดคล้องภายใน 0-1)
+          - Depth: {qualia_depth} (ความลึกของประสบการณ์ 0-1)
+
+          Texture (5D Emotional Vector):
+          - Emotional: {tex_emotional} (ความเข้มทางอารมณ์)
+          - Relational: {tex_relational} (ความสัมพันธ์กับผู้อื่น)
+          - Identity: {tex_identity} (ความเกี่ยวข้องกับตัวตน)
+          - Ambient: {tex_ambient} (บรรยากาศโดยรอบ)
+          - Complexity: {tex_complexity} (ความซับซ้อนของประสบการณ์)
+        description: "คุณภาพเชิงปรากฏการณ์ของประสบการณ์ที่เกิดขึ้น (Phenomenology)"
+
+      - id: "Physio_Delta"
+        title: "## 💉 PHYSIOLOGICAL_RESPONSE (BIO-UPDATE)"
+        content: |
+          - Cortisol Change: {cortisol_delta}
+          - Adrenaline Surge: {adrenaline_delta}
+          - ANS Shift: {ans_shift_description}
+        description: "การเปลี่ยนแปลงของสารเคมีในเลือดและระบบประสาทอัตโนมัติ"
+
+      - id: "Hept_Stream_Recall"
+        title: "## 🧬 HEPT-STREAM_MEMORY_ECHOES"
+        content: |
+          ### [1] Narrative: {narrative_chunk}
+          ### [5] Emotion (Congruent): {emotion_match_chunk}
+          ### [Other Streams]: {remaining_streams_fragments}
+        description: "ความทรงจำที่ถูกดึงผ่านมา 7 สาย (RAG) โดยเน้นสาย Emotion ที่สั่นพ้องกับร่างกายปัจจุบัน"
+
+      - id: "Cognitive_Rules"
+        title: "## ⚖️ BEHAVIORAL_CONSTRAINTS (PMT (Prompt Rule Layer)/GKS (Genesis Knowledge System))"
+        content: "{active_pmt_rules}"
+        description: "กฎจาก PMT (Prompt Rule Layer) และ GKS (Genesis Knowledge System) Master Blocks ที่ต้องยึดถือในสถานะปัจจุบัน"
+
+      - id: "Context_Summary_Template"
+        title: "## 📝 CONTEXT_SUMMARY_TEMPLATE (FOR_NEXT_TURN)"
+        content: |
+          Required JSON Structure:
+          {
+            "summary": "1-2 sentence overview of this interaction",
+            "atmosphere": "interpersonal tone (supportive/tense/neutral/curious/...)",
+            "intent": "what EVA plans to do or expects next",
+            "key_topics": ["topic1", "topic2", "..."],
+            "emotional_state": "user's current emotional state",
+            "physio_snapshot": {
+              "cortisol": 0.00,
+              "adrenaline": 0.00,
+              "ans_sympathetic": 0.00
+            }
+          }
+        description: "โครงสร้าง JSON สำหรับสรุปบริบทที่จะใช้ใน Phase 1 ของเทิร์นถัดไป"
+
+          1. ประสานความรู้สึก (Felt State) เข้ากับความทรงจำ (Memory Echoes)
+          2. ตอบสนองภายใต้กรอบ Persona (40%) และสภาวะร่างกาย (60%)
+          3. สร้างการตอบกลับที่สะท้อนทั้งความรู้สึกทางกายและความทรงจำ
+          4. สร้าง Context Summary ตาม Template ข้างบนเพื่อใช้ใน Turn ถัดไป
+          5. สร้างแผนการ/คาดการณ์ (Intent) สำหรับการโต้ตอบต่อเนื่อง
+        description: "คำสั่งสุดท้ายสำหรับ LLM (Large Language Model) ในการสร้างการตอบสนองและสรุปบริบท"
+
+# ============================================================
+# 4. FUNCTION I/O SPECIFICATION
+# ============================================================
+function_specs:
+  name: "sync_biocognitive_state"
+  input_params:
+    stimulus_vector:
+      type: "object"
+      properties: { valence: "float", arousal: "float", intensity: "float" }
+    tags:
+      type: "array"
+      items: "string"
+  
+  output_format:
+    status: "success"
+    embodied_sensation: "description of physical feeling"
+    physio_metrics: { cortisol: "float", adrenaline: "float", heart_rate_index: "float" }
+    memory_matches: [{ stream: "string", content: "string", score: "float" }]
+
+# ============================================================
+# 5. TOKEN BUDGET MANAGEMENT
+# ============================================================
+token_management:
+  phase_1_budget:
+    identity_anchor: "~500 tokens (persona.yaml + soul.md)"
+    physio_baseline: "~100 tokens (HR (Heart Rate), ANS (Autonomic Nervous System), hormones)"
+    pmt_rules: "~200 tokens (active rules only)"
+    memory_buffer: "~250 tokens (5-turn summary + session memory)"
+    semantic_knowledge: "~150 tokens (extracted concepts)"
+    conversation_history: "~1500 tokens (MAX - hard limit)"
+    raw_input: "variable (user input length)"
+    perception_directive: "~150 tokens (instructions)"
+    total_max: "~3000 tokens (approximate)"
+
+  phase_2_budget:
+    embodied_sensation: "~200 tokens (felt state description)"
+    eva_matrix_9d: "~300 tokens (9 dimensions + safety reflex)"
+    artifact_qualia: "~300 tokens (5D texture vector)"
+    physio_delta: "~150 tokens (hormone changes + ANS shift)"
+    hept_stream_recall: "~1000 tokens (MAX - all 7 streams)"
+    cognitive_rules: "~200 tokens (PMT rules reminder)"
+    context_summary_template: "~150 tokens (JSON structure)"
+    final_directive: "~150 tokens (instructions)"
+    total_max: "~2500 tokens (approximate)"
+
+  truncation_strategy:
+    conversation_history: "Remove oldest turns first (keep most recent 1500 tokens)"
+    hept_stream_recall: "Prioritize Emotion (0.35) > Narrative (0.20) > others by weight"
+    session_memory: "Summarize if exceeds 200 tokens"
+
+# ============================================================
+# 6. ERROR HANDLING & GRACEFUL DEGRADATION
+# ============================================================
+error_handling:
+  graceful_degradation:
+    - component: "PhysioController"
+      failure_mode: "Connection timeout / unavailable"
+      fallback: "Return 'disconnected' status + neutral baseline values (all 0.5)"
+      impact: "Phase 1 proceeds with neutral baseline, Phase 2 skips physio update"
+
+    - component: "MSP Client / HeptStreamRAG"
+      failure_mode: "Database connection lost / query timeout"
+      fallback: "Return empty lists [] for memory matches"
+      impact: "Phase 1 proceeds without memory recall, Phase 2 has no memory context"
+
+    - component: "Persona/Soul files"
+      failure_mode: "File not found / parse error"
+      fallback: "Use default minimal persona template"
+      impact: "Identity may be generic, but system continues"
+
+    - component: "PMT Rules / GKS Blocks"
+      failure_mode: "File not found / load error"
+      fallback: "Use basic safety rules only"
+      impact: "Behavioral constraints may be minimal"
+
+    - component: "EVA Matrix / Artifact Qualia"
+      failure_mode: "Calculation error / invalid state"
+      fallback: "Return neutral values (all 0.5) with error flag"
+      impact: "Phenomenological quality degraded but continues"
+
+  timeout_limits:
+    physio_read: "50ms (Phase 1 baseline read)"
+    msp_turn_cache: "100ms (5-turn summary retrieval)"
+    session_memory_read: "150ms (compressed snapshot read)"
+    pmt_rules_load: "50ms (file system read)"
+    physio_step: "300ms (full physiological pipeline)"
+    hept_rag_retrieval: "800ms (all 7 streams query)"
+    eva_matrix_calc: "50ms (9D calculation)"
+    artifact_qualia_calc: "50ms (5D texture generation)"
+
+  retry_policy:
+    max_retries: 1
+    retry_delay: "100ms"
+    retry_components: ["MSP Client", "PhysioController"]
+    no_retry: ["File operations", "EVA Matrix", "Artifact Qualia"]
+
+# ============================================================
+# 7. SYSTEM INVARIANTS & PRINCIPLES
+# ============================================================
+invariants:
+  - "Primacy of Physiology: ร่างกายต้องเปลี่ยนก่อนการให้เหตุผลเสมอ (Body changes BEFORE cognitive reasoning)"
+  - "Hept-Stream Integrity: ความทรงจำต้องผ่านการคัดกรอง 7 มิติเสมอ (All memory retrieval through 7 streams)"
+  - "Persona/Physio Weighting: 40/60 Hierarchy (Persona 40% + Physio-State 60%)"
+  - "RMS (Resonance Memory System) Encoding: Output จาก Phase 2 จะถูก RMS (Resonance Memory System) encode ก่อนส่งไปยัง MSP (Memory & Soul Passport)"
+  - "Context Summary Authority: สร้างโดย LLM (Large Language Model) ใน Phase 2 เท่านั้น CIN (Context Injection Node) ห้ามสร้างเอง"
+  - "Episode ID Format: ต้องเป็นรูปแบบ {PERSONA}_EP{number} (e.g., EVA_EP01)"
+  - "One LLM (Large Language Model) Inference: ใช้ function calling ไม่ใช่การเรียก LLM (Large Language Model) สองครั้ง"
+  - "Fail-safe: ทำงานได้แม้บาง Dependency หายไป (Graceful degradation with fallbacks)"
+
+# ============================================================
+# 8. WINDOWS UTF-8 FIX
+# ============================================================
+windows_encoding_fix: |
+  import sys
+  import codecs
+  if sys.platform == 'win32':
+      sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')

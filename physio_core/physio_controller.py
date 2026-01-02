@@ -15,25 +15,25 @@ STRICT RULES:
 
 import yaml
 from datetime import datetime
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 # --- Endocrine ---
-from endocrine.EndocrineController import EndocrineController
-from endocrine.HPARegulator import HPARegulator
-from endocrine.CircadianController import CircadianController
-from endocrine.glands import EndocrineGland
+from .logic.endocrine.EndocrineController import EndocrineController
+from .logic.endocrine.HPARegulator import HPARegulator
+from .logic.endocrine.CircadianController import CircadianController
+from .logic.endocrine.glands import EndocrineGland
 
 # --- Blood ---
-from blood.BloodEngine import BloodEngine
+from .logic.blood.BloodEngine import BloodEngine
 
 # --- Receptor ---
-from receptor.ReceptorEngine import ReceptorEngine
+from .logic.receptor.ReceptorEngine import ReceptorEngine
 
 # --- Reflex ---
-from reflex.FastReflexEngine import FastReflexEngine
+from .logic.reflex.FastReflexEngine import FastReflexEngine
 
 # --- Autonomic ---
-from autonomic.AutonomicResponseEngine import AutonomicResponseEngine
+from .logic.autonomic.AutonomicResponseEngine import AutonomicResponseEngine
 
 
 def clamp(x, lo, hi):
@@ -53,6 +53,7 @@ class PhysioController:
         receptor_cfg_path: str,
         reflex_cfg_path: str,
         autonomic_cfg_path: str,
+        msp: Any = None,
     ):
         # --------------------------------------------------
         # Load configs
@@ -63,6 +64,16 @@ class PhysioController:
         self.receptor_cfg = yaml.safe_load(open(receptor_cfg_path))
         self.reflex_cfg_path = reflex_cfg_path
         self.autonomic_cfg = yaml.safe_load(open(autonomic_cfg_path))
+        self.msp = msp
+
+        # Streaming definitions (from contract)
+        self.CORE_HORMONES = [
+            "ESC_H01_ADRENALINE",
+            "ESC_H02_CORTISOL",
+            "ESC_H05_DOPAMINE",
+            "ESC_H06_SEROTONIN",
+            "ESC_H09_OXYTOCIN"
+        ]
 
         # --------------------------------------------------
         # Build Endocrine
@@ -79,7 +90,7 @@ class PhysioController:
         # --------------------------------------------------
         # Blood
         # --------------------------------------------------
-        self.blood = BloodEngine(self.blood_cfg)
+        self.blood = BloodEngine(self.blood_cfg, msp=self.msp)
 
         # --------------------------------------------------
         # Receptor
@@ -178,6 +189,27 @@ class PhysioController:
             reflex_surges=reflex_surges,
             dt=dt
         )
+
+        # --------------------------------------------------
+        # 7) Dashboard Streaming (MSP Integration)
+        # --------------------------------------------------
+        if self.msp:
+            # Stream Hormones
+            for h_id in self.CORE_HORMONES:
+                val = blood_levels.get(h_id, 0.0)
+                self.msp.register_dashboard_metric(
+                    metric_id=h_id,
+                    value=val,
+                    category="physiological_stream"
+                )
+            
+            # Stream Heart Rate (from autonomic state)
+            hr = ans_state.get("heart_rate", 60.0)
+            self.msp.register_dashboard_metric(
+                metric_id="heart_rate",
+                value=hr,
+                category="physiological_stream"
+            )
 
         # --------------------------------------------------
         # Output snapshot

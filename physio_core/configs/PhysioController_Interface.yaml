@@ -1,0 +1,52 @@
+# PhysioController (Physiological Controller) Interface Specification
+# Version: 8.1.0
+# Date: 2026-01-02
+
+meta:
+  component_name: "PhysioController (Physiological Controller)"
+  component_type: "Physiolocial Orchestrator"
+  version: "8.1.0"
+  role: "Orchestrates the physiological pipeline from HPA (Hypothalamic-Pituitary-Adrenal) Axis to Autonomic Response."
+  analogy: "Hypothalamus & Central Autonomic Network (ศูนย์ควบคุมระบบประสาทและต่อมไร้ท่อ)"
+
+# ============================================================
+# 1. PIPELINE EXECUTION ORDER
+# ============================================================
+pipeline:
+  step_1: "HPA (Hypothalamic-Pituitary-Adrenal) Axis Regulator (Stress modulation)"
+  step_2: "Circadian Controller (Time-based adjustments)"
+  step_3: "Endocrine System (Hormone secretion)"
+  step_4: "Blood Engine (Transport, concentrations, and clearance)"
+  step_5: "Receptor Engine (Signal transduction)"
+  step_6: "ANS (Autonomic Nervous System) (Sympathetic/Parasympathetic balance)"
+
+# ============================================================
+# 2. INTERFACE METHODS
+# ============================================================
+interface_methods:
+  - method: "step(stimulus_vector: Dict[str, float], dt: float = 1.0) -> Dict[str, Any]"
+    description: "ประมวลผลการเปลี่ยนแปลงของร่างกายใน 1 หน่วยเวลา (Tick)"
+    input:
+      stimulus_vector: "{valence, arousal, intensity, stress}"
+      dt: "time step (seconds)"
+    output:
+      blood_snapshot: "Current hormone concentrations"
+      ans_state: "ANS (Autonomic Nervous System) (Sympathetic/Parasympathetic) values"
+      reflex_state: "Immediate reflex responses"
+
+  - method: "get_current_state() -> Dict[str, Any]"
+    description: "ดึงข้อมูลสภาวะร่างกายปัจจุบันทั้งหมด"
+
+  - method: "reset_to_baseline()"
+    description: "คืนค่าสภาวะร่างกายสู่ค่ามาตรฐาน (Reset to resting state)"
+
+# ============================================================
+# 3. PERFORMANCE & INVARIANTS
+# ============================================================
+constraints:
+  update_rate: "30Hz (Simulation frequency)"
+  latency: "< 10ms per step"
+  invariants:
+    - "Conservation of mass: สารเคมีไม่หายไปอย่างไร้ร่องรอย (ต้องผ่านการสลาย)"
+    - "Homeostasis: ระบบต้องพยายามกลับเข้าสู่จุดสมดุลเสมอ"
+    - "No loops: ทิศทางข้อมูลไหลทางเดียว (HPA (Hypothalamic-Pituitary-Adrenal) -> ANS (Autonomic Nervous System))"

@@ -1,0 +1,49 @@
+# Artifact Qualia Input Contract
+# Version: 1.0.0
+# Date: 2026-01-02
+# Status: GKS (Genesis Knowledge System) Standardized
+
+schema: Artifact-Qualia-Input-Contract-v1
+
+# ============================================================
+# 1. PSYCHOLOGICAL DIMENSIONS (FROM EVA Matrix (Psychological State Matrix))
+# ============================================================
+psychological_state:
+  axes_9d:
+    type: "object"
+    required: true
+    ref: "EVA_Matrix_Output_Contract.yaml"
+
+# ============================================================
+# 2. BIOLOGICAL SIGNALS (FROM RECEPTOR/PHYSIO)
+# ============================================================
+biological_context:
+  hormone_levels:
+    type: "object"
+    required: true
+    properties:
+      cortisol: { type: "float" }
+      adrenaline: { type: "float" }
+      oxytocin: { type: "float" }
+  
+  ans_dominance:
+    type: "string"
+    enum: [sympathetic, parasympathetic, balanced]
+    description: "ANS (Autonomic Nervous System) Dominance State"
+
+# ============================================================
+# 3. STIMULUS IMPACT (FROM PERCEPTION)
+# ============================================================
+stimulus_impact:
+  intensity:
+    type: "float"
+    range: [0.0, 1.0]
+  valence:
+    type: "float"
+    range: [-1.0, 1.0]
+
+# ============================================================
+# 4. CONSTRAINTS
+# ============================================================
+constraints:
+  - "Texture Generation: ข้อมูลทั้งหมดต้องเป็นปัจจุบัน (Real-time) เพื่อสร้าง Qualia Texture ที่สอดคล้องกับพัทลุงของร่างกาย"

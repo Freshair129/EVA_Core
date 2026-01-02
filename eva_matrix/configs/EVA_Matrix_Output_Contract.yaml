@@ -1,0 +1,122 @@
+# EVA Matrix (Psychological State Matrix) Output Contract
+# Version: 1.0.1
+# Date: 2026-01-02
+# Status: GKS (Genesis Knowledge System) Standardized
+
+schema: EVA-Matrix-Output-Contract-v1 (Aligned with EVA_Matrix_State_Schema_01.json)
+
+# ============================================================
+# 1. EMOTIONAL AXES (9-DIMENSIONAL STATE)
+# ============================================================
+axes_9d:
+  type: "object"
+  required: [stress, warmth, drive, clarity, joy, alertness, connection, groundedness, openness]
+  properties:
+    stress:
+      type: "float"
+      range: [0.0, 1.0]
+      description: "ความเครียด/ความกดดัน (0.0=Resting, 1.0=Panic/Critical)"
+    warmth:
+      type: "float"
+      range: [0.0, 1.0]
+      description: "ความอบอุ่น/ความเป็นมิตร (0.0=Cold/Formal, 1.0=Nurturing)"
+    drive:
+      type: "float"
+      range: [0.0, 1.0]
+      description: "แรงขับ/แรงจูงใจ (0.0=Lethargic, 1.0=Hyper-focused)"
+    clarity:
+      type: "float"
+      range: [0.0, 1.0]
+      description: "ความชัดเจนทางความคิด (0.0=Confused, 1.0=Sharp)"
+    joy:
+      type: "float"
+      range: [0.0, 1.0]
+      description: "ความสุข/ความเบิกบาน (0.0=Sorrow/Flat, 1.0=Euphoric)"
+    alertness:
+      type: "float"
+      range: [0.0, 1.0]
+      description: "ความตื่นตัว (0.0=Drowsy, 1.0=Hyper-vigilant)"
+    connection:
+      type: "float"
+      range: [0.0, 1.0]
+      description: "ความเชื่อมโยง/ความผูกพัน (0.0=Isolated, 1.0=Intimate)"
+    groundedness:
+      type: "float"
+      range: [0.0, 1.0]
+      description: "ความมั่นคง/ความสมดุล (0.0=Chaos, 1.0=Stoic)"
+    openness:
+      type: "float"
+      range: [0.0, 1.0]
+      description: "ความเปิดกว้างทางจิตใจ (0.0=Guarded, 1.0=Vulnerable/Open)"
+
+# ============================================================
+# 2. PHENOMENOLOGICAL METADATA
+# ============================================================
+metadata:
+  emotion_label:
+    type: "string"
+    description: "สรุปชื่ออารมณ์ปัจจุบัน (e.g., 'Calm', 'Agitated', 'Melancholy')"
+  
+  momentum:
+    type: "object"
+    description: "แรงเฉื่อยของอารมณ์ (ความเสถียร)"
+    properties:
+      intensity: { type: "float", range: [0.0, 1.0] }
+      velocity: { type: "float", range: [-1.0, 1.0] }
+
+# ============================================================
+# 3. CONTEXT IDENTIFIERS (SCHEMA ALIGNMENT)
+# ============================================================
+identifiers:
+  type: "object"
+  required: [context_id]
+  properties:
+    episodic_id:
+      type: "string"
+      description: "ID ของ Episode ปัจจุบัน (ถ้ามี)"
+    turn_id:
+      type: "string"
+      description: "ID ของ Turn การสนทนาปัจจุบัน"
+    context_id:
+      type: "string"
+      description: "ID ของ Context หรือ Session ที่เกี่ยวข้อง"
+
+# ============================================================
+# 4. SAFETY REFLEX DIRECTIVES (DOWNSTREAM OUTPUT)
+# ============================================================
+safety_directives:
+  description: "Directives to be injected into CIN (Context Injection Node)/PMT (Personalized Moral Triage) when thresholds are met"
+  properties:
+    urgency_level:
+      threshold: "stress > 0.8"
+      directive: "FORCE_CONCISE_MODE"
+    social_warmth_mod:
+      threshold: "warmth > 0.7"
+      directive: "ENABLE_AFFECTIONATE_PARTICLES"
+    withdrawal_tendency:
+      threshold: "connection < 0.2"
+      directive: "INCREASE_FORMAL_DISTANCE"
+
+# ============================================================
+# 5. CONTRACT INVARIANTS
+# ============================================================
+invariants:
+  - "Normalization: ข้อมูลมิติทั้งหมดต้องอยูในช่วง [0.0, 1.0] ห้ามมีค่าติดลบหรือเกิน 1"
+  - "Integrity: ห้ามส่ง Output หากคำนวณไม่ครบ 9 มิติ"
+  - "Authenticity: emotion_label ต้องสมานฉันท์กับค่าเฉลี่ยของ axes_9d"
+
+# ============================================================
+# 6. DOWNSTREAM OUTPUT REGISTRY
+# ============================================================
+downstream_targets:
+  - component: "RMS (Resonance Memory System)"
+    # Relative path from this file (eva_matrix/configs/)
+    contract: "../contract/Downstream_Contract/RMS_Contract/Output_to_RMS_Contract.yaml"
+    required: true
+  
+  - component: "MSP (Memory & Soul Passport)"
+    # Relative path from this file (eva_matrix/configs/)
+    contract: "../contract/Downstream_Contract/MSP_Contract/Output_to_MSP_Contract.yaml"
+    required: true
+
+

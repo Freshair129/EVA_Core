@@ -1,0 +1,84 @@
+# EVA Matrix System Configuration
+# Version: 8.1.0
+# Date: 2026-01-02
+# Description: Defines the mapping, weights, and thresholds for the 9-Dimensional Psychological Matrix.
+
+# ============================================================
+# 1. DIMENSION WEIGHTS (Hormone -> Axis Mapping)
+# Values represent the influence [0.0 - 1.0] of each hormone signal on the axes.
+# ============================================================
+dimension_mapping:
+  stress:
+    cortisol: 0.8
+    adrenaline: 0.5
+    serotonin: -0.3
+  warmth:
+    oxytocin: 0.9
+    dopamine: 0.3
+    cortisol: -0.4
+  drive:
+    dopamine: 0.8
+    adrenaline: 0.6
+    serotonin: 0.2
+  clarity:
+    dopamine: 0.5
+    serotonin: 0.4
+    cortisol: -0.2
+  joy:
+    serotonin: 0.7
+    dopamine: 0.6
+    oxytocin: 0.4
+  alertness:
+    adrenaline: 0.9
+    cortisol: 0.4
+    dopamine: 0.2
+  connection:
+    oxytocin: 0.8
+    serotonin: 0.3
+    cortisol: -0.2
+  groundedness:
+    serotonin: 0.6
+    oxytocin: 0.3
+    adrenaline: -0.4
+  openness:
+    oxytocin: 0.5
+    dopamine: 0.4
+    cortisol: -0.5
+
+# ============================================================
+# 2. MOOD PERSISTENCE & MOMENTUM
+# Defines how quickly emotional states change or stabilize.
+# ============================================================
+mood_dynamics:
+  momentum_decay: 0.15          # How fast momentum drops over turns [0-1]
+  state_inertia: 0.7            # Influence of previous state on new calculation
+  learning_rate: 0.3            # Sensitivity to new stimulus signals
+
+# ============================================================
+# 3. EMOTION LABEL MAPPING
+# Thresholds for categorizing the 9D vector into a human-readable label.
+# ============================================================
+emotion_labels:
+  - id: "Euphoric"
+    condition: "joy > 0.8 and drive > 0.7"
+  - id: "Empathetic"
+    condition: "warmth > 0.7 and connection > 0.7"
+  - id: "Agitated"
+    condition: "stress > 0.7 and alertness > 0.8"
+  - id: "Calm"
+    condition: "groundedness > 0.6 and stress < 0.3"
+  - id: "Focused"
+    condition: "drive > 0.6 and clarity > 0.7"
+  - id: "Guarded"
+    condition: "openness < 0.3 and stress > 0.5"
+  - id: "Neutral"
+    condition: "default"
+
+# ============================================================
+# 4. SAFETY REFLEX THRESHOLDS
+# ============================================================
+reflex_thresholds:
+  critical_stress: 0.85         # Triggers urgency directives
+  low_connection: 0.15          # Triggers social withdrawal
+  high_warmth: 0.75             # Triggers affectionate tone
+  low_clarity: 0.25             # Triggers cognitive pattern recovery

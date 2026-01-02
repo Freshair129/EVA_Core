@@ -1,0 +1,26 @@
+# Input from PhysioController Contract
+# Component: PhysioController -> CIN
+# Version: 1.0.0
+# Description: Defines physiological state data CIN requested for baseline perception (Phase 1) and bio-update (Phase 2).
+
+schema: EVA-Input-from-Physio-Contract-v1.0
+
+required_inputs:
+  baseline_state:
+    type: "object"
+    description: "Snapshot of autonomic and hormonal state."
+    required: true
+    properties:
+      hr_index: { type: "float" }
+      autonomic_state: { type: "string" }
+      hormone_summary: { type: "string" }
+  
+  ans_delta:
+    type: "object"
+    description: "Change in state after stimulus processing (Phase 2)."
+    required: false
+    properties:
+      sympathetic: { type: "float" }
+      parasympathetic: { type: "float" }
+      cortisol_delta: { type: "float" }
+      adrenaline_delta: { type: "float" }

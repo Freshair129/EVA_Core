@@ -1,0 +1,38 @@
+# EVA Matrix Runtime Hookup Configuration
+# Version: 8.1.0
+# Date: 2026-01-02
+# Description: Dynamic binding for the EVA Matrix system in the main orchestrator.
+
+runtime_hook:
+  component: "EVAMatrix"
+  module_path: "eva_matrix.eva_matrix_engine"
+  class_name: "EVAMatrixSystem"
+  
+  # Initialization arguments
+  initialization:
+    args:
+      base_path: "ROOT"
+      msp: "HOOK:MSP (Memory & Soul Passport) Client" # Reference to another initialized component
+    
+  # Component lifecycle hooks
+  lifecycle:
+    on_startup: "load_state()"
+    on_shutdown: "_save_state()"
+  
+  # Orchestrator bindings
+  orchestrator_bindings:
+    - trigger: "after:PhysioController.step"
+      action: "process_signals"
+      mapping:
+        input: "physio_output.neural_signals"
+        output: "context.psychological_state"
+    
+    - trigger: "before:CIN (Context Injection Node).assemble_prompt"
+      action: "get_full_state"
+      mapping:
+        output: "context.current_matrix_state"
+
+  # Resource dependencies
+  resources:
+    persistence_path: "Consciousness/10_state/eva_matrix_state.json"
+    config_path: "eva_matrix/configs/EVA_Matrix_configs.yaml"

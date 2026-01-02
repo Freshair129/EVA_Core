@@ -1,0 +1,35 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Receptor State Schema",
+    "type": "object",
+    "required": [
+        "signals",
+        "metadata"
+    ],
+    "properties": {
+        "signals": {
+            "type": "object",
+            "description": "Transduced signals available for autonomic integration",
+            "patternProperties": {
+                "^[A-Z0-9_]+$": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1.0
+                }
+            }
+        },
+        "metadata": {
+            "type": "object",
+            "properties": {
+                "timestamp": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "unit": {
+                    "type": "string",
+                    "default": "normalized_activation"
+                }
+            }
+        }
+    }
+}

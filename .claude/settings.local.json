@@ -6,7 +6,11 @@
       "Bash(xargs ls:*)",
       "Bash(python:*)",
       "Bash(timeout 30 python:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(dir /s /b \"Persona*.md\")",
+      "Bash(pip install:*)",
+      "Bash(tree:*)"
     ]
   }
 }

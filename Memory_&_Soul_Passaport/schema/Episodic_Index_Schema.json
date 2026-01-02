@@ -1,0 +1,49 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Episodic Memory Index Schema",
+    "type": "object",
+    "properties": {
+        "system": {
+            "type": "string",
+            "const": "EVA"
+        },
+        "origin_name": {
+            "type": "string",
+            "const": "Episodic_memory_index"
+        },
+        "timestamp": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "episodes": {
+            "type": "array",
+            "description": "List of indexed episode IDs or shorthand objects.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "timestamp": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id"
+                ]
+            }
+        }
+    },
+    "required": [
+        "system",
+        "origin_name",
+        "timestamp",
+        "episodes"
+    ]
+}

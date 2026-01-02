@@ -35,15 +35,17 @@ if sys.platform == 'win32':
     except:
         pass  # Already configured or not needed
 
-# Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Add core system paths (including non-Python-safe directory names)
+msp_path = Path(__file__).parent.parent / "Memory_&_Soul_Passaport"
+sys.path.insert(0, str(msp_path / "MSP_Client"))
+sys.path.insert(0, str(msp_path / "MSP"))
 
 # Import components
-from orchestrator.dynamic_chunking_orchestrator import DynamicChunkingOrchestrator
-from orchestrator.CIN_ContextInjectionNode.cin import ContextInjectionNode
-from services.hept_stream_rag import HeptStreamRAG
-from services.msp_client import MSPClient
-from services.llm_bridge import LLMBridge, SYNC_BIOCOGNITIVE_STATE_TOOL
+from orchestrator.dual_phase_engine import DynamicChunkingOrchestrator
+from orchestrator.cin.cin import ContextInjectionNode
+from services.hept_stream_rag.hept_stream_rag import HeptStreamRAG
+from msp_client import MSPClient
+from services.llm_bridge.llm_bridge import LLMBridge, SYNC_BIOCOGNITIVE_STATE_TOOL
 
 # Optional: PMT (Prompt Rule Layer)
 try:

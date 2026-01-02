@@ -1,0 +1,52 @@
+# EVA Matrix Coherence & Validation Rules
+# Purpose: Ensures the psychological state remains realistic, internally consistent, and secure.
+
+# 1. RANGE & PRECISION
+technical_boundaries:
+  global_range: [0.0, 1.0]
+  precision_decimal: 4
+  allow_null: false
+
+# 2. SCHEMA COMPLIANCE (STRICT)
+# All downstream outputs MUST comply with this specific schema version.
+schema_compliance:
+  required_schema_id: "EVA_Matrix_State_Schema_01.json"
+  enforcement_policy: "BLOCK_ON_INVALID"
+  forbidden_fields:
+    - "raw_physio_pointers" # Never expose raw massive data pointers
+    - "internal_debug_trace" # Block internal logs from downstream
+  allowed_targets:
+    - target: "RMS"
+      access_level: "FULL_STATE"
+    - target: "MSP"
+      access_level: "FULL_STATE"
+
+# 3. COHERENCE RULES (Cross-Axis Logic)
+# Rules for how dimensions should (or should not) relate to each other.
+coherence_rules:
+  - id: "STRESS_JOY_INVERSE"
+    logic: "High stress ( > 0.8 ) generally inhibits Joy ( capped at 0.4 unless 'Euphoric Stress' context )"
+    action: "WARNING_LOG"
+  
+  - id: "CLARITY_ALERTNESS_LINK"
+    logic: "Low Alertness ( < 0.2 ) must logically decrease Clarity ( capped at 0.5 )"
+    action: "AUTO_CLAMP"
+
+  - id: "CONNECTION_WARMTH_LINK"
+    logic: "Connection cannot be significantly higher than Warmth ( delta < 0.4 )"
+    action: "ADJUST_CONNECTION"
+
+# 4. TEMPORAL VALIDATION (State Transition)
+# Prevents "Teleporting" emotions (unrealistic jumps).
+temporal_rules:
+  max_delta_per_second: 0.15 # Max change in any axis per second
+  persistence_factor: 0.8 # How much of the previous state is kept (0.0 to 1.0)
+
+# 5. CRITICAL THRESHOLDS (System Triggers)
+system_thresholds:
+  panic_mode:
+    condition: "stress > 0.9 && groundedness < 0.2"
+    trigger: "ENGAGE_CIN_SAFETY_PROTOCOL"
+  shutdown_risk:
+    condition: "alertness < 0.1 && drive < 0.1"
+    trigger: "INITIATE_DORMANCY_PROCEDURE"

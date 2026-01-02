@@ -1,0 +1,47 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "State Buffer Schema",
+    "description": "Schema for module state buffer files (recent history for trend analysis).",
+    "type": "object",
+    "required": [
+        "module_name",
+        "buffer_size",
+        "entries"
+    ],
+    "properties": {
+        "module_name": {
+            "type": "string",
+            "description": "Module identifier"
+        },
+        "buffer_size": {
+            "type": "integer",
+            "description": "Maximum number of entries to retain",
+            "default": 20
+        },
+        "last_updated": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "entries": {
+            "type": "array",
+            "description": "Recent state updates (oldest first, newest last)",
+            "items": {
+                "type": "object",
+                "required": [
+                    "timestamp",
+                    "state_data"
+                ],
+                "properties": {
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "state_data": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                }
+            }
+        }
+    }
+}

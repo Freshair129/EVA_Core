@@ -1,0 +1,10 @@
+# PMT (Prompt Rule Layer) Output Contract Registry
+# Version: 1.0.0
+
+schema: EVA-PMT-Output-Contract-v1
+
+destinations:
+  - module: "CIN (Context Injection Node)"
+    contract: "../contract/downstream/CIN_Contract/Output_to_CIN_Contract.yaml"
+    required: true
+    description: "Injects Identity and Behavioral Rules into the prompt."

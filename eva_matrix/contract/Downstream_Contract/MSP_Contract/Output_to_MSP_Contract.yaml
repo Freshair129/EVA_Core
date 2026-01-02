@@ -1,0 +1,39 @@
+# Output to MSP Contract
+# Component: EVA Matrix -> MSP Integration
+# Version: 1.0.0
+# Description: Specifies the exact payload EVA Matrix sends OUT to MSP for the 'state_snapshot' field.
+
+schema: EVA-Output-to-MSP-Contract-v1.1 (Aligned with EVA_Matrix_State_Schema_01.json)
+
+proposal_scope: "state_snapshot"
+
+payload_structure:
+  eva_matrix_state:
+    type: "object"
+    required: true
+    description: "The authoritative psychological state to be frozen in episodic memory."
+    properties:
+      axes_9d:
+        stress:       { type: "float" }
+        warmth:       { type: "float" }
+        drive:        { type: "float" }
+        clarity:      { type: "float" }
+        joy:          { type: "float" }
+        alertness:    { type: "float" }
+        connection:   { type: "float" }
+        groundedness: { type: "float" }
+        openness:     { type: "float" }
+      
+      metadata:
+        emotion_label: { type: "string" }
+        primary_axis:  { type: "string", description: "The dominant axis interacting with the user." }
+        intensity:     { type: "float", description: "Overall vector magnitude." }
+
+      identifiers:
+        episodic_id: { type: "string" }
+        turn_id:     { type: "string" }
+        context_id:  { type: "string" }
+
+coherence_policy:
+  - "Snapshot must be taken AT THE END of the inference phase (Post-Update)."
+  - "Snapshot data is immutable once proposed to MSP."

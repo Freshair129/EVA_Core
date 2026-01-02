@@ -1,0 +1,49 @@
+# EVA Matrix (Psychological State Matrix) Input Contract Registry
+# Version: 1.0.1
+# Description: Master registry of all allowed inputs into the EVA Matrix. Validates consolidated data from upstream sources.
+
+schema: EVA-Matrix-Master-Input-Registry-v1
+
+# ============================================================
+# 1. CENTRAL INPUT REGISTRY
+# ============================================================
+input_sources:
+  - id: "physio_controller"
+    # Relative path from this file (eva_matrix/configs/)
+    contract: "../contract/Upstream_Contract/Physio_Contract/Input_from_PhysioController_Contract.yaml"
+    required: true
+  
+  - id: "receptor_layer"
+    # Relative path from this file (eva_matrix/configs/)
+    contract: "../contract/Upstream_Contract/Receptor_Contract/Input_from_Receptor_Contract.yaml"
+    required: true
+
+# ============================================================
+# 2. CONSOLIDATED VALIDATION SCHEMA
+# ============================================================
+consolidated_inputs:
+  neural_signals:
+    type: "dict"
+    properties:
+      cortisol_signal:   { type: "float", range: [0.0, 1.0] }
+      adrenaline_signal: { type: "float", range: [0.0, 1.0] }
+      oxytocin_signal:   { type: "float", range: [0.0, 1.0] }
+      dopamine_signal:   { type: "float", range: [0.0, 1.0] }
+      serotonin_signal:  { type: "float", range: [0.0, 1.0] }
+
+  autonomic_state:
+    type: "object"
+    properties:
+      sympathetic_tone:     { type: "float", range: [0.0, 1.0] }
+      parasympathetic_tone: { type: "float", range: [0.0, 1.0] }
+      vagal_tone:           { type: "float", range: [0.0, 1.0] }
+
+  reflex_layer:
+    type: "object"
+    properties:
+      threat_level: { type: "float", range: [0.0, 1.0] }
+      social_stimulus: { type: "float", range: [-1.0, 1.0] }
+
+validation_rules:
+  - "Zero-Check: If all signals are 0.0, engage persistent mock state."
+  - "Normalization: All inputs must be pre-normalized [0.0, 1.0]."

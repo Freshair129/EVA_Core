@@ -1,0 +1,21 @@
+{
+  "summary": "This is a test session snapshot representing a Core compression.",
+  "key_points": [
+    "Point A",
+    "Point B",
+    "Point C"
+  ],
+  "metadata": {
+    "test_run": true,
+    "complexity": "low"
+  },
+  "session_id": "THA-01-S003_SP1C2_SS2",
+  "timestamp": "2026-01-01T16:53:26.251464",
+  "compression_counters": {
+    "Session_seq": 2,
+    "Core_seq": 1,
+    "Sphere_seq": 0,
+    "Total_sessions": 10,
+    "last_update": "2026-01-01T16:39:06.573963"
+  }
+}

@@ -1,0 +1,29 @@
+# Physio Coherence Rules
+# Version: v1.0
+
+coherence_rules:
+  - id: hormone_non_negative
+    description: "Hormone concentrations must never be negative"
+    rule: "plasma[H_ID] >= 0.0"
+    severity: CRITICAL
+
+  - id: adrenal_exhaustion_limit
+    description: "Gland mass must not drop below zero"
+    rule: "gland.mass >= 0.0"
+    severity: WARNING
+
+  - id: cardiac_output_safety
+    description: "Cardiac output must remain within biological limits"
+    min: 50.0 # ml/sec
+    max: 400.0 # ml/sec
+    severity: CRITICAL
+
+  - id: stress_resonance_coupling
+    description: "High adrenal levels should correlate with high sympathetic activity"
+    assertion: "if Adrenaline > 0.8 then SNS > 0.5"
+    severity: DEBUG
+
+biological_baselines:
+  heart_rate: 60.0
+  blood_pressure: 120/80
+  breath_rate: 12

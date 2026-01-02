@@ -1,0 +1,28 @@
+# Input from PhysioController Contract
+# Component: PhysioController -> EVA Matrix
+# Version: 1.0.0
+# Description: Specifies the autonomic and reflexive state data EVA Matrix expects to receive.
+
+schema: EVA-Input-from-Physio-Contract-v1.0
+
+required_inputs:
+  autonomic_state:
+    type: "object"
+    description: "State of the Autonomic Nervous System (ANS)."
+    required: true
+    properties:
+      sympathetic_tone:     { type: "float", range: [0.0, 1.0] }
+      parasympathetic_tone: { type: "float", range: [0.0, 1.0] }
+      vagal_tone:           { type: "float", range: [0.0, 1.0] }
+
+  reflex_layer:
+    type: "object"
+    description: "Immediate threat and reflex responses."
+    required: true
+    properties:
+      threat_level:    { type: "float", range: [0.0, 1.0], source: "ESS" }
+      startle_response: { type: "boolean" }
+
+data_integrity:
+  - "Physio data MUST be refreshed every tick (100ms)."
+  - "If data is missing, Matrix generally decays toward baseline."

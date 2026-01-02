@@ -1,0 +1,49 @@
+# Dual-Phase Orchestrator Input Contract
+# Version: 1.0.0
+# Date: 2026-01-02
+# Status: GKS (Genesis Knowledge System) Standardized
+
+schema: Dual-Phase-Orchestrator-Input-Contract-v1
+
+# ============================================================
+# 1. USER INTERACTION
+# ============================================================
+user_interaction:
+  user_input:
+    type: "string"
+    required: true
+  
+  episode_id:
+    type: "string"
+    pattern: "^[A-Z]+_EP[0-9]+$"
+    required: true
+
+# ============================================================
+# 2. SYSTEM STATE
+# ============================================================
+system_state:
+  current_turn:
+    type: "integer"
+    min: 0
+  
+  last_context_summary:
+    type: "string"
+    optional: true
+
+# ============================================================
+# 3. COMPONENT REGISTRY
+# ============================================================
+components:
+  description: "References to required services"
+  required: [llm_bridge, physio_controller, cin, msp_client, hept_rag]
+  details:
+    cin: "CIN (Context Injection Node)"
+    msp_client: "MSP (Memory & Soul Passport) Client"
+    hept_rag: "Hept-Stream RAG (Retrieval-Augmented Generation)"
+
+# ============================================================
+# 4. CONSTRAINTS
+# ============================================================
+constraints:
+  - "Atomic Execution: ต้องจบกระบวนการ Phase 1 และรอผลจาก The Gap ก่อนเริ่ม Phase 2 เสมอ"
+  - "Error Handling: หากโมดูลใดล้มเหลว ต้องเข้าสู่โหมด Graceful Degradation ตามที่ CIN (Context Injection Node) กำหนด"

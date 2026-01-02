@@ -1,0 +1,92 @@
+# EVA Matrix (Psychological State Matrix) System Interface Specification
+# Version: 8.1.0
+# Status: GKS (Genesis Knowledge System) Integrated Authority
+# Date: 2026-01-02
+
+meta:
+  component_name: "EVA Matrix (Psychological State Matrix) System"
+  component_type: "Psyche Core / State Authority"
+  version: "8.1.0"
+  role: "Psyche Core System: Owns and manages continuous 9D emotional state (Consciousness Layer)."
+  analogy: "Limbic System & Prefrontal Cortex (ตัวควบคุมสภาวะอารมณ์และจิตใจ)"
+
+# ============================================================
+# 1. CORE DATA STRUCTURES
+# ============================================================
+state_definition:
+  axes_9d:
+    description: "9-Dimensional Psychological State (Neural -> Psychological mapping)"
+    dimensions:
+      - id: "stress"
+        description: "ความเครียด/ความกดดัน (0.0 - 1.0)"
+      - id: "warmth"
+        description: "ความอบอุ่น/เป็นมิตร (0.0 - 1.0)"
+      - id: "drive"
+        description: "แรงขับ/แรงจูงใจ (0.0 - 1.0)"
+      - id: "clarity"
+        description: "ความชัดเจนทางความคิด (0.0 - 1.0)"
+      - id: "joy"
+        description: "ความสุข/ความเบิกบาน (0.0 - 1.0)"
+      - id: "alertness"
+        description: "ความตื่นตัว/ความมีสติ (0.0 - 1.0)"
+      - id: "connection"
+        description: "ความเชื่อมโยง/ความผูกพัน (0.0 - 1.0)"
+      - id: "groundedness"
+        description: "ความมั่นคง/ความมีหลักฐาน (0.0 - 1.0)"
+      - id: "openness"
+        description: "ความเปิดกว้าง/การยอมรับ (0.0 - 1.0)"
+
+  momentum:
+    description: "Temporal momentum of emotional vectors (determines 'mood' stability)"
+    
+  emotion_label:
+    type: "string"
+    description: "Human-readable label for the current state (e.g., 'Calm', 'Agitated', 'Empathetic')"
+
+# ============================================================
+# 2. INTERFACE METHODS (PUBLIC API)
+# ============================================================
+interface_methods:
+  - method: "process_signals(signals: Dict[str, float]) -> Dict[str, Any]"
+    description: "ประมวลผลสัญญาณประสาท (Neural Signals) จากตัวรับ (Receptor Engine) เพื่ออัปเดตสภาวะจิตใจ"
+    input:
+      signals: "Dictionary of hormone-driven neural signals (e.g., {'cortisol_signal': 0.4})"
+    output:
+      axes_9d: "Updated 9D state"
+      emotion_label: "New emotion label"
+      momentum: "Updated momentum state"
+
+  - method: "get_full_state() -> Dict[str, Any]"
+    description: "ดึงข้อมูลสภาวะจิตใจทั้งหมดในปัจจุบัน"
+    output:
+      axes_9d: "Current 9D state"
+      momentum: "Current momentum"
+      emotion_label: "Current label"
+
+  - method: "load_state(state_data: Dict[str, Any])"
+    description: "โหลดสภาวะจิตใจจากแหล่งภายนอก (เช่น MSP (Memory & Soul Passport) หรือ Session Memory)"
+    input:
+      state_data: "Dict with axes_9d, momentum, and emotion_label"
+
+# ============================================================
+# 3. SAFETY & CONSTRAINTS
+# ============================================================
+safety_reflexes:
+  directives:
+    - id: "urgency"
+      description: "Triggered when Stress > 0.8: Forces concise response mode"
+    - id: "cognitive_drive"
+      description: "Triggered when Clarity < 0.3: Increases pattern recognition effort"
+    - id: "social_warmth"
+      description: "Triggered when Warmth > 0.7: Influences use of polite particles (ka/kub)"
+    - id: "withdrawal"
+      description: "Triggered when Connection < 0.2: Increases formal distance in conversation"
+
+# ============================================================
+# 4. SYSTEM INVARIANTS
+# ============================================================
+invariances:
+  - "Stateless Calculation: การคำนวณมิติใช้ lib-eva-matrix เป็น Pure Function"
+  - "State Ownership: EVAMatrixSystem เป็นเจ้าของค่า axes_9d ปัจจุบันเพียงผู้เดียว"
+  - "Persistence: ทุกครั้งที่ process_signals() สำเร็จ ต้องบันทึกลง Persistence ทันที"
+  - "Authenticity: ห้ามแก้ไขสภาวะจิตใจตามใจชอบโดยไม่มีสัญญาณกระตุ้นจากร่างกาย (ECL (External Constraint Layer) Integrity)"

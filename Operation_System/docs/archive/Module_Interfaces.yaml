@@ -1,0 +1,145 @@
+schema: EVA-Module-Interfaces-v8.1
+version: 8.1.0
+updated: 2026-01-02
+description: Structural interface definitions for EVA 8.1.0 core modules.
+
+layers:
+  cognitive:
+    EVAOrchestrator:
+      description: "Main controller for the Dual-Phase One-Inference pipeline."
+      contact_from: [User, DynamicChunkingOrchestrator, ContextInjectionNode, LLMBridge]
+      contact_to: [MSPClient, LLMBridge, ContextInjectionNode, PhysioController, HeptStreamRAG]
+      methods:
+        process_user_input:
+          params: [user_input, context]
+          returns: {final_response: string, final_state: dict, episode_id: string}
+        _meta_evaluation:
+          params: [user_input, response, stimulus_vector, physio_state]
+          returns: evaluation_result
+        _write_to_memory:
+          params: [context_id, user_input, response, stimulus_vector, physio_state, tags]
+          returns: episode_id
+
+    DynamicChunkingOrchestrator:
+      description: "Implements sequential Micro-Reactions and retroactive synthesis."
+      contact_from: [EVAOrchestrator]
+      contact_to: [ContextInjectionNode, EVAOrchestrator]
+      methods:
+        split_into_chunks:
+          params: [text]
+          returns: list_of_strings
+        process_interaction:
+          params: [user_input, context]
+          returns: interaction_trace
+        _process_micro_reaction:
+          params: [chunk, context]
+          returns: micro_reaction_data
+
+    ContextInjectionNode:
+      description: "Embodied Context Builder & State Manager."
+      contact_from: [EVAOrchestrator]
+      contact_to: [LLMBridge]
+      methods:
+        inject_phase_1:
+          params: [user_input]
+          returns: rough_context
+        inject_phase_2:
+          params: [stimulus_vector, tags, updated_physio, memory_matches]
+          returns: deep_context
+        build_phase_1_prompt:
+          params: [context]
+          returns: prompt_string
+        build_phase_2_prompt:
+          params: [context]
+          returns: function_result_string
+
+  physiological:
+    PhysioController:
+      description: "Full physiological pipeline controller (Endocrine -> Autonomic)."
+      contact_from: [EVAOrchestrator, InternalBioGlands]
+      contact_to: [EVAOrchestrator, ContextInjectionNode]
+      methods:
+        step:
+          params: [eva_stimuli, zeitgebers, dt]
+          returns: {blood: dict, receptors: dict, reflex: dict, autonomic: dict}
+
+  memory:
+    MSPClient:
+      description: "Memory Service Protocol with Authority over persistence."
+      contact_from: [EVAOrchestrator, EVAMatrixSystem]
+      contact_to: [LocalFilesystem, HeptStreamRAG]
+      methods:
+        write_episode:
+          params: [episode_data]
+          returns: episode_id
+        write_session_memory:
+          params: [session_data]
+          returns: session_id
+        query_by_physio_state:
+          params: [physio_query, threshold]
+          returns: list_of_episodes
+
+    HeptStreamRAG:
+      description: "7-Dimensional Affective Memory Retrieval."
+      contact_from: [EVAOrchestrator, MSPClient]
+      contact_to: [EVAOrchestrator, ContextInjectionNode]
+      methods:
+        retrieve:
+          params: [query_context, enabled_streams]
+          returns: list_of_MemoryMatch
+
+  llm_governance:
+    LLMBridge:
+      description: "Real Gemini API Bridge with Function Calling support."
+      contact_from: [ContextInjectionNode, EVAOrchestrator]
+      contact_to: [GoogleGeminiAPI, EVAOrchestrator]
+      methods:
+        generate:
+          params: [prompt, tools]
+          returns: LLMResponse
+        continue_with_result:
+          params: [function_result]
+          returns: LLMResponse
+
+    PromptRuleLayer:
+      description: "Behavioral Governor & Weighting Authority."
+      contact_from: [EVAOrchestrator]
+      contact_to: [ContextInjectionNode]
+      methods:
+        get_phase_1_rules:
+          params: []
+          returns: list_of_rules
+        get_phase_2_rules:
+          params: [physio_state, rim_impact]
+          returns: list_of_rules
+
+  psychological_resonance:
+    EVAMatrixSystem:
+      description: "Psyche Core System: Owns continuous emotional state (axes_9d)."
+      contact_from: [BioReceptors, MSPClient]
+      contact_to: [MSPClient, ArtifactQualiaCore, RMSEngineV6]
+      methods:
+        process_signals:
+          params: [signals]
+          returns: {axes_9d: dict, emotion_label: string}
+        get_full_state:
+          params: []
+          returns: psyche_state
+
+    ArtifactQualiaCore:
+      description: "Phenomenological Experience Integrator (The 'Felt' Experience)."
+      contact_from: [EVAMatrixSystem, RIM]
+      contact_to: [EVAOrchestrator, LLMBridge]
+      methods:
+        integrate:
+          params: [eva_state, rim_semantic]
+          returns: QualiaSnapshot (Intensity, Tone, Coherence, Texture)
+
+    RMSEngineV6:
+      description: "Resonance Memory System: Experiential Memory Encoding & Trauma Protection."
+      contact_from: [EVAMatrixSystem, RIM, Reflex]
+      contact_to: [MSPClient]
+      methods:
+        process:
+          params: [eva_matrix, rim_output, reflex_state, ri_total]
+          returns: state_snapshot (memory_color, encoding_level, texture)

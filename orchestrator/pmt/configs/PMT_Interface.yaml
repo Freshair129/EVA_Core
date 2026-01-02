@@ -1,0 +1,30 @@
+# PMT (Prompt Rule Layer) Interface
+# Version: 1.0.0
+# Description: Public API Specification for the Prompt Rule Layer.
+
+schema: EVA-PMT-Interface-v1
+name: Prompt_Rule_Layer
+role: Behavioral Constraint & Identity Management
+
+description: >
+  Manages the "Soul" (Persona) and "Rules" (Behavioral Constraints).
+  Adapts rules based on Physiological State (e.g., High Stress -> Enforce Concise Protocol).
+
+position:
+  upstream:
+    - PhysioController (State Modulation)
+  downstream:
+    - CIN (Rule Injection)
+
+methods:
+  - name: get_active_rules
+    input: "Physio State (Object)"
+    output: "Rule Block (String)"
+  
+  - name: get_identity_block
+    input: "None"
+    output: "Persona + Soul (String)"
+
+constraints:
+  - "Identity is immutable during session."
+  - "Safety rules override persona quirks."

@@ -1,0 +1,23 @@
+# Output to Orchestrator Contract
+# Component: CIN -> Orchestrator (LLM)
+# Version: 1.0.0
+# Description: Defines the Prompt Context Blocks injected into the LLM.
+
+schema: EVA-Output-to-Orchestrator-Contract-v1.0
+
+required_outputs:
+  phase_1_prompt:
+    type: "string"
+    description: "Perception Prompt (Identity + Physio Baseline + Recent History)."
+    required: true
+  
+  phase_2_prompt:
+    type: "string"
+    description: "Reasoning Prompt (Embodied Sensation + Matrix State + RAG)."
+    required: true
+
+  context_meta:
+    type: "object"
+    properties:
+      context_id: { type: "string" }
+      token_count: { type: "integer" }

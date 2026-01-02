@@ -1,0 +1,17 @@
+schema: EVA-Artifact-Qualia-Output-Contract-v1
+version: 1.0
+updated: 2026-01-02
+
+module: Artifact Qualia
+role: output_registry
+
+destinations:
+  - module: LLM_Bridge
+    contract_path: contract/downstream/LLM_Bridge_Contract/
+    output_fields:
+      - artifact_qualia_packet
+
+guarantees:
+  - No linguistic labels are generated in the output
+  - Signals remain within normalized ranges
+  - Temporal continuity is maintained via delta calculations

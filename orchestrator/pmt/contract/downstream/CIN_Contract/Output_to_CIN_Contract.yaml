@@ -1,0 +1,14 @@
+# Output to CIN Contract
+# Component: PMT -> CIN
+# Version: 1.0.0
+
+schema: EVA-Output-to-CIN-Contract-v1.0
+
+required_outputs:
+  identity_block:
+    type: "string"
+    description: "Formatted Persona and Soul content."
+  
+  behavioral_rules:
+    type: "string"
+    description: "Active list of Dos and Donts based on current state."

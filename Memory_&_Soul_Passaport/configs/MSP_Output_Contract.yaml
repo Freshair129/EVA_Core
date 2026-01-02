@@ -1,0 +1,124 @@
+# MSP Output Contract Registry
+# Version: 1.0.0
+
+schema: EVA-MSP-Output-Contract-v1
+
+destinations:
+  - module: "CIN (Context Injection Node)"
+    contract: "../contract/downstream/CIN_Contract/Output_to_CIN_Contract.yaml"
+    required: true
+    description: "Provides memory context for the next turn."
+
+persistence:
+  description: "MSP manages the lifecycle of storage in the 'Consciousness' directory."
+  root_path: "e:/The Human Algorithm/T2/EVA 8.1.0/Consciousness/"
+  
+  dashboard_streaming:
+    description: "Real-time streaming metrics for dashboard visualization"
+    enabled: true
+    
+    core_hormones:
+      - ESC_H01_ADRENALINE
+      - ESC_H02_CORTISOL
+      - ESC_H05_DOPAMINE
+      - ESC_H06_SEROTONIN
+      - ESC_H09_OXYTOCIN
+    
+    vital_metrics:
+      - heart_rate
+      - emotion_label  # from EVA Matrix
+      - memory_color   # from RMS
+    
+    buffer_config:
+      physiological_stream: 900  # 30 seconds @ 30 Hz
+      cognitive_state: 20        # Last 20 states
+      update_rate: "30 Hz for hormones, per-turn for cognitive"
+  
+  structure:
+    - type: "Episodic Storage (JSON)"
+      target_path: "01_Episodic_memory/episodes/"
+      schema_ref: "../schema/Episodic_Memory_Schema_v2.json"
+      role: "Full content of memories (Unified User+LLM)."
+      from: "LLM Proposal (Episodic) + EVA Matrix (State) + RMS (Encoding)"
+
+    - type: "Episodic Index (JSON)"
+      target_path: "01_Episodic_memory/Episodic_memory_index.json"
+      schema_ref: "../schema/Episodic_Index_Schema.json"
+      role: "Search lookup table."
+      from: "Derived from Episodic Storage (MSP Logic)"
+
+    - type: "Episodic Log (JSONL)"
+      target_path: "01_Episodic_memory/episodic_log.jsonl"
+      schema_ref: "../schema/Episodic_Log_Schema.json"
+      role: "Write-ahead log for recovery."
+      from: "Derived from Episodic Storage (MSP Logic)"
+
+    - type: "Episodic User (JSON)"
+      target_path: "01_Episodic_memory/episodes_user/"
+      schema_ref: "../schema/Episodic_User_Schema.json"
+      role: "User-side episode fragment."
+      from: "User Input Processor"
+
+    - type: "Episodic LLM (JSON)"
+      target_path: "01_Episodic_memory/episodes_llm/"
+      schema_ref: "../schema/Episodic_LLM_Schema.json"
+      role: "LLM-side episode fragment."
+      from: "LLM Output Generator"
+
+    - type: "Semantic Memory"
+      target_path: "02_Semantic_memory/"
+      schema_ref: "../schema/Semantic_Memory_Schema.json"
+      role: "Knowledge extraction and fact storage."
+      from: "LLM Proposal (Semantic)"
+    
+    - type: "Sensory Memory"
+      target_path: "03_Sensory_memory/"
+      schema_ref: "../schema/Sensory_Memory_Schema.json"
+      role: "High-fidelity raw input/qualia snapshots."
+      from: "LLM Proposal (Sensory) OR Raw Input Stream"
+
+    - type: "Session Memory"
+      target_path: "04_Session_Memory/"
+      role: "Short-term compressed session history."
+      from: "Internal MSP Logic (Session Lifecycle)"
+
+    - type: "Core Memory"
+      target_path: "06_Core_memory/"
+      role: "foundational memories defining identity/beliefs."
+      from: "LLM Proposal (Identity Update) / Manual Config"
+
+    - type: "Sphere Memory"
+      target_path: "07_Sphere_memory/"
+      role: "Conceptual domains and knowledge spheres."
+      from: "LLM Proposal (Knowledge Expansion)"
+
+    - type: "User Block"
+      target_path: "08_User_block/"
+      role: "User-specific profiles and preferences."
+      from: "Orchestrator (User Analysis)"
+
+    - type: "State: Bio-System"
+      target_path: "09_state/"
+      auxiliary_files: ["Endocrine_state.json", "Hemodynamics_state.json", "receptor_state.json"]
+      schema_ref: "../schema/Bio_State_Schema.json"
+      role: "Biological substrate persistence."
+      from: "Physio Core (Real-time)"
+
+    - type: "State: Psyche-System"
+      target_path: "09_state/"
+      auxiliary_files: ["eva_matrix_state.json", "artifact_qualia_state.json", "rms_state.json"]
+      schema_ref: "../schema/Psyche_State_Schema.json"
+      role: "Psychological framework persistence."
+      from: "EVA Matrix + RMS"
+
+    - type: "State: Meta-Data"
+      target_path: "09_state/"
+      auxiliary_files: ["episode_counter.json", "consciousness_history.jsonl"]
+      role: "System-level state tracking."
+      from: "MSP Internal Logic"
+
+    - type: "Context Storage"
+      target_path: "10_context_storage/"
+      role: "Cached context vectors for retrieval."
+      from: "Orchestrator (Prompt Context Snapshot)"
+

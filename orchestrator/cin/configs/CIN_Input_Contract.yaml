@@ -1,0 +1,61 @@
+# CIN (Context Injection Node) Input Contract
+# Version: 1.0.0
+# Date: 2026-01-02
+# Status: GKS (Genesis Knowledge System) Standardized
+
+schema: CIN-Input-Contract-v1
+
+# ============================================================
+# 1. IDENTITY & STATIC CONTEXT
+# ============================================================
+identity:
+  persona_yaml:
+    type: "string"
+    source: "orchestrator/PMT (Prompt Rule Layer)/Identity/persona.yaml"
+    required: true
+  soul_md_context:
+    type: "string"
+    source: "orchestrator/PMT (Prompt Rule Layer)/Identity/soul.md"
+    required: true
+
+# ============================================================
+# 2. PHYSIOLOGICAL STATE (BASELINE & DYNAMIC)
+# ============================================================
+# ============================================================
+# 2. PHYSIOLOGICAL STATE (BASELINE & DYNAMIC)
+# ============================================================
+physiology:
+  - id: "physio_controller"
+    # Relative to configs/
+    contract: "../contract/upstream/Physio_Contract/Input_from_PhysioController_Contract.yaml"
+    required: true
+
+# ============================================================
+# 3. MEMORY & STATE CONTEXT (Via MSP)
+# ============================================================
+memory_and_state:
+  - id: "msp_context"
+    # Relative to configs/
+    contract: "../contract/upstream/MSP_Contract/Input_from_MSP_Contract.yaml"
+    required: true
+    description: "Includes Turn Cache, Session Memory, RAG Matches, and EVA Matrix State."
+
+# ============================================================
+# 4. USER STIMULUS
+# ============================================================
+stimulus:
+  user_input:
+    type: "string"
+    required: true
+  
+  user_semantic_anchors:
+    type: "string"
+    description: "Extracted concepts from current turn"
+    required: true
+
+# ============================================================
+# 5. INVARIANTS
+# ============================================================
+invariants:
+  - "Phase Separation: ข้อมูล Phase 2 (RAG, Physio Delta) ต้องไม่ถูกส่งก่อนกระบวนการ Phase 1 เสร็จสิ้น"
+  - "Data Completeness: หากขาด Persona หรือ Soul ให้ใช้ Default Safe Template"

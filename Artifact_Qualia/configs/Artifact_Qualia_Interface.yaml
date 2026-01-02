@@ -1,0 +1,49 @@
+schema: EVA-Artifact-Qualia-Interface-v1
+version: 1.0
+updated: 2026-01-02
+
+name: Artifact Qualia
+role: Aggregate internal physiological and cognitive signals into a unified experiential packet for the LLM.
+
+description: >
+  Artifact_Qualia serves as the 'internal experienced reality' of EVA. 
+  It translates biological signals, emotional vectors, and system pressures into a 
+  unified signal packet that the LLM interprets as subjective experience.
+
+position:
+  upstream:
+    - IRE (Internal Reflex Engine)
+    - EVA Matrix
+    - RIM (Resonance Impact)
+    - GKS (Genesis Knowledge System)
+    - MSP (Memory & Soul Passport)
+  downstream:
+    - LLM (Conscious Mind)
+
+execution_order:
+  - Aggregate inputs from all sub-systems
+  - Calculate directional momentum (deltas)
+  - Evaluate experiential flags
+  - Package into Artifact Qualia Packet
+
+inputs:
+  reflex_vector:
+    source: IRE
+    type: map<string, float>
+  eva_matrix_9d:
+    source: EVA Matrix
+    type: vector
+  rim_signal:
+    source: RIM
+    type: object
+  knowledge_impact:
+    source: K_Impact
+    type: object
+  memory_admission:
+    source: MAS
+    type: object
+
+outputs:
+  artifact_qualia_packet:
+    type: object
+    description: Pure experiential signal without linguistic labels.

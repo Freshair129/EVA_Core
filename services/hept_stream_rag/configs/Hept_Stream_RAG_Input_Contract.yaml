@@ -1,0 +1,64 @@
+# Hept-Stream RAG (Retrieval-Augmented Generation) Input Contract
+# Version: 1.0.0
+# Date: 2026-01-02
+# Status: GKS (Genesis Knowledge System) Standardized
+
+schema: Hept-Stream-RAG-Input-Contract-v1
+
+# ============================================================
+# 1. QUERY CONTEXT (COGNITIVE)
+# ============================================================
+query_context:
+  tags:
+    type: "array"
+    items: "string"
+    description: "Keywords extracted by Phase 1 analysis"
+    required: true
+  
+  semantic_vector:
+    type: "array"
+    items: "float"
+    description: "Embedding vector for the current query"
+    optional: true
+
+# ============================================================
+# 2. AFFECTIVE ANCHORS (BIOLOGICAL)
+# ============================================================
+affective_anchors:
+  physio_vector:
+    type: "object"
+    description: "Current hormone levels for physio-congruent matching"
+    required: true
+  
+  ans_state:
+    type: "object"
+    description: "ANS (Autonomic Nervous System) dominance (Sympathetic vs Parasympathetic)"
+    required: true
+
+  qualia_texture:
+    type: "array"
+    items: "float"
+    description: "5D texture vector from Artifact Qualia"
+    required: true
+
+# ============================================================
+# 3. SEARCH PARAMETERS
+# ============================================================
+search_parameters:
+  limit_per_stream:
+    type: "integer"
+    default: 5
+  
+  global_limit:
+    type: "integer"
+    default: 20
+
+  similarity_threshold:
+    type: "float"
+    default: 0.7
+
+# ============================================================
+# 4. CONSTRAINTS
+# ============================================================
+constraints:
+  - "Sync requirement: ห้ามเรียก RAG (Retrieval-Augmented Generation) ก่อนที่จะมีการสร้าง Qualia Texture และสภาวะร่างกายปัจจุบัน"

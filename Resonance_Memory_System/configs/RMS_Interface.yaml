@@ -1,0 +1,125 @@
+# RMS (Resonance Memory System) Interface Specification
+# Version: 8.1.0
+# Date: 2026-01-02
+# Status: GKS (Genesis Knowledge System) Standardized
+
+schema: EVA-RMS-Interface-v8
+version: 8.1.0
+name: RMS (Resonance Memory System) Interface (RMS (Resonance Memory System) v8.1)
+role: experiential_memory_encoding
+description: >
+  RMS (Resonance Memory System) encodes phenomenological experience into authoritative memory signals.
+  It integrates EVA Matrix state (9D), RIM (Resonance Impact), and Reflex state
+  into a unified Episodic Memory Snapshot, driving the Hept-Stream RAG (Retrieval-Augmented Generation) prioritization.
+
+# ============================================================
+# 1. POSITION & FLOW
+# ============================================================
+position:
+  upstream:
+    - component: "EVAMatrixSystem"
+      data: "9-Dimensional Psychological State"
+    - component: "RI (Resonance Index)"
+      data: "Interaction Impact and Coherence"
+    - component: "PhysioController / ESS (Emergency System Shield)"
+      data: "Reflex state and threat levels"
+    - component: "Artifact Qualia"
+      data: "Phenomenological experience (Texture/Intensity)"
+  downstream:
+    - component: "MSP (Memory & Soul Passport)"
+      usage: "Episodic encoding and persistence"
+    - component: "Hept-Stream RAG (Retrieval-Augmented Generation)"
+      usage: "Affective indexing for retrieval prioritization"
+
+execution_order:
+  - "Bio/Physio Pipeline Step"
+  - "EVAMatrix Update"
+  - "RMS (Resonance Memory System) Encoding (Intensity, Color, Level calculation)"
+  - "MSP (Memory & Soul Passport) Commit (Episode generation)"
+
+# ============================================================
+# 2. INPUT CONTRACT
+# ============================================================
+inputs:
+  eva_matrix_state:
+    source: "EVAMatrixSystem"
+    type: "object"
+    required_fields:
+      - stress
+      - warmth
+      - drive
+      - clarity
+      - joy
+      - alertness
+      - connection
+      - groundedness
+      - openness
+      - emotion_label
+
+  resonance_state:
+    source: "RIM (Resonance Impact)"
+    type: "object"
+    required_fields:
+      - impact_level
+      - impact_trend
+
+  ri_score:
+    source: "RI (Resonance Index)"
+    type: "float"
+    description: "Global Resonance Intelligence Total [0.0 - 1.0]"
+
+  reflex_state:
+    source: "PhysioController / ESS (Emergency System Shield)"
+    type: "object"
+    required_fields:
+      - threat_level [0.0 - 1.0]
+
+  qualia_state:
+    source: "Artifact Qualia"
+    type: "object"
+    required_fields:
+      - intensity [0.0 - 1.0]
+      - texture_5d
+      - emotion_texture_5d
+
+# ============================================================
+# 3. OUTPUT CONTRACT (Episodic Snapshot)
+# ============================================================
+outputs:
+  episodic_snapshot:
+    fields:
+      memory_encoding_level:
+        type: "enum"
+        values: [L0_trace, L1_light, L2_standard, L3_deep, L4_trauma]
+      
+      memory_color:
+        type: "hex_string"
+        description: "Emotive signature color based on Matrix/Qualia texture."
+
+      resonance_texture:
+        type: "vector_5d"
+        axes: [stress, warmth, clarity, drive, ambient]
+        description: "Smoothed phenomenological sidecar data."
+
+      qualia:
+        intensity: "float [0.0 - 1.0]"
+      
+      resonance_index:
+        type: "float [0.0 - 1.0]"
+
+      trauma_flag:
+        type: "boolean"
+        description: "True if threat_level > 0.85."
+
+# ============================================================
+# 4. CONSTRAINTS & INVARIANTS
+# ============================================================
+constraints:
+  latency: "< 5ms"
+  state: "Stateless (Deterministic pipeline)"
+  forbidden_actions: ["Language processing", "Context synthesis", "Persona logic"]
+
+invariants:
+  - "Deterministic Output: Same input state sequence must result in identical RMS encoding."
+  - "Trauma Primacy: High threat levels must override positive valence in color/level calculation."
+  - "Authoritative Source: RMS metrics (RI, level) override LLM self-reports in database storage."

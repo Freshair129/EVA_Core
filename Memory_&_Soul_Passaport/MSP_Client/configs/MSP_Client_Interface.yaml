@@ -1,0 +1,28 @@
+schema: EVA-MSP-Client-Interface-v1
+version: 1.0
+updated: 2026-01-02
+
+name: MSP Client
+role: Local interface to the Memory & Soul Passport system.
+
+description: >
+  The MSP Client handles local data scrubbing, JSON serialization, and persistence 
+  routing for memory data before it is sent to the MSP system.
+
+position:
+  upstream:
+    - Main Orchestrator
+    - CIN
+  downstream:
+    - MSP
+
+execution_order:
+  - Scrub non-serializable data
+  - Validate against schema
+  - Persist to local buffer
+  - Transmit to MSP
+
+outputs:
+  scrubbed_data:
+    type: object
+    description: Cleaned memory package ready for persistence.

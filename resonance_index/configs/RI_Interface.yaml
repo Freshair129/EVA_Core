@@ -1,0 +1,46 @@
+schema: EVA-RI-Interface-v1
+version: 1.0
+updated: 2026-01-02
+
+name: Resonance Index (RI)
+role: Calculate the resonance index based on current state and history.
+
+description: >
+  The Resonance Index module calculates a scalar value representing the degree of 
+  alignment or 'resonance' between the current cognitive state and historical patterns.
+
+position:
+  upstream:
+    - EVA Matrix
+    - RMS
+  downstream:
+    - MSP
+    - CIN
+
+execution_order:
+  - Receive state vector
+  - Query memory for matches
+  - Calculate resonance score
+  - Return RI value
+
+inputs:
+  state_vector:
+    source: EVA Matrix
+    type: vector
+    required_fields:
+      - emotions
+      - values
+
+outputs:
+  resonance_index:
+    type: float
+    range: [0.0, 1.0]
+    fields:
+      - score
+
+constraints:
+  performance:
+    - latency: < 50ms
+
+invariants:
+  - score must always be between 0.0 and 1.0

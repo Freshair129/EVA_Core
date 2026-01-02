@@ -1,0 +1,10 @@
+# PMT (Prompt Rule Layer) Input Contract Registry
+# Version: 1.0.0
+
+schema: EVA-PMT-Input-Contract-v1
+
+physiology:
+  - id: "physio_modulation"
+    contract: "../contract/upstream/Physio_Contract/Input_from_PhysioController_Contract.yaml"
+    required: true
+    description: "Physio state used to select active behavioral rules (e.g. Stress Level)."

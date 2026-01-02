@@ -1,0 +1,27 @@
+schema: EVA-Artifact-Qualia-Configs-v1
+version: 1.0
+updated: 2026-01-02
+
+principles:
+  - "Qualia is experience, not description"
+  - "Body sends signals, not labels"
+  - "Trend is more important than absolute value"
+  - "Event weight is separate from expression"
+
+derived_dynamics:
+  perception_threshold: 0.05
+  delta_clamp: [-1.0, 1.0]
+
+usage_constraints:
+  allow_emotion_labels: false
+  allow_indirect_expression: true
+  prefer_tone_shift_over_explicit_statement: true
+
+intent:
+  artifact_qualia_is:
+    - "perceptual substrate"
+    - "experience carrier"
+  artifact_qualia_not:
+    - "decision engine"
+    - "intent selector"
+    - "language generator"

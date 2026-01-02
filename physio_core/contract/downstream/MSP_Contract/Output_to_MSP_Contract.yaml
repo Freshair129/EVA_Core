@@ -1,0 +1,37 @@
+# Output to MSP Contract (Dashboard Streaming)
+# Version: v1.1
+# Reference: Memory_&_Soul_Passaport/docs/Dashboard_Streaming_Integration.md
+
+source: PhysioCore
+destination: MSP (Dashboard Streaming)
+protocol: internal_registry_call
+
+streaming_registry:
+  frequency: 30Hz
+  target_method: msp.register_dashboard_metric
+
+metrics_to_stream:
+  - id: ESC_H01_ADRENALINE
+    category: physiological_stream
+    unit: pg/ml
+  - id: ESC_H02_CORTISOL
+    category: physiological_stream
+    unit: pg/ml
+  - id: ESC_H05_DOPAMINE
+    category: physiological_stream
+    unit: pg/ml
+  - id: ESC_H06_SEROTONIN
+    category: physiological_stream
+    unit: pg/ml
+  - id: ESC_H09_OXYTOCIN
+    category: physiological_stream
+    unit: pg/ml
+  - id: heart_rate
+    category: physiological_stream
+    unit: bpm
+    derivation: autonomic_state.heart_rate
+
+guarantees:
+  - All core hormones listed must be streamed at 30Hz.
+  - Value must be non-negative.
+  - Category must be "physiological_stream" for dashboard recognition.
