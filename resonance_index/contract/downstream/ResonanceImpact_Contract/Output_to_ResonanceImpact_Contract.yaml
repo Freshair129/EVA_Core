@@ -1,0 +1,34 @@
+# Output to Resonance Impact Contract
+# Version: 1.0.0
+# Date: 2026-01-03
+# Description: Detailed agreement for ranked scores sent to RIM.
+
+schema: EVA-Output-To-ResonanceImpact-Contract-v1
+
+source:
+  module: Resonance_Index
+  component_id: SYS-RI-8.1
+
+destination:
+  module: Resonance_Impact
+  component_id: SYS-RIM-8.1
+
+data:
+  format: yaml
+  fields:
+    ranked_matches:
+      type: array
+      items:
+        type: object
+        required: [episode_id, score]
+        properties:
+          episode_id: { type: string }
+          score: { type: float } # RI score
+
+delivery:
+  method: function_call
+  frequency: on_demand
+
+validation:
+  required_fields:
+    - ranked_matches

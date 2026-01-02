@@ -14,6 +14,8 @@ inputs:
   stimulus_data:
     type: "Dict[str, Any]"
     required: true
+    source: "Main_Orchestrator"
+    contract_path: "contract/upstream/Orchestrator_Contract/Input_from_Orchestrator_Contract.yaml"
     description: "The incoming stimulus or event to analyze."
     properties:
       text: {type: "string", description: "The content of the stimulus."}
@@ -23,6 +25,8 @@ inputs:
   semantic_matches:
     type: "List[Dict[str, Any]]"
     required: true
+    source: "Resonance_Index"
+    contract_path: "contract/upstream/ResonanceIndex_Contract/Input_from_ResonanceIndex_Contract.yaml"
     description: "Retrieved memories related to the stimulus (from RI or RAG)."
     properties:
       text: {type: "string"}
