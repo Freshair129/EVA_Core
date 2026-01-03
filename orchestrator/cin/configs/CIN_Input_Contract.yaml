@@ -33,11 +33,17 @@ physiology:
 # 3. MEMORY & STATE CONTEXT (Via Memory & Soul Passport)
 # ============================================================
 memory_and_state:
-  - id: "msp_context"
+  - id: "msp_perception_context"
     module: MSP (Memory & Soul Passport)
-    contract_path: "contract/upstream_contract/MSP_Contract/Input_from_MSP_Contract.yaml"
+    contract_path: "contract/upstream_contract/MSP_Contract/Input_from_MSP_Perception_Contract.yaml"
     required: true
-    description: "Includes Turn Cache, Session Memory, and Quick Recall (Intuition)."
+    description: "Raw turns, physio baseline, and user profile (Phase 1 Intuition)."
+
+  - id: "msp_reasoning_context"
+    module: MSP (Memory & Soul Passport)
+    contract_path: "contract/upstream_contract/MSP_Contract/Input_from_MSP_Reasoning_Contract.yaml"
+    required: true
+    description: "Rich context: 9D Matrix, Resonance, and AgenticRAG (Phase 2 Reasoning)."
 
 # ============================================================
 # 4. USER STIMULUS
