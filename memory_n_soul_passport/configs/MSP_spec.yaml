@@ -1,0 +1,191 @@
+schema: EVA-MSP-Spec-v8.1
+version: 8.1.0-R1
+updated: 2026-01-01
+
+description: >
+  Technical specification for the MSP (Memory & Soul Passport) system.
+  Defines how cognitive data is persisted, indexed, and retrieved.
+
+msp_architecture:
+
+  storage_modes:
+    primary: "Local Indexed Files (L0/L1)"
+    secondary: "MongoDB (Episodic Deep Archive)"
+    relational: "Neo4j (Semantic Graph Database)"
+    vector: "Embedded Context Search (Vector DB)"
+
+  memory_layers:
+    - id: EPISODIC
+      path: "consciousness/01_Episodic_memory/"
+      format: "JSON + JSONL Index (Split Storage)"
+      purpose: "Long-term conversation history and biological state snapshots."
+      description: "Episodic_memory.jsonl,Episodic_index.json,EP_01.json"
+      episode_id_format:
+        pattern: "{PERSONA}_EP{number}"
+        examples: ["EVA_EP01", "EVA_EP79", "ALEX_EP123"]
+        persona_code:
+          max_length: 4
+          abbreviation_rule: "Airport code style (consonants first, max 4 chars)"
+          examples:
+            - name: "EVA"
+              code: "EVA"
+            - name: "Alexander"
+              code: "LXND"
+            - name: "Christopher"
+              code: "CHRS"
+            - name: "สมหญิง(Somyying)"
+              code: "SMY"
+        episode_number:
+          format: "Zero-padded, minimum 2 digits"
+          auto_increment: true
+          counter_file: "consciousness/09_state/episode_counter.json"
+        rationale: "Human-readable IDs for easy reference in memory recall (e.g., 'at [EVA_EP79] user said they're allergic to seafood')"
+      storage_optimization:
+        split_strategy: "user_llm_separation"
+        user_episodes:
+          path: "episodes_user/"
+          content: "User turn + lightweight metadata (turn_1, tags, emotion)"
+          size: "~500-800 bytes per episode"
+          purpose: "Fast RAG (Retrieval-Augmented Generation) queries without loading LLM (Large Language Model) responses"
+        llm_episodes:
+          path: "episodes_llm/"
+          content: "LLM (Large Language Model) turn + full physiological state (turn_2, Endocrine, qualia)"
+          size: "~2-5 KB per episode"
+          purpose: "Detailed state for full episode reconstruction"
+        rationale: "Optimize I/O for RAG (Retrieval-Augmented Generation) queries that only need user input"
+
+    - id: SEMANTIC
+      path: "consciousness/02_Semantic_memory/"
+      format: "JSONL Sidecar / Neo4j Nodes"
+      purpose: "Evolving concepts, user preferences, and worldview."
+      
+    - id: SENSORY
+      path: "consciousness/03_Sensory_memory/"
+      format: "JSONL Sidecar / MongoDB Sidecars"
+      purpose: "High-fidelity vectors (Resonance Textures) and raw signal logs."
+
+    - id: SESSION_MEMORY
+      path: "consciousness/04_Session_memory/"
+      format: "JSON"
+      purpose: "Compressed session snapshots (Core and Sphere layers)"
+      filename_format:
+        pattern: "{develop_id}_SP{sphere}C{core}_SS{session}.json"
+        examples:
+          - "THA-01-S003_SP1C1_SS1.json  # Session 1 in Core 1, Sphere 1 (clone S003)"
+          - "THA-01_SP1C1_SS6.json       # Session 6 in Core 1, Sphere 1 (original)"
+          - "THA-01-S003_SP1C2_SS1.json  # Session 1 in Core 2, Sphere 1 (clone S003)"
+        components:
+          develop_id:
+            format: "{project_id}-{subject_id}"
+            description: "Development ID + Subject ID (clone lineage indicator)"
+            examples:
+              - name: "THA-01"
+                description: "Original instance (no -S suffix)"
+              - name: "THA-01-S003"
+                description: "Clone instance (Subject 003)"
+              - name: "USA-01-S002"
+                description: "USA project clone (Subject 002)"
+            source: "orchestrator/PMT_PromptRuleLayer/Identity/soul.md (Deverlop_id field)"
+            note: "Subject ID only appears for clones. S001 = original, S002+ = clones"
+          hierarchy:
+            sphere: "SP{number} (1-indexed, starts at 1)"
+            core: "C{number} (1-indexed, starts at 1)"
+            session: "SS{number} (position in current Core, 0-7)"
+        rationale: >
+          Develop ID indicates clone lineage (original vs clone).
+          Filenames reflect compression hierarchy for easy navigation.
+          Example: "THA-01-S003_SP1C1_SS6 = Clone S003, 6th session of Core 1 in Sphere 1"
+
+    - id: consciousness_STATE
+      path: "consciousness/09_state/"
+      format: "JSON"
+      purpose: "Real-time synchronization of body and physio_state."
+
+    - id: CONTEXT_STORAGE
+      path: "consciousness/10_context_storage/"
+      format: "JSON"
+      purpose: "Real-time synchronization of context."
+      description: "delivery by CIN (Context Injection Node)"
+
+    - id: memory_compression
+      description: "ทุกๆ 8 session สกัดเป็น 1 Core ทุกๆ 8 Core สกัดเป็น 1 Sphere"
+      hierarchy:
+        session_to_core: "8 sessions → 1 Core"
+        core_to_sphere: "8 Cores → 1 Sphere"
+        total_capacity: "64 sessions per Sphere"
+      Index_counters:
+        location: "consciousness/09_state/compression_counters.json"
+        fields:
+          Session_seq: "Position in current Core (0-7, resets after each Core)"
+          Core_seq: "Number of completed Cores (0-7, resets after each Sphere)"
+          Sphere_seq: "Number of completed Spheres (cumulative)"
+          Total_sessions: "Cumulative session count (never resets)"
+      session_memory_naming:
+        enabled: true
+        write_method: "write_session_memory(session_data)"
+        format: "{develop_id}_SP{sphere}C{core}_SS{session}.json"
+        develop_id_source: "soul.md (Deverlop_id field)"
+        clone_indicator: "-S{number} suffix (only for clones, S001 original)"
+        storage: "consciousness/04_Session_memory/"
+      last_update: "2026-01-01"
+      implementation_status: "Method implemented (L1 Storage Only)"
+
+# --- Retrieval Strategies (Hept-Stream RAG (Retrieval-Augmented Generation) v8.1) ---
+
+retrieval_strategies:
+  - stream: narrativa
+    source: episodes_user (chronological scan)
+    weight: 1.0
+    description: "Recalls chronologically relevant episodes."
+
+  - stream: salience
+    source: episodes_user (resonance_index)
+    weight: 0.8
+    description: "Recalls high-impact/emotional memories (ผ่าน RI (Resonance Index))."
+
+  - stream: sensory
+    source: sensory_log (vectors)
+    weight: 0.7
+    description: "Recalls memories with similar resonance textures."
+
+  - stream: intuition
+    source: semantic_graph (neo4j)
+    weight: 0.6
+    description: "Recalls related concepts and structural knowledge."
+
+  - stream: emotion
+    source: episodes_user (emotion_label)
+    weight: 0.9
+    description: "Recalls episodes with matching emotional signatures."
+
+  optimization_note: >
+    All RAG (Retrieval-Augmented Generation) streams query episodes_user/ first (lightweight).
+    Load from episodes_llm/ only when full episode reconstruction needed.
+
+# --- Persistence Policy ---
+
+persistence:
+  write_strategy: "write-through (Local First -> Async Remote)"
+  sync_on_episode_end: true
+  auto_index_update: true
+  validation_level: "strict" # options: off, warn, strict
+
+# --- Database Bridges ---
+
+bridges:
+  mongo_bridge:
+    db: "EVA_DATA"
+    collections:
+      episodes: "episodes_v8"
+      state_snapshots: "state_history"
+      sensory_sidecars: "sensory_vault"
+  
+  neo4j_bridge:
+    labels:
+      episode: "Episode"
+      concept: "Concept"
+      user: "UserIdentity"
+    rel_types:
+      referenced: "REFERENCED_IN"
+      linked_to: "LINKED_TO"
+      triggered: "TRIGGERED_BY"

@@ -110,8 +110,8 @@ if not all_same:
 print(f"\n📂 File Existence:")
 
 for episode_id in episode_ids:
-    user_file = Path(f"Consciousness/01_Episodic_memory/episodes_user/{episode_id}_user.json")
-    llm_file = Path(f"Consciousness/01_Episodic_memory/episodes_llm/{episode_id}_llm.json")
+    user_file = Path(f"consciousness/01_Episodic_memory/episodes_user/{episode_id}_user.json")
+    llm_file = Path(f"consciousness/01_Episodic_memory/episodes_llm/{episode_id}_llm.json")
 
     user_exists = user_file.exists()
     llm_exists = llm_file.exists()
@@ -157,7 +157,7 @@ print(f"\n{'='*60}")
 print("Episode Counter File")
 print(f"{'='*60}")
 
-counter_file = Path("Consciousness/09_state/episode_counter.json")
+counter_file = Path("consciousness/09_state/episode_counter.json")
 
 if counter_file.exists():
     with open(counter_file, 'r', encoding='utf-8') as f:

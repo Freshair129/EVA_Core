@@ -1,5 +1,5 @@
 schema: EVA-Module-Interfaces-v8.1
-version: 8.1.0
+version: 8.1.0-R1
 updated: 2026-01-02
 description: Structural interface definitions for EVA 8.1.0 core modules.
 

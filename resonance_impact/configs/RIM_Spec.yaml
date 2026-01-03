@@ -1,0 +1,735 @@
+# Resonance Impact Module (RIM) Comprehensive Specification
+# version: 8.1.0-R1
+# Date: 2026-01-03
+# Status: Complete Documentation for Implemented System
+
+schema: EVA-RIM-Spec-v8.1
+version: 8.1.0-R1
+updated: 2026-01-03
+
+# ============================================================
+# SPECIFICATION SCOPE
+# ============================================================
+description: >
+  Comprehensive specification for Resonance Impact Module (RIM) in EVA 8.1.0.
+
+  RIM evaluates the experiential impact of interaction on EVA's biological
+  and psychic substrate. It measures how deeply an event "matters" by
+  tracking changes across phenomenological (qualia), biological (reflex),
+  and relational (RI) dimensions.
+
+  Impact Formula:
+  rim_raw = (qualia_mag × 0.40) + (reflex_mag × 0.35) + (relational_mag × 0.25)
+  rim_value = rim_raw × time_factor (clamped to [0.0, 1.0])
+
+  Where:
+    qualia_mag = mean(|intensity_delta|, |coherence_delta|, |depth_delta|)
+    reflex_mag = mean(|reflex_delta[k]| for all k)
+    relational_mag = |ri_delta|
+    time_factor = exp(-time_delta_sec / tau), clamped to [0.2, 1.0]
+
+component_id: "SYS-RIM-8.1"
+component_type: "Experiential Impact Calculator"
+role: "Event Salience & Memory Weight Determination"
+analogy: "Impact Sensor (เครื่องวัดแรงกระทบ)"
+
+# ============================================================
+# DESIGN PRINCIPLES
+# ============================================================
+design_principles:
+  multi_dimensional_impact:
+    principle: "Impact Across Three Substrates"
+    description: >
+      Experiential impact isn't just emotional change or biological reflex.
+      True impact requires coordinated change across phenomenological,
+      biological, and relational dimensions simultaneously.
+
+    dimensions:
+      phenomenological: "How does the experience feel different? (Qualia)"
+      biological: "How does the body react differently? (Reflex)"
+      relational: "How does alignment with self change? (RI)"
+
+    rationale: >
+      An event can be emotionally intense (high qualia) but low reflex
+      (body doesn't react) and low RI (doesn't fit self-concept).
+      Such events have lower lasting impact than those that align all three.
+
+  temporal_decay:
+    principle: "Recent Events Matter More"
+    description: >
+      Impact fades exponentially with time. An event from 30 seconds ago
+      has higher impact weight than one from 5 minutes ago.
+
+    formula: "time_factor = exp(-time_delta_sec / tau)"
+    halflife: "10.0 seconds (default)"
+    minimum_factor: "0.2 (events never fully decay to zero)"
+
+    rationale: >
+      Human memory and emotional processing prioritize recency.
+      Recent events are more salient for decision-making and memory encoding.
+
+  weighted_integration:
+    principle: "Not All Changes Equal"
+    description: >
+      Qualia changes (40%) and reflex changes (35%) matter more than
+      relational changes (25%) for immediate experiential impact.
+
+    weights_rationale:
+      qualia_40_percent: "Phenomenological change is core to experience"
+      reflex_35_percent: "Biological reactions are visceral and memorable"
+      relational_25_percent: "Alignment with self is important but slower"
+
+  bounded_output:
+    principle: "Normalized Impact [0.0, 1.0]"
+    description: >
+      All components and final RIM value are clamped to [0.0, 1.0] for
+      consistency across the system.
+
+# ============================================================
+# ARCHITECTURE
+# ============================================================
+architecture:
+  description: "Delta-based impact calculation with temporal decay"
+
+  data_flow:
+    inputs:
+      qualia_delta:
+        type: "Dict[str, float]"
+        source: "Artifact_Qualia.integrate() - delta from previous"
+        fields:
+          - "intensity_delta"
+          - "coherence_delta"
+          - "depth_delta"
+
+      reflex_delta:
+        type: "Dict[str, float]"
+        source: "FastReflexEngine - delta from previous"
+        fields:
+          - "freeze_delta"
+          - "flee_delta"
+          - "fight_delta"
+          - "approach_delta"
+
+      ri_delta:
+        type: "float"
+        source: "RI Engine - current_RI_total - previous_RI_total"
+        range: [-1.0, 1.0]
+
+      time_delta_sec:
+        type: "float"
+        source: "System timer"
+        range: [0.0, ∞]
+        unit: "seconds"
+
+    outputs:
+      rim_value:
+        type: "float"
+        range: [0.0, 1.0]
+        description: "Overall experiential impact magnitude"
+
+      confidence:
+        type: "float"
+        range: [0.0, 1.0]
+        description: "Confidence in impact estimate"
+
+      components:
+        type: "Dict[str, float]"
+        fields:
+          - "qualia"
+          - "reflex"
+          - "relational"
+          - "temporal"
+
+      impact_level:
+        type: "string"
+        enum: ["low", "medium", "high"]
+
+      impact_trend:
+        type: "string"
+        enum: ["rising", "stable", "fading"]
+
+      affected_domains:
+        type: "List[str]"
+        possible_values: ["emotional", "identity", "relational", "ambient"]
+
+  processing_pipeline:
+    description: "5-step calculation from deltas to impact"
+
+    steps:
+      1_calculate_magnitudes:
+        description: "Convert delta dicts to scalar magnitudes"
+        operations:
+          - "qualia_mag = mean(|intensity_delta|, |coherence_delta|, |depth_delta|)"
+          - "reflex_mag = mean(|reflex_delta[k]| for all k)"
+          - "relational_mag = |ri_delta|"
+
+      2_temporal_decay:
+        description: "Calculate time-based decay factor"
+        formula: "time_factor = exp(-time_delta_sec / tau)"
+        tau_calculation: "tau = decay_halflife / 0.693"
+        default_halflife: "10.0 seconds"
+        clamp: "[0.2, 1.0]"
+
+      3_weighted_impact:
+        description: "Combine magnitudes with weights and time factor"
+        formula: |
+          rim_raw = (
+              qualia_mag * weights["qualia"] +
+              reflex_mag * weights["reflex"] +
+              relational_mag * weights["relational"]
+          ) * time_factor
+        default_weights:
+          qualia: 0.40
+          reflex: 0.35
+          relational: 0.25
+        clamp: "[0.0, 1.0]"
+
+      4_confidence:
+        description: "Estimate confidence based on signal strength"
+        formula: "confidence = 0.4 + (qualia_mag * 0.6) + (reflex_mag * 0.4)"
+        rationale: >
+          Higher activity in qualia/reflex dimensions increases confidence.
+          Baseline confidence is 0.4 even with zero activity.
+        clamp: "[0.0, 1.0]"
+
+      5_semantic_mapping:
+        description: "Map numeric impact to semantic categories"
+        impact_level:
+          high: "rim_value > 0.60"
+          medium: "rim_value > 0.25"
+          low: "rim_value <= 0.25"
+
+        impact_trend:
+          rising: "rim_value - last_rim_value > 0.05"
+          fading: "rim_value - last_rim_value < -0.05"
+          stable: "otherwise"
+
+        affected_domains:
+          emotional: "qualia_mag > 0.25"
+          identity: "reflex_mag > 0.25"
+          relational: "relational_mag > 0.20"
+          ambient: "default if no other domains"
+
+# ============================================================
+# MATHEMATICAL FORMULAS
+# ============================================================
+formulas:
+  magnitude_calculation:
+    description: "Convert delta dicts to scalar values"
+
+    qualia_magnitude:
+      input: "qualia_delta: Dict[str, float]"
+      formula: "mean(|v| for v in qualia_delta.values())"
+      implementation: "sum(abs(v) for v in d.values()) / len(d)"
+      empty_dict_behavior: "0.0"
+
+    reflex_magnitude:
+      input: "reflex_delta: Dict[str, float]"
+      formula: "mean(|v| for v in reflex_delta.values())"
+      implementation: "sum(abs(v) for v in d.values()) / len(d)"
+      empty_dict_behavior: "0.0"
+
+    relational_magnitude:
+      input: "ri_delta: float"
+      formula: "|ri_delta|"
+      implementation: "abs(ri_delta)"
+
+  temporal_decay:
+    description: "Exponential decay with time"
+
+    time_factor:
+      formula: "exp(-time_delta_sec / tau)"
+      tau_formula: "tau = decay_halflife / 0.693"
+      default_halflife: 10.0
+      default_tau: 14.43  # 10.0 / 0.693
+      clamp: "[0.2, 1.0]"
+
+    rationale: >
+      Standard exponential decay where halflife is the time for impact
+      to reduce to 50%. Minimum factor 0.2 ensures old events never
+      fully disappear (background context).
+
+    examples:
+      immediate:
+        time_delta_sec: 0.0
+        time_factor: 1.0
+        meaning: "Event just happened - full impact"
+
+      after_5_sec:
+        time_delta_sec: 5.0
+        time_factor: 0.73
+        meaning: "~73% of original impact remains"
+
+      after_10_sec:
+        time_delta_sec: 10.0
+        time_factor: 0.50
+        meaning: "Halflife reached - 50% impact"
+
+      after_30_sec:
+        time_delta_sec: 30.0
+        time_factor: 0.20
+        meaning: "Clamped to minimum - background level"
+
+  weighted_impact:
+    description: "Combine all dimensions"
+
+    rim_raw:
+      formula: |
+        rim_raw = (
+            qualia_mag * w_qualia +
+            reflex_mag * w_reflex +
+            relational_mag * w_relational
+        ) * time_factor
+
+      default_weights:
+        w_qualia: 0.40
+        w_reflex: 0.35
+        w_relational: 0.25
+
+      final_clamp: "[0.0, 1.0]"
+
+  confidence:
+    description: "Estimate reliability of impact calculation"
+
+    formula: "confidence = 0.4 + (qualia_mag * 0.6) + (reflex_mag * 0.4)"
+
+    rationale: >
+      Confidence increases with signal strength in qualia and reflex.
+      Baseline 0.4 represents minimum confidence (educated guess).
+      Full qualia and reflex activity can push confidence to 1.0.
+
+    clamp: "[0.0, 1.0]"
+
+    examples:
+      no_activity:
+        qualia_mag: 0.0
+        reflex_mag: 0.0
+        confidence: 0.4
+
+      high_qualia_only:
+        qualia_mag: 0.8
+        reflex_mag: 0.0
+        confidence: 0.88  # 0.4 + (0.8 * 0.6)
+
+      high_reflex_only:
+        qualia_mag: 0.0
+        reflex_mag: 0.8
+        confidence: 0.72  # 0.4 + (0.8 * 0.4)
+
+      both_high:
+        qualia_mag: 0.8
+        reflex_mag: 0.8
+        confidence: 1.0  # Clamped
+
+# ============================================================
+# STATE MANAGEMENT
+# ============================================================
+state_management:
+  internal_state:
+    _last_rim_value:
+      type: "float"
+      range: [0.0, 1.0]
+      purpose: "Track previous RIM value for trend calculation"
+      initialization: "baseline (from config, default 0.5)"
+
+  methods:
+    get_full_state:
+      signature: "def get_full_state(self) -> Dict[str, Any]"
+      returns: "{'last_rim_value': float}"
+      purpose: "Export state for persistence"
+
+    load_state:
+      signature: "def load_state(self, state_dict: Dict[str, Any])"
+      expects: "{'last_rim_value': float}"
+      purpose: "Restore state from persistence"
+      fallback: "If 'last_rim_value' missing, use baseline"
+
+  persistence:
+    save_location: "consciousness/10_state/rim_state.json"
+    save_trigger: "After each evaluate() call (orchestrator responsibility)"
+    load_trigger: "On system initialization"
+
+# ============================================================
+# CONFIGURATION
+# ============================================================
+configuration:
+  config_file: "resonance_impact/configs/rim_config.yaml"
+
+  parameters:
+    baseline:
+      type: "float"
+      default: 0.5
+      range: [0.0, 1.0]
+      description: "Initial RIM value on system start"
+
+    decay_halflife_sec:
+      type: "float"
+      default: 10.0
+      range: [0.1, 60.0]
+      unit: "seconds"
+      description: "Time for impact to decay to 50%"
+
+    weights:
+      qualia:
+        type: "float"
+        default: 0.40
+        range: [0.0, 1.0]
+        description: "Weight for phenomenological changes"
+
+      reflex:
+        type: "float"
+        default: 0.35
+        range: [0.0, 1.0]
+        description: "Weight for biological reflex changes"
+
+      relational:
+        type: "float"
+        default: 0.25
+        range: [0.0, 1.0]
+        description: "Weight for cognitive resonance changes"
+
+  validation:
+    weight_sum:
+      constraint: "weights.qualia + weights.reflex + weights.relational == 1.0"
+      enforcement: "Configuration load-time validation"
+
+# ============================================================
+# INTEGRATION
+# ============================================================
+integration:
+  upstream_sources:
+    Artifact_Qualia:
+      method: "integrate(eva_state, rim_semantic)"
+      data_provided: "QualiaSnapshot (intensity, coherence, depth)"
+      delta_calculation: "current.field - previous.field for each field"
+
+    FastReflexEngine:
+      method: "get_reflex_vector()"
+      data_provided: "Dict[str, float] (freeze, flee, fight, approach)"
+      delta_calculation: "current[k] - previous[k] for each k"
+
+    RI_Engine:
+      method: "compute_RI()"
+      data_provided: "RI_total (float)"
+      delta_calculation: "current_RI_total - previous_RI_total"
+
+    System_Timer:
+      method: "time.time()"
+      data_provided: "Current timestamp"
+      delta_calculation: "current_time - last_evaluation_time"
+
+  downstream_consumers:
+    Artifact_Qualia:
+      input_field: "rim_semantic"
+      data_used:
+        - "impact_level"
+        - "impact_trend"
+        - "affected_domains"
+      purpose: "Modulate phenomenological experience"
+
+    RMS:
+      input_field: "rim_value"
+      data_used:
+        - "rim_value"
+        - "impact_level"
+      purpose: "Weight memory encoding (high impact = stronger encoding)"
+
+    MSP:
+      input_field: "episode.rim"
+      data_used:
+        - "rim_value"
+        - "impact_level"
+        - "affected_domains"
+      purpose: "Memory salience and retrieval priority"
+
+  orchestrator_responsibilities:
+    1_track_previous_state:
+      description: "Store previous qualia, reflex, and RI values"
+      timing: "After each turn"
+
+    2_calculate_deltas:
+      description: "Compute deltas before calling RIM.evaluate()"
+      formula: "current - previous for all dimensions"
+
+    3_call_rim:
+      description: "Invoke RIM.evaluate() with deltas and time_delta"
+      timing: "After Artifact_Qualia and RI Engine complete"
+
+    4_persist_rim_state:
+      description: "Save RIM state (last_rim_value) to disk"
+      method: "RIM.get_full_state() → JSON file"
+
+# ============================================================
+# EDGE CASES
+# ============================================================
+edge_cases:
+  first_turn:
+    condition: "No previous state exists"
+    behavior: >
+      All deltas = 0.0 (current = previous)
+      rim_value = 0.0 (no change yet)
+      impact_level = "low"
+      trend = "stable"
+
+  empty_deltas:
+    qualia_delta: "Empty dict → qualia_mag = 0.0"
+    reflex_delta: "Empty dict → reflex_mag = 0.0"
+    impact: "Only relational_mag (ri_delta) contributes"
+
+  long_time_gap:
+    condition: "time_delta_sec > 60 seconds (user went away)"
+    behavior: "time_factor clamped to 0.2 (minimum)"
+    recommendation: "Consider resetting baseline if gap > 5 minutes"
+
+  negative_deltas:
+    description: "Deltas can be negative (decrease in value)"
+    handling: "Absolute value taken (magnitude ignores direction)"
+    rationale: "Impact cares about change magnitude, not direction"
+
+  clamping:
+    rim_value: "[0.0, 1.0]"
+    confidence: "[0.0, 1.0]"
+    time_factor: "[0.2, 1.0]"
+
+# ============================================================
+# PERFORMANCE
+# ============================================================
+performance:
+  target_latency: "< 30ms"
+
+  computational_complexity:
+    magnitude_calculation: "O(n) where n = dict length"
+    temporal_decay: "O(1) - single exp() call"
+    weighted_sum: "O(1) - 3 multiplications + 2 additions"
+    overall: "O(n) dominated by dict iteration"
+
+  typical_dict_sizes:
+    qualia_delta: "3-5 fields"
+    reflex_delta: "4-8 fields"
+    expected_latency: "< 5ms on modern hardware"
+
+  optimization_notes:
+    - "Math operations (exp, abs, sum) are native Python C implementations"
+    - "No external API calls"
+    - "No file I/O during evaluate()"
+    - "Minimal memory allocation (reuses _last_rim_value)"
+
+# ============================================================
+# USE CASES & EXAMPLES
+# ============================================================
+use_cases:
+  high_impact_event:
+    description: "User shares deeply emotional personal story"
+
+    inputs:
+      qualia_delta:
+        intensity_delta: 0.45
+        coherence_delta: 0.38
+        depth_delta: 0.52
+
+      reflex_delta:
+        freeze_delta: 0.15
+        approach_delta: 0.32
+        fight_delta: -0.05
+
+      ri_delta: 0.42
+      time_delta_sec: 2.0
+
+    calculation:
+      qualia_mag: 0.45  # mean(|0.45|, |0.38|, |0.52|)
+      reflex_mag: 0.17  # mean(|0.15|, |0.32|, |-0.05|)
+      relational_mag: 0.42  # |0.42|
+      tau: 14.43
+      time_factor: 0.87  # exp(-2.0 / 14.43)
+      rim_raw: 0.38  # (0.45*0.40 + 0.17*0.35 + 0.42*0.25) * 0.87
+      rim_value: 0.38
+      confidence: 0.87  # 0.4 + (0.45*0.6) + (0.17*0.4)
+
+    output:
+      rim_value: 0.38
+      confidence: 0.87
+      impact_level: "medium"
+      impact_trend: "rising" (if last_rim_value was 0.25)
+      affected_domains: ["emotional", "relational"]
+
+  low_impact_event:
+    description: "User says 'ok thanks'"
+
+    inputs:
+      qualia_delta:
+        intensity_delta: 0.02
+        coherence_delta: -0.01
+        depth_delta: 0.00
+
+      reflex_delta:
+        freeze_delta: 0.00
+        approach_delta: 0.01
+
+      ri_delta: -0.03
+      time_delta_sec: 1.5
+
+    calculation:
+      qualia_mag: 0.01
+      reflex_mag: 0.005
+      relational_mag: 0.03
+      time_factor: 0.93
+      rim_raw: 0.015
+      rim_value: 0.015
+
+    output:
+      rim_value: 0.015
+      confidence: 0.41
+      impact_level: "low"
+      impact_trend: "fading"
+      affected_domains: ["ambient"]
+
+  trauma_threshold_event:
+    description: "High-threat stimulus triggering defensive reflexes"
+
+    inputs:
+      qualia_delta:
+        intensity_delta: 0.88
+        coherence_delta: -0.65
+        depth_delta: 0.72
+
+      reflex_delta:
+        freeze_delta: 0.91
+        flee_delta: 0.78
+        fight_delta: 0.15
+
+      ri_delta: -0.45  # Negative - misalignment
+      time_delta_sec: 0.5
+
+    calculation:
+      qualia_mag: 0.75
+      reflex_mag: 0.61
+      relational_mag: 0.45
+      time_factor: 0.98  # Recent event
+      rim_raw: 0.77
+      rim_value: 0.77
+
+    output:
+      rim_value: 0.77
+      confidence: 0.94
+      impact_level: "high"
+      impact_trend: "rising"
+      affected_domains: ["emotional", "identity", "relational"]
+
+    downstream_effect:
+      RMS: "High rim_value → Memory encoded as highly salient"
+      MSP: "Episode marked for priority retrieval"
+      Artifact_Qualia: "rim_semantic modulates next phenomenological state"
+
+# ============================================================
+# VALIDATION & TESTING
+# ============================================================
+validation:
+  unit_tests:
+    test_zero_deltas:
+      inputs:
+        qualia_delta: {}
+        reflex_delta: {}
+        ri_delta: 0.0
+        time_delta_sec: 1.0
+      expected:
+        rim_value: 0.0
+        impact_level: "low"
+
+    test_perfect_alignment:
+      inputs:
+        qualia_delta: {intensity_delta: 0.9, coherence_delta: 0.85, depth_delta: 0.92}
+        reflex_delta: {freeze_delta: 0.88, approach_delta: 0.91}
+        ri_delta: 0.85
+        time_delta_sec: 0.5
+      expected:
+        rim_value: "> 0.75"
+        impact_level: "high"
+        confidence: "> 0.90"
+
+    test_temporal_decay:
+      inputs:
+        qualia_delta: {intensity_delta: 0.5}
+        reflex_delta: {}
+        ri_delta: 0.0
+        time_delta_sec: 10.0  # Exactly halflife
+      expected:
+        time_factor: "~0.50"
+        rim_value: "~0.10"  # 0.5 * 0.4 * 0.5
+
+    test_negative_deltas:
+      inputs:
+        qualia_delta: {intensity_delta: -0.6, coherence_delta: -0.4}
+        reflex_delta: {}
+        ri_delta: -0.3
+      expected:
+        qualia_mag: 0.5  # mean(|−0.6|, |−0.4|)
+        relational_mag: 0.3  # |−0.3|
+
+  integration_tests:
+    test_trend_tracking:
+      scenario: "Three sequential events with rising impact"
+      turn_1: {rim_value: 0.30, trend: "stable"}
+      turn_2: {rim_value: 0.45, trend: "rising"}
+      turn_3: {rim_value: 0.60, trend: "rising"}
+
+    test_state_persistence:
+      scenario: "Save and restore RIM state"
+      step_1: "RIM.evaluate() → rim_value = 0.65"
+      step_2: "state = RIM.get_full_state()"
+      step_3: "new_rim = RIMEngine(); new_rim.load_state(state)"
+      expected: "new_rim._last_rim_value == 0.65"
+
+# ============================================================
+# PHILOSOPHICAL GROUNDING
+# ============================================================
+philosophical_grounding:
+  impact_vs_resonance:
+    question: "How is RIM (impact) different from RI (resonance)?"
+    answer: >
+      RI measures alignment - how well an interaction fits EVA's current state.
+      RIM measures change - how much an interaction shifts that state.
+
+      An interaction can be:
+      - High RI, Low RIM: Perfectly aligned, but no change (comfortable chat)
+      - Low RI, High RIM: Misaligned, but forces growth (challenging insight)
+      - High RI, High RIM: Aligned AND transformative (peak experience)
+      - Low RI, Low RIM: Neither aligned nor impactful (neutral small talk)
+
+  memory_salience:
+    question: "Why use RIM for memory encoding weight?"
+    answer: >
+      Humans remember events that changed them, not just comfortable ones.
+      High-impact events (positive or negative) become salient memories.
+      RIM captures this by measuring magnitude of change across all dimensions.
+
+  embodied_cognition:
+    question: "Why include reflex_delta in impact?"
+    answer: >
+      The body's reaction (reflex) is a key indicator of how much an event
+      "matters" at a biological level. Cognitive interpretation can be wrong,
+      but the body doesn't lie. Including reflex grounds impact in embodiment.
+
+# ============================================================
+# METADATA
+# ============================================================
+metadata:
+  contract_type: "COMPREHENSIVE_SPEC"
+  eva_version: 8.1.0-R1
+  module_location: "resonance_impact/rim_engine.py"
+  implementation_version: 8.1.0-R1
+
+  contract_status: "COMPLETE"
+  last_validated: "2026-01-03"
+
+  related_contracts:
+    - "RIM_Interface.yaml"
+    - "RIM_Input_Contract.yaml"
+    - "RIM_Output_Contract.yaml"
+
+  documentation_completeness: "4/4 contracts (Interface, Input, Output, Spec)"
+
+  implementation_notes:
+    - "Implementation is 106 lines (rim_engine.py)"
+    - "Uses dataclass for RIMResult output structure"
+    - "State management via _last_rim_value for trend calculation"
+    - "Config-driven weights and decay parameters"

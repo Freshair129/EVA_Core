@@ -1,0 +1,176 @@
+schema: EVA-Episodic-LLM-Proposal-Contract-v1
+version: 8.1.0-R1
+updated: 2025-12-18
+
+owner: MSP (Memory & Soul Passport)
+role: >
+  Defines the exact structure and epistemic limits of episodic
+  proposals that an LLM (Large Language Model) may submit to MSP (Memory & Soul Passport).
+  LLM (Large Language Model) proposals describe narrative, interpretation, and hypotheses
+  only. MSP (Memory & Soul Passport) is the sole authority for episodic memory writing.
+
+# ==========================================================
+# CORE PRINCIPLES
+# ==========================================================
+
+principles:
+  - Episodic memory represents lived experience, not interpretation.
+  - LLM (Large Language Model) proposals are narrative and inferential only.
+  - LLM (Large Language Model) must never generate episodic identity, metrics, or state.
+  - MSP (Memory & Soul Passport) decides admission, structure, and persistence.
+
+# ==========================================================
+# PROPOSAL PAYLOAD (LLM MAY SUBMIT)
+# ==========================================================
+
+proposal_payload:
+
+  required_sections:
+    - turns
+
+  optional_sections:
+    - episode_tag
+    - event_label
+    - situation_interpretation
+    - affective_inference
+
+  sections:
+
+    turns:
+      description: >
+        Narrative content of the interaction turns.
+        LLM (Large Language Model) may only write linguistic and interpretive fields.
+      items:
+        allowed_fields:
+          - raw_text
+          - text_excerpt
+          - summary
+          - semantic_frames
+          - epistemic_mode
+          - affective_inference
+
+    episode_tag:
+      type: string
+      description: >
+        Suggested name for this specific episode (e.g. "Meeting the Boss").
+        Proposal only; MSP (Memory & Soul Passport) validates and normalizes.
+
+    event_label:
+      type: string
+      description: >
+        Suggested narrative arc or event name (e.g. "Project EVA 7.3").
+        Used for grouping related episodes.
+
+    situation_interpretation:
+      description: >
+        LLM (Large Language Model) interpretation of interaction context.
+      allowed_fields:
+        - interaction_mode
+        - stakes_level
+        - time_pressure
+
+    affective_inference:
+      description: >
+        Hypothesized emotional interpretation inferred from language.
+        Must be epistemically marked as uncertain.
+      required_fields:
+        - epistemic_status
+        - emotion_signal
+      optional_fields:
+        - intensity
+        - confidence
+
+# ==========================================================
+# FIELD-LEVEL CONSTRAINTS
+# ==========================================================
+
+field_constraints:
+
+  affective_inference:
+    epistemic_status:
+      allowed_values: [hypothesize, speculate]
+    authority: none
+
+  semantic_frames:
+    rules:
+      - framing_only
+      - no_truth_claims
+
+# ==========================================================
+# FORBIDDEN FIELDS (LLM MUST NOT SUBMIT)
+# ==========================================================
+
+forbidden_fields:
+
+  episodic_identity:
+    - episode_id
+    - turn_id
+    - context_id
+    - session_id
+    - user_id
+    - instance_id
+
+  experiential_state:
+    - eva_matrix
+    - indexed_state
+    - emotive_snapshot
+    - qualia
+    - reflex
+    - threat_level
+
+  metrics_and_scores:
+    - RI (Resonance Index)
+    - RIM (Resonance Impact)
+    - Resonance_impact (RIM)
+    - salience_score
+    - memory_color_ref
+
+  physiology_and_ess:
+    - dose_input
+    - D_Remaining
+    - D_Cumulative
+    - hormone_level
+    - PK_state
+
+  memory_control:
+    - promotion_level
+    - write_mode
+    - admission_priority
+
+# ==========================================================
+# MSP VALIDATION & HANDLING
+# ==========================================================
+
+msp_handling:
+
+  on_accept:
+    actions:
+      - generate_episode_id
+      - generate_turn_ids
+      - compute_resonance_metrics
+      - generate_indexed_state
+      - write_episodic_memory
+
+  on_modify:
+    actions:
+      - normalize_tags
+      - trim_narrative_noise
+      - discard_invalid_fields
+
+  on_reject:
+    actions:
+      - discard_proposal
+      - log_rejection_reason
+
+# ==========================================================
+# AUDIT & TRACEABILITY
+# ==========================================================
+
+audit:
+
+  tag_all_proposals_with:
+    - llm_proposed
+    - non_authoritative
+    - episodic_candidate
+
+  retain_rejected_proposals: false

@@ -51,7 +51,8 @@ class CircadianController:
 
         for group, signals in self.circ["zeitgebers"].items():
             for k, w in signals.items():
-                z_drive += zeitgeber_inputs.get(k, 0.0) * w
+                gain = w.get("gain", 1.0) if isinstance(w, dict) else w
+                z_drive += zeitgeber_inputs.get(k, 0.0) * gain
 
         # -------------------------------
         # Hormone modulation

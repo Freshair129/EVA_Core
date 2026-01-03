@@ -1,0 +1,26 @@
+{
+  "episode_id": "EVA_EP05",
+  "turn_2": {
+    "speaker": "EVA",
+    "content": "\nI have synchronized the biocognitive state. Is there anything else I can help you with?\n",
+    "summary": "\nI have synchronized the biocognitive state. Is there anything else I can help you with?\n"
+  },
+  "state_snapshot": {
+    "Endocrine": {},
+    "memory_encoding_level": null,
+    "memory_color": null,
+    "qualia": {
+      "intensity": 0.23,
+      "tone": "neutral",
+      "coherence": 0.675,
+      "depth": 0.0,
+      "texture": {
+        "emotional": 0.0,
+        "relational": 0.0,
+        "identity": 0.0,
+        "ambient": 0.0
+      }
+    },
+    "reflex": null
+  }
+}

@@ -1,0 +1,39 @@
+# CIN (Context Injection Node) Runtime Configurations
+# version: 8.1.0-R1
+
+schema: EVA-CIN-Configs-v1
+version: 8.1.0-R1
+
+# Token Counter Settings
+token_settings:
+  model: "cl100k_base"
+  fallback_multiplier: 4.0
+
+# Phase 1: Perception Budget (Tokens)
+phase_1_budget:
+  identity_anchor: 500
+  physio_baseline: 100
+  pmt_rules: 200
+  memory_buffer: 250
+  semantic_knowledge: 150
+  conversation_history: 1500
+  perception_directive: 150
+  total_max: 3000
+
+# Phase 2: Reasoning Budget (Tokens)
+phase_2_budget:
+  embodied_sensation: 200
+  eva_matrix_9d: 300
+  artifact_qualia: 300
+  physio_delta: 150
+  hept_stream_recall: 1000
+  cognitive_rules: 200
+  context_summary_template: 150
+  final_directive: 150
+  total_max: 2500
+
+# Path Discovery Settings
+discovery_paths:
+  persona: "orchestrator/pmt/configs/persona.yaml"
+  soul: "orchestrator/pmt/docs/soul.md"
+  pmt_rules: "orchestrator/pmt/configs/"

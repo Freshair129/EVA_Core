@@ -1,0 +1,133 @@
+# ============================================================
+# Autonomic Nervous System (ANS) Configuration
+# version: 8.1.0-R1
+# Maps Receptor Signals & Reflexes -> Sympathetic/Parasympathetic Balance
+# ============================================================
+
+version: 8.1.0-R1
+system_id: "EVA_ANS_CORE"
+
+# ------------------------------------------------------------
+# Global Dynamics
+# ------------------------------------------------------------
+global:
+  update_rate_hz: 30.0
+  
+  smoothing:
+    description: "Exponential Moving Average (EMA) to prevent jitter"
+    alpha_sympathetic: 0.2
+    alpha_parasympathetic: 0.1  # Parasympathetic reacts slightly slower/calmer
+  
+  balance_sensitivity: 1.0      # Scalar for balance calculation
+
+# ------------------------------------------------------------
+# Hormone Weights
+# contribution: [sympathetic_weight, parasympathetic_weight]
+# Range: 0.0 to 1.0 (Strength of effect)
+# ------------------------------------------------------------
+hormone_weights:
+
+  # --- Stress & Arousal (Sympathetic Drivers) ---
+  ESC_H01_ADRENALINE:
+    sympathetic: 0.95
+    parasympathetic: 0.0
+    desc: "Primary Fight-or-Flight driver"
+
+  ESC_N01_NORADRENALINE:
+    sympathetic: 0.85
+    parasympathetic: 0.0
+    desc: "Alertness and vigilance"
+
+  ESC_H02_CORTISOL:
+    sympathetic: 0.60
+    parasympathetic: 0.05
+    desc: "Sustained stress, mixed effect"
+
+  ESC_N02_DOPAMINE:
+    sympathetic: 0.50
+    parasympathetic: 0.0
+    desc: "Motivation and drive (minor arousal)"
+
+  ESC_H06_TESTOSTERONE:
+    sympathetic: 0.40
+    parasympathetic: 0.0
+    desc: "Dominance and competitive arousal"
+
+  # --- Calm & Restoration (Parasympathetic Drivers) ---
+  ESC_H04_OXYTOCIN:
+    sympathetic: 0.0
+    parasympathetic: 0.80
+    desc: "Bonding and trust"
+
+  ESC_N05_GABA:
+    sympathetic: -0.2   # Active inhibition of sympathetic
+    parasympathetic: 0.90
+    desc: "Primary inhibitory neurotransmitter"
+
+  ESC_N03_SEROTONIN:
+    sympathetic: -0.1
+    parasympathetic: 0.50
+    desc: "Mood stabilization"
+
+  ESC_N04_ENDORPHIN:
+    sympathetic: -0.3
+    parasympathetic: 0.60
+    desc: "Pain relief and soothing"
+
+  ESC_H14_MELATONIN:
+    sympathetic: -0.5
+    parasympathetic: 0.70
+    desc: "Sleep induction"
+
+# ------------------------------------------------------------
+# Reflex Integration
+# Fast-path signals from Internal Reflex Engine (IRE)
+# ------------------------------------------------------------
+reflex_integration:
+  enabled: true
+  
+  mappings:
+    # Threat reflex boosts sympathetic immediately
+    threat_surge:
+      target: "sympathetic"
+      gain: 0.8
+    
+    # Startle response
+    startle_surge:
+      target: "sympathetic"
+      gain: 1.0
+
+    # Freeze response (high tone in both, but locked)
+    freeze_reflex:
+      target: "sympathetic"
+      gain: 0.5
+      secondary_target: "parasympathetic"
+      secondary_gain: 0.5
+
+# ------------------------------------------------------------
+# Output Normalization
+# ------------------------------------------------------------
+output:
+  metrics:
+    - "sympathetic_tone"    
+    - "parasympathetic_tone"
+    - "balance_index"
+    - "heart_rate_variability"
+
+  ranges:
+    max_tone: 10.0
+    min_tone: 0.0
+
+# ------------------------------------------------------------
+# Heart Rate Model (Biometric Simulation)
+# ------------------------------------------------------------
+heart_rate_model:
+  baseline_bpm: 65.0
+  
+  modulation:
+    sympathetic_gain: 15.0
+    parasympathetic_gain: -8.0
+  
+  limits:
+    min_bpm: 45.0
+    max_bpm: 180.0

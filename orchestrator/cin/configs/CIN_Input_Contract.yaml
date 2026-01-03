@@ -1,44 +1,43 @@
 # CIN (Context Injection Node) Input Contract
-# Version: 1.0.0
-# Date: 2026-01-02
+# version: 8.1.0-R1
+# Date: 2026-01-03
 # Status: GKS (Genesis Knowledge System) Standardized
 
-schema: CIN-Input-Contract-v1
+schema: EVA-CIN-Input-Contract-v1
+module: CIN (Context Injection Node)
+role: input_registry
 
 # ============================================================
-# 1. IDENTITY & STATIC CONTEXT
+# 1. IDENTITY & STATIC CONTEXT (SSOT)
 # ============================================================
 identity:
   persona_yaml:
     type: "string"
-    source: "orchestrator/PMT (Prompt Rule Layer)/Identity/persona.yaml"
+    source: "orchestrator/pmt/configs/persona.yaml"
     required: true
   soul_md_context:
     type: "string"
-    source: "orchestrator/PMT (Prompt Rule Layer)/Identity/soul.md"
+    source: "orchestrator/pmt/docs/soul.md"
     required: true
 
 # ============================================================
-# 2. PHYSIOLOGICAL STATE (BASELINE & DYNAMIC)
-# ============================================================
-# ============================================================
-# 2. PHYSIOLOGICAL STATE (BASELINE & DYNAMIC)
+# 2. PHYSIOLOGICAL STATE (Via Physiological Controller)
 # ============================================================
 physiology:
   - id: "physio_controller"
-    # Relative to configs/
-    contract: "../contract/upstream/Physio_Contract/Input_from_PhysioController_Contract.yaml"
+    module: PhysioController (Physiological Controller)
+    contract_path: "contract/upstream_contract/Physio_Contract/Input_from_PhysioController_Contract.yaml"
     required: true
 
 # ============================================================
-# 3. MEMORY & STATE CONTEXT (Via MSP)
+# 3. MEMORY & STATE CONTEXT (Via Memory & Soul Passport)
 # ============================================================
 memory_and_state:
   - id: "msp_context"
-    # Relative to configs/
-    contract: "../contract/upstream/MSP_Contract/Input_from_MSP_Contract.yaml"
+    module: MSP (Memory & Soul Passport)
+    contract_path: "contract/upstream_contract/MSP_Contract/Input_from_MSP_Contract.yaml"
     required: true
-    description: "Includes Turn Cache, Session Memory, RAG Matches, and EVA Matrix State."
+    description: "Includes Turn Cache, Session Memory, and Quick Recall (Intuition)."
 
 # ============================================================
 # 4. USER STIMULUS
@@ -57,5 +56,6 @@ stimulus:
 # 5. INVARIANTS
 # ============================================================
 invariants:
-  - "Phase Separation: ข้อมูล Phase 2 (RAG, Physio Delta) ต้องไม่ถูกส่งก่อนกระบวนการ Phase 1 เสร็จสิ้น"
-  - "Data Completeness: หากขาด Persona หรือ Soul ให้ใช้ Default Safe Template"
+  - "Phase Separation: Phase 2 data (Deep RAG, Physio Delta) must not be processed before Phase 1."
+  - "Data Completeness: Always fallback to default persona if file is missing."
+  - "Versioning: All inputs must match project version 8.1.0."

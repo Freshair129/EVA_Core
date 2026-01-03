@@ -6,7 +6,7 @@ class PMTIdentityManager:
     PMT (Prompt Management Tool) - Identity Module v8.1.0
     ทำหน้าที่โหลดกฎเกณฑ์จาก YAML และจิตวิญญาณจาก MD เข้าสู่ Prompt
     """
-    def __init__(self, root_dir="Consciousness"):
+    def __init__(self, root_dir="consciousness"):
         self.persona_path = os.path.join(root_dir, 'persona.yaml')
         self.soul_path = os.path.join(root_dir, 'soul.md')
 

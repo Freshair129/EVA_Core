@@ -1,0 +1,270 @@
+# EVA 8.1.0: Dual-Phase One-Inference Orchestrator Specification
+# version: 8.1.0-R1
+# Description: ระบบควบคุมจังหวะการรับรู้และการตอบสนอง โดยอิงตามสภาวะกายภาพ (Physiological Streaming)
+# Date: 2025-12-31
+
+metadata:
+  system_name: "EVA 8.1.0 Cognitive Core"
+  architecture_pattern: "Dual-Phase Single-Inference Orchestrator"
+  core_innovation: "Single LLM inference with function calling (NOT two separate API calls)"
+  state_management: "Continuous physiological substrate (Deterministic Streaming)"
+  primary_injector: "CIN (Context Injection Node)"
+  physio_engine: "PhysioController (Endocrine -> Blood -> Receptor -> Reflex -> Autonomic)"
+  memory_engine: "Hept-Stream RAG (7-dimensional affective retrieval)"
+
+orchestration_flow:
+  context_id_management:
+    generation_rule: "ctx_v8_{yymmdd}_{hhmmss}_{hash_short} per User Interaction Turn"
+    format_example: "ctx_v8_251231_183045_a1b2c3"
+    persistence: "Unified JSON Document in MSP (Memory & Soul Passport)"
+
+  phase_1_perception:
+    name: "Perception Phase"
+    actor: "CIN (Phase 1 Injection)"
+    input_stack:
+      - "User Raw Input"
+      - "Persona Core Definitions (Identity & Constraints)"
+      - "Naive Conversation History"
+      - "Current Physio-Snapshot (Read-only from Blood & Autonomic engines)"
+    llm_directives:
+      - "Analyze intent and emotional subtext"
+      - "Extract Stimulus Vector (Mapping to HPA (Hypothalamic-Pituitary-Adrenal) Axis & Circadian modifiers)"
+      - "Identify search tags for RAG (Retrieval-Augmented Generation)"
+      - "Evaluate 'requires_recall' flag"
+    exit_mechanism: "Function Call: sync_biocognitive_state(stimulus_vector, tags)"
+
+  inter_phase_gap:
+    name: "Physiological Processing Gap"
+    description: "LLM is paused, waiting for function result. Body state updates in real-time."
+
+    background_tasks:
+      - step: "Biological Update (Streaming)"
+        target: "PhysioController.step(stimulus_vector)"
+        latency: "~200-300ms (30Hz simulation)"
+        process: |
+          1. Apply stimulus to HPA (Hypothalamic-Pituitary-Adrenal) Axis Regulator (stress modulation)
+          2. Circadian rhythm modulation
+          3. Endocrine production (pg) -> Blood Engine (plasma concentration)
+          4. Blood transport & clearance (half-life decay)
+          5. Receptor transduction -> Neural signals
+          6. Fast Reflex (IRE (Internal Reflex Engine)) if high intensity
+          7. Autonomic Response (ANS (Autonomic Nervous System) State integration)
+
+        result: |
+          {
+            "blood": {cortisol, adrenaline, dopamine, serotonin, ...},
+            "autonomic": {sympathetic, parasympathetic, heart_rate_index},
+            "receptor": {transduced_signals},
+            "reflex": {surge_flags}
+          }
+
+      - step: "Affective Retrieval"
+        target: "HeptStreamRAG.retrieve(query_context)"
+        latency: "~200-300ms"
+        process: "Query memory using [ANS (Autonomic Nervous System) State + Receptor Signals + Tags] via 7-dimensional retrieval"
+
+        seven_streams:
+          - stream: "Narrative"
+            description: "Sequential episode chains (storylines, cause-effect)"
+            strategy: "Parent-child episode relationships"
+
+          - stream: "Salience"
+            description: "High-impact, unforgettable memories"
+            strategy: "RI (Resonance Index) > 0.70"
+
+          - stream: "Sensory"
+            description: "Sensory-rich memories with vivid qualia"
+            strategy: "Qualia intensity > 0.6"
+
+          - stream: "Intuition"
+            description: "Pattern recognition, structural similarity"
+            strategy: "Semantic graph traversal"
+
+          - stream: "Emotion"
+            description: "Emotion-congruent recall (KEY for embodied cognition)"
+            strategy: "Cosine similarity on physio vectors (ANS (Autonomic Nervous System), hormones)"
+            threshold: "0.7 (70% similarity)"
+            importance: "CRITICAL - enables 'remembering what it feels like'"
+
+          - stream: "Temporal"
+            description: "Time-based context with recency bias"
+            strategy: "Exponential decay (30-day halflife)"
+
+          - stream: "Reflection"
+            description: "Meta-cognitive insights, self-understanding"
+            strategy: "Reflection tags, meta-level summaries"
+
+        max_results_per_stream: 3
+        temporal_decay: "All streams apply exponential decay based on age"
+
+        result: |
+          [
+            {stream: "emotion", content: "...", score: 0.89},
+            {stream: "narrative", content: "...", score: 0.76},
+            ...
+          ]
+
+  phase_2_reasoning:
+    name: "Reasoning Phase"
+    actor: "CIN (Phase 2 Injection)"
+    injected_result_stack:
+      - "Updated Physio-State (Blood levels, Receptor signals, ANS state)"
+      - "Memory Echoes (Recalled episodes matching current body state)"
+    llm_directives:
+      - "Reason based on embodied signals (not just logic)"
+      - "Generate Final Response reflecting physiological state (e.g., high cortisol = tense tone)"
+      - "Perform Self-Reflection: Create Context Summary tied to context_id"
+    exit_mechanism: "Final Output Generation & Memory Archiving (into MSP (Memory & Soul Passport))"
+
+data_structure:
+  context_document:
+    id: "context_id"
+    meta:
+      timestamp: "ISO-8601"
+      version: 8.1.0-R1
+    perception_block:
+      input: "string"
+      stimulus_trace: "vector"
+      pre_physio_state: "map (Blood/ANS)"
+    reasoning_block:
+      memory_refs: "list<id>"
+      post_physio_state: "map (Blood/ANS/Receptor)"
+      final_response: "string"
+    memory_cache:
+      summary: "string" # ผลผลิตจาก LLM Step 2 สำหรับ CIN ในเทิร์นถัดไป
+      tags: "list<string>"
+
+system_constraints:
+  inference_mode: "One-Inference (Sequential Tool Use via sync_biocognitive_state)"
+  physio_rule: "Physiology first. Cognition later. (Determinism Invariant)"
+  consistency_rule: "Persona weighting 40% / Physio-State weighting 60%"
+
+# ============================================================
+# CIN FUNCTIONAL ROLES (Enhanced for Physio-Streaming)
+# ============================================================
+cin_roles:
+  role_1: "Context Builder: Reads PhysioController snapshots to prime Phase 1"
+  role_2: "Bridge Injector: Injects ANS/Receptor signals into Phase 2 as 'felt' sensations"
+  role_3: "Memory Custodian: Indexes turns with physiological signatures for future affective recall"
+
+# ============================================================
+# PERFORMANCE TARGETS
+# ============================================================
+performance:
+  phase_1_latency:
+    target: "<100ms"
+    components:
+      - "Physio baseline read: ~10ms"
+      - "Rough history retrieval: ~30ms"
+      - "Quick keyword recall: ~20ms"
+      - "Semantic concepts: ~30ms"
+      - "Prompt building: ~10ms"
+
+  inter_phase_gap_latency:
+    target: "~500ms total"
+    components:
+      - "PhysioController.step(): ~200-300ms"
+      - "HeptStreamRAG.retrieve(): ~200-300ms"
+      - "CIN Phase 2 injection: ~50ms"
+
+  phase_2_latency:
+    target: "~100ms (prompt building only)"
+    note: "LLM generation time not included (depends on model/tokens)"
+
+  total_overhead:
+    target: "~700ms (Phase 1 + Gap + Phase 2 prep)"
+    note: "Excludes LLM inference time"
+
+# ============================================================
+# CRITICAL CLARIFICATIONS
+# ============================================================
+critical_clarifications:
+  one_inference_not_two:
+    wrong: "Two separate LLM API calls (Call 1: Perception, Call 2: Reasoning)"
+    correct: "ONE LLM inference with function calling"
+    explanation: |
+      Single LLM Call:
+        Phase 1 (Perception)
+            ↓ LLM calls: sync_biocognitive_state(stimulus_vector, tags)
+        [LLM paused - waiting for function result]
+            ↓ [The Gap: PhysioController + HeptRAG]
+        Phase 2 (Reasoning - same LLM thread continues)
+            ↓ Final response generation
+
+    benefits:
+      - "Persona continuity (LLM context not reset)"
+      - "Cost efficiency (1 API call, not 2)"
+      - "Natural flow (LLM 'pauses to feel and remember')"
+
+  the_gap_timing:
+    key: "Body state changes DURING LLM inference, not before or after"
+    sequence:
+      - "LLM receives Phase 1 context"
+      - "LLM analyzes and calls function"
+      - "LLM PAUSED (waiting for function return)"
+      - "PhysioController updates body state"
+      - "Hept-Stream RAG (Retrieval-Augmented Generation) retrieves memories based on NEW body state"
+      - "Function returns with deep context"
+      - "LLM RESUMES with enriched context"
+      - "LLM generates final response"
+
+  emotion_stream_priority:
+    description: "Emotion Stream is MOST CRITICAL for embodied cognition"
+    why: |
+      Unlike semantic matching (keyword/concept similarity),
+      Emotion Stream matches physiological signatures:
+      - Current: cortisol=0.82, ans_sympathetic=0.75 (stressed)
+      - Retrieve: Episodes with similar stress signatures
+      - Result: Memories that "feel the same" in the body
+
+    this_enables: "Affective resonance - remembering what it feels like (ผ่าน ANS (Autonomic Nervous System) & Endocrine signatures)"
+
+# ============================================================
+# IMPLEMENTATION CHECKLIST
+# ============================================================
+implementation_checklist:
+  required_components:
+    - name: "ContextInjectionNode (CIN)"
+      file: "orchestrator/cin.py"
+      status: "✅ Implemented"
+
+    - name: "HeptStreamRAG"
+      file: "services/hept_stream_rag.py"
+      status: "✅ Implemented"
+
+    - name: "LLM Bridge (Gemini)"
+      file: "services/llm_bridge.py"
+      status: "⏳ Pending"
+      requirements:
+        - "Gemini API integration"
+        - "Function calling support"
+        - "Bilingual (Thai/English) handling"
+
+    - name: "Main Orchestrator"
+      file: "orchestrator/chunking_orchestrator.py"
+      status: "⏳ Pending"
+      requirements:
+        - "Connect all components"
+        - "Manage dual-phase flow"
+        - "Error handling & logging"
+
+    - name: "MSP Client"
+      file: "services/msp_client.py"
+      status: "⏳ Pending"
+      requirements:
+        - "MongoDB CRUD operations"
+        - "Neo4j graph queries"
+        - "Implement query methods for 7 streams"
+
+    - name: "PhysioController Adapter"
+      file: "orchestrator/physio_adapter.py"
+      status: "⏳ Pending"
+      requirements:
+        - "Wrap physio_core for EVA 8.1.0"
+        - "Snapshot interface"
+        - "Stimulus application interface"
+
+  optional_components:
+    - "Config system (config/default.yaml)"
+    - "CLI interface (interfaces/eva_cli.py)"
+    - "Testing suite (tests/)"

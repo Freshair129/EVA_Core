@@ -1,0 +1,46 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Physio_to_CIN_Data_Schema",
+    "description": "Schema for physiological state data sent from PhysioController to CIN",
+    "type": "object",
+    "required": [
+        "baseline_state"
+    ],
+    "properties": {
+        "baseline_state": {
+            "type": "object",
+            "required": [
+                "hr_index",
+                "autonomic_state"
+            ],
+            "properties": {
+                "hr_index": {
+                    "type": "number"
+                },
+                "autonomic_state": {
+                    "type": "string"
+                },
+                "hormone_summary": {
+                    "type": "string"
+                }
+            }
+        },
+        "ans_delta": {
+            "type": "object",
+            "properties": {
+                "sympathetic": {
+                    "type": "number"
+                },
+                "parasympathetic": {
+                    "type": "number"
+                },
+                "cortisol_delta": {
+                    "type": "number"
+                },
+                "adrenaline_delta": {
+                    "type": "number"
+                }
+            }
+        }
+    }
+}

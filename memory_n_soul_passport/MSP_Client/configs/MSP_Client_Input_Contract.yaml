@@ -1,0 +1,37 @@
+# MSP Client Input Contract
+# version: 8.1.0-R1
+# Date: 2026-01-03
+# Description: Specifies the required inputs for persisting data via MSP Client.
+
+schema: EVA-MSP-Client-Input-Contract-v8.1
+version: 8.1.0-R1
+updated: 2026-01-03
+
+# ============================================================
+# INPUT SPECIFICATION
+# ============================================================
+inputs:
+  payload:
+    type: "Dict[str, Any]"
+    required: true
+    description: "The data package to be persisted."
+    properties:
+      id: {type: "string", description: "Unique identifier for the record (e.g., episode_id)."}
+      type: {type: "string", description: "Category of data (e.g., 'episodic', 'session', 'concept')."}
+      content: {type: "Dict[str, Any]", description: "The actual object/data to save."}
+
+  storage_policy:
+    type: "Dict[str, Any]"
+    required: false
+    description: "Overrides for default persistence behavior."
+    properties:
+      target: {type: "string", enum: ["local", "mongodb", "neo4j", "all"]}
+      synchronous: {type: "boolean", default: false}
+
+# ============================================================
+# VALIDATION RULES
+# ============================================================
+validation_rules:
+  - "payload.id and payload.type are mandatory for all persistence operations."
+  - "The payload must be JSON-serializable."
+  - "If storage_policy is missing, the default policy from MSP_Client_configs.yaml will be used."

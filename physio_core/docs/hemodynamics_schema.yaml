@@ -1,0 +1,262 @@
+# ============================================================
+# Circulation & Blood Physiology — Specification
+# ============================================================
+
+spec_name: "Circulation & Blood Physiology"
+spec_id: "EVA-CBP-SPEC"
+version: 8.1.0-R1
+updated: "2025-12-31"
+
+scope:
+  description: >
+    This specification defines the physiological blood circulation,
+    hormone transport, and adaptive runtime scheduling model used by EVA.
+    It covers blood volume, flow, hormone clearance, and update-rate control.
+  non_goals:
+    - CFD (Computational Fluid Dynamics) or Navier–Stokes fluid simulation
+    - Vessel-level topology or geometry
+    - Receptor dynamics and reflex behavior
+    - Neural firing or emotional interpretation
+
+design_principles:
+  - physiology_over_physics
+  - lumped_parameter_model
+  - streaming_background_safe
+  - deterministic_core
+  - modular_control_plane
+
+# ------------------------------------------------------------
+# 1) Runtime Model
+# ------------------------------------------------------------
+runtime_model:
+  execution:
+    mode: "streaming_continuous"
+    description: >
+      The system runs continuously in the background.
+      Updates are event-driven and bounded by adaptive Hz (Hertz) scheduling.
+
+  time_handling:
+    unit: "seconds"
+    max_dt_sec: 0.2
+    lazy_evaluation: true
+    rationale: >
+      Hormone decay and clearance are evaluated only when state is
+      updated or read, not on every wall-clock tick.
+
+# ------------------------------------------------------------
+# 2) Blood Circulation Model
+# ------------------------------------------------------------
+blood_model:
+  abstraction_level: "lumped_compartments"
+
+  total_volume:
+    unit: "mL"
+    typical_adult_value: 5000
+    description: >
+      Total circulating blood volume used for hormone concentration
+      normalization.
+
+  compartments:
+    arterial:
+      role: "high_pressure_distribution"
+      parameters:
+        volume_fraction: 0.15
+        compliance: "low"
+        resistance: "moderate"
+
+    capillary:
+      role: "exchange_interface"
+      parameters:
+        volume_fraction: 0.10
+        compliance: "moderate"
+        resistance: "high"
+
+    venous:
+      role: "low_pressure_reservoir"
+      parameters:
+        volume_fraction: 0.75
+        compliance: "high"
+        resistance: "low"
+
+  rationale: >
+    Compartments represent aggregated vascular behavior rather than
+    explicit vessel geometry.
+
+# ------------------------------------------------------------
+# 3) Hemodynamics
+# ------------------------------------------------------------
+hemodynamics:
+  modeled_quantities:
+    - heart_rate
+    - stroke_volume
+    - cardiac_output
+
+  simplifications:
+    - no_pulse_waveform
+    - no_beat_to_beat_variability
+    - no_ecg (Electrocardiogram) simulation
+
+  blood_viscosity:
+    role: "resistance_modifier"
+    description: >
+      Blood viscosity affects effective vascular resistance and flow,
+      without explicit shear modeling.
+
+# ------------------------------------------------------------
+# 4) Flow Rate Model
+# ------------------------------------------------------------
+flow_model:
+  definition:
+    unit: "mL/sec"
+    base_source: "cardiac_output"
+
+  governing_relation:
+    equation: "Flow = ΔPressure / Resistance"
+    description: >
+      Flow is computed as a scalar quantity and used to modulate
+      hormone transport and clearance efficiency.
+
+  usage:
+    - hormone_mixing_speed
+    - clearance_scaling
+    - scheduler_input
+
+  constraints:
+    min_flow: "physiological lower bound"
+    max_flow: "physiological upper bound"
+
+# ------------------------------------------------------------
+# 5) Hormone Transport & Clearance
+# ------------------------------------------------------------
+hormone_transport:
+  distribution:
+    model: "instant_plasma_mixing"
+    description: >
+      Hormones are assumed to be uniformly mixed within plasma.
+      Spatial localization is intentionally ignored.
+
+  concentration:
+    representation: "mass / distribution_volume"
+
+  clearance:
+    primary_model: "half_life_decay"
+    equation: "C(t) = baseline + (C0 - baseline) * exp(-k * t)"
+    flow_coupling: optional
+
+  recovery:
+    below_baseline_behavior: "slow_recovery"
+    rationale: >
+      Physiological recovery below baseline is slower than excess clearance.
+
+# ------------------------------------------------------------
+# 6) Plasma Protein Binding
+# ------------------------------------------------------------
+protein_binding:
+  purpose: >
+    Separate free and bound hormone fractions to enable
+    realistic bioavailability modeling.
+
+  proteins:
+    - albumin
+    - SHBG (Sex Hormone-Binding Globulin)
+    - CBG (Corticosteroid-Binding Globulin)
+
+  binding_model:
+    type: "equilibrium"
+    kinetics: "Kd-based"
+    note: >
+      No molecular dynamics or stochastic binding simulation is used.
+
+# ------------------------------------------------------------
+# 7) Pressure Model
+# ------------------------------------------------------------
+pressure_model:
+  abstraction:
+    type: "derived_scalar"
+    equation: "Pressure = Volume / Compliance"
+
+  coupling:
+    with_flow: true
+
+  limits:
+    enforce_physiological_bounds: true
+
+# ------------------------------------------------------------
+# 8) Adaptive Scheduler (Hz (Hertz) Control)
+# ------------------------------------------------------------
+scheduler_model:
+  role: >
+    Determine update frequency (Hz (Hertz)) for the streaming system.
+
+  inputs:
+    - stress_index
+    - flow_factor
+    - user_activity_state
+    - user_focus_index
+
+  output:
+    - update_rate_hz (Hertz)
+
+  control_strategy:
+    type: "hybrid_adaptive"
+    components:
+      - physiology_driven_base
+      - user_activity_modifier
+      - focus_fine_tuning
+      - smoothing_filter
+
+  smoothing:
+    method: "EMA (Exponential Moving Average)"
+    rationale: >
+      Prevent abrupt frequency oscillations.
+
+# ------------------------------------------------------------
+# 9) Interaction Sensors
+# ------------------------------------------------------------
+interaction_model:
+  typing_rhythm:
+    signals:
+      - inter_keystroke_interval
+      - burst_length
+      - pause_duration
+
+    derived_metric:
+      focus_index:
+        range: [0.0, 1.0]
+        interpretation: "cognitive engagement"
+
+  design_note: >
+    Interaction signals influence scheduling only and never directly
+    modify physiological state.
+
+# ------------------------------------------------------------
+# 10) Safety & Stability
+# ------------------------------------------------------------
+safety:
+  numerical:
+    - clamp_exponential
+    - concentration_floor
+    - concentration_cap
+
+  system_level:
+    - deterministic_updates
+    - bounded_time_steps
+
+# ------------------------------------------------------------
+# 11) Extension Points
+# ------------------------------------------------------------
+extension_points:
+  future_modules:
+    - receptor_dynamics
+    - reflex_engine
+    - feedback_loops (HPA (Hypothalamic-Pituitary-Adrenal) / HPT (Hypothalamic-Pituitary-Thyroid) / HPG (Hypothalamic-Pituitary-Gonadal))
+    - organ_specific_flow
+    - sleep_state_model
+
+  compatibility_guarantee: >
+    Extensions must not require changes to the core blood
+    circulation and hormone transport logic.
+
+# ============================================================
+# End of Circulation & Blood Physiology Specification
+# ============================================================

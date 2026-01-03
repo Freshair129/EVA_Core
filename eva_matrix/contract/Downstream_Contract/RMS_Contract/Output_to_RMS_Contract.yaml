@@ -1,6 +1,6 @@
 # Output to RMS Contract
 # Component: EVA Matrix -> RMS Integration
-# Version: 1.0.0
+# version: 8.1.0-R1
 # Description: Defines the strict payload schema EVA Matrix sends OUT to RMS for memory encoding.
 
 schema: EVA-Output-to-RMS-Contract-v1.1 (Aligned with EVA_Matrix_State_Schema_01.json)

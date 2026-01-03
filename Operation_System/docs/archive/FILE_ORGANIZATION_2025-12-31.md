@@ -134,8 +134,8 @@ EVA 8.1.0/
 ├── Resonance_Memory_System/       # 🎵 Memory encoding
 ├── resonance_index/               # 📈 RI calculation
 ├── resonance_impact/              # 💥 RIM calculation
-├── Consciousness/                 # 🧠 State persistence
-└── Operation_System/              # ⚙️ System configuration
+├── consciousness/                 # 🧠 State persistence
+└── operation_system/              # ⚙️ System configuration
 ```
 
 ---

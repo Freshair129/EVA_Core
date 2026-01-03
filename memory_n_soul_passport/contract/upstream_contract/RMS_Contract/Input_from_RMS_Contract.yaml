@@ -1,0 +1,15 @@
+# Input from RMS Contract
+# Component: RMS -> MSP
+# version: 8.1.0-R1
+
+schema: EVA-Input-from-RMS-Contract-v1.0
+
+required_inputs:
+  encryption_data:
+    type: "object"
+    description: "Memory encoding attributes."
+    required: true
+    properties:
+      core_color: { type: "string", format: "hex" }
+      resonance_texture_5d: { type: "array", length: 5 }
+      trauma_flag: { type: "boolean" }

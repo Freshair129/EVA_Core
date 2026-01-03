@@ -1,0 +1,37 @@
+# Output to Downstream Contract
+# Component: PhysioController -> EVA Matrix / MSP
+# version: 8.1.0-R1
+# Description: Defines the authentic physiological state stream exported to downstream systems.
+
+schema: EVA-Output-to-Downstream-Contract-v8.1
+
+provided_outputs:
+  physio_state:
+    type: "object"
+    description: "Complete snapshot of biological state."
+    required: true
+    properties:
+      timestamp: { type: "float", description: "Unix epoch" }
+      
+      autonomic:
+        type: "object"
+        properties:
+          sympathetic_tone:     { type: "float", range: [0.0, 10.0] }
+          parasympathetic_tone: { type: "float", range: [0.0, 10.0] }
+          balance_index:        { type: "float", range: [-1.0, 1.0] }
+          heart_rate_bpm:       { type: "float", range: [45.0, 180.0] }
+      
+      endocrine:
+        type: "dict[str, float]"
+        description: "Map of Hormone IDs (ESC_Hxx/ESC_Nxx) to plasma concentration."
+      
+      metabolic:
+        type: "object"
+        properties:
+          energy_level: { type: "float", range: [0.0, 1.0] }
+          sleep_pressure: { type: "float", range: [0.0, 1.0] }
+
+data_integrity:
+  - "State updates MUST occur at minimum 30Hz."
+  - "Values are bounded by biological constraints defined in hormone_spec."
+  - "Consistency: No state teleportation allowed between frames."

@@ -98,7 +98,7 @@ print(f"\n{'='*60}")
 print("Final Counters")
 print(f"{'='*60}")
 
-counters_file = Path("Consciousness/09_state/compression_counters.json")
+counters_file = Path("consciousness/09_state/compression_counters.json")
 with open(counters_file, 'r', encoding='utf-8') as f:
     final_counters = json.load(f)
 
@@ -138,7 +138,7 @@ print("Check compression_meta in episodes")
 print(f"{'='*60}")
 
 # Read last episode
-episodes = sorted(Path("Consciousness/01_Episodic_memory/episodes").glob("ep_*.json"))
+episodes = sorted(Path("consciousness/01_Episodic_memory/episodes").glob("ep_*.json"))
 if episodes:
     with open(episodes[-1], 'r', encoding='utf-8') as f:
         last_ep = json.load(f)

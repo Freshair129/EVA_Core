@@ -331,13 +331,13 @@ EVA 8.1.0/
 ├── resonance_index/          # RI calculation
 ├── resonance_impact/         # RIM calculation
 │
-├── Consciousness/            # State persistence
+├── consciousness/            # State persistence
 │   ├── 01_Episodic_memory/
 │   ├── 02_Semantic_memory/
 │   ├── 03_Sensory_memory/
 │   └── 10_state/             # JSON state files
 │
-└── Operation_System/         # System specs
+└── operation_system/         # System specs
     └── (configuration files)
 ```
 

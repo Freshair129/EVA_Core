@@ -44,8 +44,8 @@ print(f"Validation")
 print(f"{'='*60}")
 
 # Check file sizes
-user_file = Path(f"Consciousness/01_Episodic_memory/episodes_user/{episode_id}_user.json")
-llm_file = Path(f"Consciousness/01_Episodic_memory/episodes_llm/{episode_id}_llm.json")
+user_file = Path(f"consciousness/01_Episodic_memory/episodes_user/{episode_id}_user.json")
+llm_file = Path(f"consciousness/01_Episodic_memory/episodes_llm/{episode_id}_llm.json")
 
 print(f"\n📂 File Existence:")
 print(f"{'✅' if user_file.exists() else '❌'} User file: {user_file}")

@@ -1,33 +1,37 @@
 # CIN (Context Injection Node) Interface
-# Version: 1.0.0
-# Description: Public API Specification for the Context Injection Node.
+# version: 8.1.0-R1
+# Description: Public API Specification for the CIN (Context Injection Node).
 
 schema: EVA-CIN-Interface-v1
-name: Context_Injection_Node
+version: 8.1.0-R1
+name: CIN (Context Injection Node)
 role: Orchestration & Context Builder
 
 description: >
   Dual-phase context orchestrator. 
-  Phase 1: Builds 'Perception' prompt (Lightweight).
-  Phase 2: Builds 'Reasoning' prompt (Deep Context via RAG & Matrix).
+  Phase 1 (Intuition): Builds 'Perception' prompt (Lightweight, Quick Recall).
+  Phase 2 (Reasoning): Builds 'Reasoning' prompt (Deep Context via AgenticRAG & EVA_Matrix).
 
 position:
   upstream:
-    - PhysioController
-    - MSP (Memory)
-    - PMT (Identity)
+    - PhysioController (Physiological Controller)
+    - MSP (Memory & Soul Passport)
+    - PMT (Prompt Rule Layer)
   downstream:
-    - Orchestrator (LLM)
+    - Orchestrator (Main Conductor)
 
 methods:
   - name: build_phase_1_context
     input: "User Input (String)"
-    output: "Phase 1 Prompt (String)"
+    output: "Phase 1 Perception Context (Object)"
+    description: "Assembles intuition-based context including quick recall (แว๊บแรก)."
   
   - name: build_phase_2_context
     input: "Stimulus Vector (Object) + Tags (List)"
-    output: "Phase 2 Prompt (String)"
+    output: "Phase 2 Reasoning Context (Object)"
+    description: "Assembles deep context after biological processing."
 
 constraints:
   - "Must use Read-Only access for memory."
   - "Phase 1 latency < 100ms."
+  - "Full versioning in all telemetry."

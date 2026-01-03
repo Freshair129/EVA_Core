@@ -1,5 +1,5 @@
 # EVA Matrix Runtime Hookup Configuration
-# Version: 8.1.0
+# version: 8.1.0-R1
 # Date: 2026-01-02
 # Description: Dynamic binding for the EVA Matrix system in the main orchestrator.
 
@@ -34,5 +34,5 @@ runtime_hook:
 
   # Resource dependencies
   resources:
-    persistence_path: "Consciousness/10_state/eva_matrix_state.json"
+    persistence_path: "consciousness/10_state/eva_matrix_state.json"
     config_path: "eva_matrix/configs/EVA_Matrix_configs.yaml"

@@ -34,8 +34,11 @@ All modules must follow this schema. Use "Full" for complex modules, "Minimal" f
 ├── 📂 docs/                    # [Human] Concepts & Guides
 │   └── concept.md
 │
-├── 📂 schema/                  # [Validation] JSON Schemas (Optional)
-├── 📂 validation/              # [Logic] Business Rules (Optional)
+├── 📂 schema/                  # [Validation] JSON Schemas (MANDATORY for Tier 1)
+│   └── {Module}_Output_Schema.json    # Schema for data EMITTED by this module
+│
+├── 📂 validation/              # [Logic] Schema copies for validation
+│   └── {Source}_Data_Schema.json      # Schema of data RECEIVED from upstream
 ├── 📂 tests/                   # [QA] Unit & Integration Tests
 │
 ├── 🐍 {module}.py              # Implementation (or {module}_engine.py)
@@ -105,15 +108,17 @@ data:
 delivery: {method: function_call}
 ```
 
-## 5. Delivery Modes
+## 6. Schema & Validation Rules (Integrity Enforcement)
+1. **Source Ownership**: The module producing data is responsible for maintaining the Master Schema in its `schema/` directory.
+2. **Downward Trust**: Modules receiving data must copy the provider's schema into their `validation/` directory to perform runtime/static validation.
+3. **Contract Linkage**: All bilateral contracts MUST include a `schema_ref` field pointing to the relevant `.json` schema.
 
-| Mode | Description |
-| :--- | :--- |
-| **`orchestrator_mediated`** | (Default) Orchestrator requests data from this module and passes it to dest. |
-| **`direct_push`** | Module calls destination API/Bridge directly (e.g., Database write). |
-| **`passive_pull`** | Module exposes state; waits for query. |
+| Directory | Purpose | Rule |
+| :--- | :--- | :--- |
+| `schema/` | Egress Schemas | "What I PROMISE to send" |
+| `validation/` | Ingress Schemas | "What I EXPECT to receive" |
 
-## 6. Decision Tree (Tier Selection)
+## 7. Delivery Modes
 *   **Tier 1 (Full)**: Complex logic, Schema validation, >2 dependencies. (Use full tree above).
 *   **Tier 2 (Standard)**: Most modules. `configs/`, `contract/`, `docs/`, `README`.
 *   **Tier 3 (Minimal)**: Utilities. `configs/`, code, `README`. No `contract/` folder if no deps.

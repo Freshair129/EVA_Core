@@ -1,0 +1,25 @@
+# Output to Orchestrator (Main Conductor) Contract
+# Component: CIN (Context Injection Node) -> Orchestrator (Main Conductor)
+# version: 8.1.0-R1
+# Date: 2026-01-03
+
+schema: EVA-Output-to-Orchestrator-Contract-v1.0
+version: 8.1.0-R1
+schema_ref: "orchestrator/cin/schema/CIN_Output_Schema.json"
+
+required_outputs:
+  phase_1_prompt:
+    type: "string"
+    description: "Perception Prompt (Identity + Soul + Physio Baseline + Intuition/Turn Cache)."
+    required: true
+  
+  phase_2_prompt:
+    type: "string"
+    description: "Reasoning Prompt (Embodied Sensation + Matrix State + Deep AgenticRAG)."
+    required: true
+
+  context_meta:
+    type: "object"
+    properties:
+      context_id: { type: "string" }
+      token_count: { type: "integer" }

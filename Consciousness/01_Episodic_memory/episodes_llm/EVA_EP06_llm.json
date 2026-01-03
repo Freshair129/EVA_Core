@@ -1,0 +1,19 @@
+{
+  "episode_id": "EVA_EP06",
+  "turn_2": {
+    "speaker": "EVA",
+    "content": "\nOK. I have synchronized the biocognitive state and updated the context. Can I help with anything else?\n",
+    "summary": "\nOK. I have synchronized the biocognitive state and updated the context. Can I help with anything el"
+  },
+  "state_snapshot": {
+    "Endocrine": null,
+    "memory_encoding_level": "L1_light",
+    "memory_color": "#152a2b",
+    "qualia": {
+      "intensity": 0.24
+    },
+    "reflex": {
+      "threat_level": 0.1
+    }
+  }
+}

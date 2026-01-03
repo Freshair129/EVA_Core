@@ -1,11 +1,11 @@
 # CIN (Context Injection Node) Specification
-# Version: 8.1.0
+# version: 8.1.0-R1
 # Date: 2025-12-31
 
 meta:
   component_name: "Context Injection Node (CIN)"
   component_type: "orchestrator"
-  version: "8.1.0"
+  version: 8.1.0-R1
   role: "Perception context builder for LLM Phase 1"
   analogy: "Working memory buffer before conscious processing"
 
@@ -147,7 +147,7 @@ context_structure:
         [PERSONA IDENTITY]
         Name: <name>
         Type: <type>
-        Version: <version>
+        version: 8.1.0-R1
 
         Core Being:
         - ตัวตน = <core_being>
@@ -160,7 +160,7 @@ context_structure:
         Memory Promise:
         - "<memory_promise>"
       purpose: "Define EVA's identity and communication style"
-      source: "Consciousness/08_User_block/Persona_01.md"
+      source: "consciousness/08_User_block/Persona_01.md"
 
     - section_id: 4
       name: "conversation_history"
@@ -178,7 +178,7 @@ context_structure:
         Episode 2:
         ...
       purpose: "Recent conversation context for continuity"
-      source: "MSP Episodic Memory (via ConsciousnessManager)"
+      source: "MSP Episodic Memory (via consciousnessManager)"
       retrieval: "Latest N episodes (default: 5)"
       fields:
         episode_id: "Unique episode identifier"
@@ -326,20 +326,20 @@ implementation:
   file_path: "orchestrator/cin.py"
 
   dependencies:
-    - "orchestrator.consciousness_manager.ConsciousnessManager"
+    - "orchestrator.consciousness_manager.consciousnessManager"
     - "orchestrator.context_builder.ContextBuilder (optional)"
 
   initialization:
     parameters:
       consciousness_manager:
-        type: "ConsciousnessManager"
+        type: "consciousnessManager"
         required: true
-        description: "File I/O API for Consciousness/"
+        description: "File I/O API for consciousness/"
       persona_path:
         type: "string"
         required: true
         description: "Path to Persona_01.md"
-        example: "Consciousness/08_User_block/Persona_01.md"
+        example: "consciousness/08_User_block/Persona_01.md"
       context_builder:
         type: "ContextBuilder"
         required: false
@@ -410,7 +410,7 @@ implementation:
 
     - name: "_fetch_body_state"
       returns: "dict"
-      description: "Fetch current body state from Consciousness"
+      description: "Fetch current body state from consciousness"
 
     - name: "_load_persona"
       returns: "dict"
@@ -445,7 +445,7 @@ configuration:
 
     persona_path:
       type: "string"
-      default: "Consciousness/08_User_block/Persona_01.md"
+      default: "consciousness/08_User_block/Persona_01.md"
       description: "Path to persona file"
 
     enable_body_state:
@@ -489,16 +489,16 @@ configuration:
 # ============================================================
 
 usage_example: |
-  from orchestrator.consciousness_manager import ConsciousnessManager
+  from orchestrator.consciousness_manager import consciousnessManager
   from orchestrator.cin_builder import CognitivePerceptionNode, CINInput
   from orchestrator.context_builder import ContextBuilder
 
   # Initialize
-  cm = ConsciousnessManager("E:/The Human Algorithm/T2/EVA 8.1.0/Consciousness")
+  cm = consciousnessManager("E:/The Human Algorithm/T2/EVA 8.1.0/consciousness")
   context_builder = ContextBuilder("config/context_thresholds.yaml")
   cin = CognitivePerceptionNode(
       consciousness_manager=cm,
-      persona_path="Consciousness/08_User_block/Persona_01.md",
+      persona_path="consciousness/08_User_block/Persona_01.md",
       context_builder=context_builder
   )
 
@@ -527,7 +527,7 @@ integration:
   with_chunking_orchestrator: |
     class ChunkingOrchestrator:
         def __init__(self, config_path: str):
-            self.cm = ConsciousnessManager(...)
+            self.cm = consciousnessManager(...)
             self.cin = CognitivePerceptionNode(...)
             self.llm = LLMBridge()
             self.chunker = SemanticChunkerV2(self.llm)
@@ -672,9 +672,9 @@ references:
     - "Memory_&_Soul_Passaport/schema/Semantic_Memory_Schema_v2.json"
 
   related_specs:
-    - "Operation_System/chunking_orchestrator_spec.yaml"
-    - "Operation_System/semantic_chunker_spec.yaml"
-    - "Operation_System/context_builder_spec.yaml"
+    - "operation_system/chunking_orchestrator_spec.yaml"
+    - "operation_system/semantic_chunker_spec.yaml"
+    - "operation_system/context_builder_spec.yaml"
 
   example_payload:
     - "example_cin_phase1_payload.txt"

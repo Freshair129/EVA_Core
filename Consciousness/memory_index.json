@@ -301,6 +301,56 @@
       "speaker_2": "eva",
       "resonance_index": null,
       "emotion_label": null
+    },
+    {
+      "episode_id": "EVA_EP05",
+      "timestamp": "2026-01-03T04:33:51.905528",
+      "session_id": null,
+      "event_label": null,
+      "episode_tag": null,
+      "summary_user": "ขอบคุณนะที่วันนี้มาส่งที่สนามบิน น่ารักมากๆเลย",
+      "tags": [
+        "neutral"
+      ],
+      "salience_anchor": null,
+      "speaker_1": "Human",
+      "summary_eva": "\nI have synchronized the biocognitive state. Is there anything else I can help you with?\n",
+      "speaker_2": "EVA",
+      "resonance_index": null
+    },
+    {
+      "episode_id": "EVA_EP06",
+      "timestamp": "2026-01-03T04:51:05.962656",
+      "session_id": null,
+      "event_label": null,
+      "episode_tag": null,
+      "summary_user": "ขอบคุณนะที่วันนี้มาส่งที่สนามบิน น่ารักมากๆเลย",
+      "tags": [
+        "neutral"
+      ],
+      "salience_anchor": null,
+      "speaker_1": "Human",
+      "summary_eva": "\nOK. I have synchronized the biocognitive state and updated the context. Can I help with anything el",
+      "speaker_2": "EVA",
+      "resonance_index": null
+    },
+    {
+      "episode_id": "EVA_EP07",
+      "timestamp": "2026-01-03T04:51:35.530034",
+      "session_id": null,
+      "event_label": null,
+      "episode_tag": null,
+      "summary_user": "ขอบคุณนะที่วันนี้มาส่งที่สนามบิน น่ารักมากๆเลย",
+      "tags": [
+        "gratitude",
+        "affection",
+        "airport"
+      ],
+      "salience_anchor": null,
+      "speaker_1": "Human",
+      "summary_eva": "I have analyzed the user's gratitude and affection expressed in their message. This has been transla",
+      "speaker_2": "EVA",
+      "resonance_index": null
     }
   ]
 }

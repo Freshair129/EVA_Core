@@ -1,10 +1,10 @@
 # Resonance Memory System (RMS) Configuration (SSOT)
-# Version: 8.1.0
+# version: 8.1.0-R1
 # Date: 2026-01-03
 # Description: Encoding parameters and resonance thresholds for RMS.
 
 schema: EVA-RMS-Configs-v8.1
-version: 8.1.0
+version: 8.1.0-R1
 updated: 2026-01-03
 
 # ============================================================

@@ -1,10 +1,10 @@
 # RMS (Resonance Memory System) Interface Specification
-# Version: 8.1.0
+# version: 8.1.0-R1
 # Date: 2026-01-02
 # Status: GKS (Genesis Knowledge System) Standardized
 
 schema: EVA-RMS-Interface-v8
-version: 8.1.0
+version: 8.1.0-R1
 name: RMS (Resonance Memory System) Interface (RMS (Resonance Memory System) v8.1)
 role: experiential_memory_encoding
 description: >

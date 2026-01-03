@@ -1,12 +1,13 @@
 # CIN (Context Injection Node) Output Contract Registry
-# Version: 1.0.0
-# Description: Master registry of all outputs from CIN.
+# version: 8.1.0-R1
+# Description: Master registry of all outputs from CIN (Context Injection Node).
 
 schema: EVA-CIN-Output-Contract-v1
+version: 8.1.0-R1
 
 destinations:
-  - module: "Orchestrator (LLM)"
-    # Relative path from configs/
-    contract: "../contract/downstream/Orchestrator_Contract/Output_to_Orchestrator_Contract.yaml"
+  - module: "Orchestrator (Main Conductor)"
+    contract_path: "contract/downstream_contract/Orchestrator_Contract/Output_to_Orchestrator_Contract.yaml"
     required: true
-    description: "Provides constructed prompts for Phase 1 & 2."
+    description: "Constructed prompts for Phase 1 (Perception) and Phase 2 (Reasoning)."
+    delivery_mode: "orchestrator_mediated"

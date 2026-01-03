@@ -44,7 +44,7 @@ episode_id = result["episode_id"]
 print(f"\n✅ Episode ID: {episode_id}")
 
 # Read the episode file
-episode_file = Path("Consciousness/01_Episodic_memory/episodes") / f"{episode_id}.json"
+episode_file = Path("consciousness/01_Episodic_memory/episodes") / f"{episode_id}.json"
 
 if not episode_file.exists():
     print(f"❌ Episode file not found: {episode_file}")

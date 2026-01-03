@@ -70,9 +70,9 @@ class PhysioController:
         self.CORE_HORMONES = [
             "ESC_H01_ADRENALINE",
             "ESC_H02_CORTISOL",
-            "ESC_H05_DOPAMINE",
-            "ESC_H06_SEROTONIN",
-            "ESC_H09_OXYTOCIN"
+            "ESC_N02_DOPAMINE",
+            "ESC_N03_SEROTONIN",
+            "ESC_H04_OXYTOCIN"
         ]
 
         # --------------------------------------------------
@@ -106,6 +106,16 @@ class PhysioController:
         # Autonomic
         # --------------------------------------------------
         self.autonomic = AutonomicResponseEngine(self.autonomic_cfg)
+
+    def get_snapshot(self, **kwargs) -> Dict[str, Any]:
+        """
+        Return a snapshot of the current physiological state.
+        Required by CIN (Context Injection Node).
+        """
+        return {
+            "ans_state": self.autonomic.get_state(),
+            "blood_levels": self.blood.get_concentrations(),
+        }
 
     # ======================================================
     # Main tick

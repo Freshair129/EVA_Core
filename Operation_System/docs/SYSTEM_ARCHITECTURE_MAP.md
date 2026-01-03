@@ -5,9 +5,7 @@
 
 ---
 
-## 2. Technical Architecture (Mermaid)
-
-## 2. Technical Architecture (Detailed Mermaid)
+## 2. Technical Architecture (Validated Mermaid)
 
 ```mermaid
 graph TB
@@ -97,9 +95,9 @@ graph TB
 
     %% Identity Layer
     subgraph IdentityLayer ["Soul & Persona - Identity Constraints"]
-        PMTRule["Prompt Rule Layer<br/>PMT Framework"]
+        PMT["Prompt Rule Layer<br/>PMT Framework"]
         Soul["soul.md<br/>Develop ID: THA-01-S003"]
-        Persona["persona.yaml<br/>Name: llm"]
+        Persona["persona.yaml<br/>Name: EVA"]
     end
 
     %% Main Flow
@@ -108,7 +106,7 @@ graph TB
 
     %% Phase 1 Flow
     CIN -->|Phase 1: Rough Context| P1
-    PMTRule -.->|Identity Rules| CIN
+    PMT -.->|Identity Rules| CIN
     Soul -.->|Soul Context| CIN
     Persona -.->|Persona Voice| CIN
 
@@ -160,27 +158,115 @@ graph TB
 
 ---
 
-## 3. Layer Definitions
+## 3. Component Overview
 
-### 🟦 Executive Mind (Tier 1)
-- **Main Orchestrator**: The central loop director.
-- **CIN (Context Injection Node)**: The dynamic prompt assembler.
-- **LLM Bridge**: The cognitive bridge to Gemini/Ollama.
+### 🎯 Core Orchestration Layer
 
-### 🟨 The Gap (Inter-Inference Processing)
-- **Physio Core**: Simulates autonomic nervous system and hormones.
-- **EVA Matrix**: Map of 9D psychological axes (Stress, Warmth, etc.).
-- **Artifact Qualia**: Translates numeric states into descriptive "feelings" for the LLM.
-- **RI/RIM**: Evaluates semantic alignment and determines biological impact.
-
-### 🟥 Memory System (Persistence)
-- **MSP (Memory & Soul Passport)**: The gatekeeper for episode persistence.
-- **Hept Stream RAG**: Ultra-high-fidelity 7-dimensional memory retrieval.
-- **Consciousness Store**: Standardized Episodic/Semantic memory storage.
+| Component | Role | Key Responsibility |
+|-----------|------|-------------------|
+| **Main Orchestrator** | System conductor | Manages dual-phase flow, error handling, logging |
+| **Context Injection Node (CIN)** | Dual-phase context builder | **Phase 1**: Rough context (fast)<br/>**Phase 2**: Deep context (accurate) |
+| **LLM Bridge** | Gemini API integration | Function calling support, bilingual handling |
 
 ---
 
-## 4. Key Standards
-- **Standard**: [MODULE_STRUCTURE_STANDARD.md](file:///E:/The%20Human%20Algorithm/T2/EVA%208.1.0/Operation_System/docs/MODULE_STRUCTURE_STANDARD.md)
-- **Compliance**: All 10 core modules are 100% compliant with the 3-Tier standard.
-- **Subject**: References to "EVA" now conceptually refer to the **llm** as the subject of experience.
+### 🧠 Dual-Phase One-Inference Loop
+
+| Phase | Component | Description | Weighting |
+|-------|-----------|-------------|-----------|
+| **Phase 1** | Perception | LLM analyzes intent & emotion from user input | N/A (Deterministic trigger) |
+| **Function Call** | `sync_biocognitive_state()` | LLM calls function with `stimulus_vector` + `tags` | N/A (Bridge to Gap) |
+| **The Gap** | Real-time Processing | Physiological + Memory retrieval (Outside LLM) | 100% embodied processing |
+| **Phase 2** | Reasoning | LLM generates response with deep context | **40% Persona + 60% Physio-State** |
+
+**Critical Rule**: This is **ONE LLM inference**, not two separate API calls. The LLM pauses during The Gap and resumes with function result.
+
+---
+
+### ⚡ THE GAP: Real-time Processing (Outside LLM)
+
+#### Physiological Pipeline (30Hz Streaming)
+
+| Component | Input | Output | Role |
+|-----------|-------|--------|------|
+| **HPA Axis Regulator** | `stimulus_vector` | Modulated stimulus | Stress modulation (HPA Axis) |
+| **Circadian Controller** | Modulated stimulus | Time-adjusted stimulus | Circadian rhythm effects |
+| **Endocrine System** | Stimulus | Hormone secretion (pg) | Hormone production from glands |
+| **Blood Engine** | Hormones (pg) | Blood concentration | Transport, clearance, half-life decay |
+| **Receptor Engine** | Blood hormones | Neural signals | Signal transduction (hormones → neural) |
+| **Autonomic Nervous System (ANS)** | Neural signals | ANS state (Sympathetic/Para) | Final autonomic integration |
+
+**Pipeline Flow**: `HPA → Circadian → Endocrine → Blood → Receptor → ANS`
+
+#### Embodiment Pipeline
+
+| Component | Input | Output | Role |
+|-----------|-------|--------|------|
+| **EVA Matrix** | Receptor signals | 9D psychological state | Converts neural signals to 9 dimensions |
+| **Artifact Qualia** | EVA Matrix state | Phenomenological experience | Generates qualia for the llm (intensity, tone, coherence, depth) |
+
+#### Memory Retrieval (Hept-Stream RAG)
+
+| Stream | Query Method | Purpose |
+|--------|--------------|---------|
+| **① Narrative Stream** | Sequential episode chains | Storyline continuity |
+| **② Salience Stream** | High RI score | High-impact memories |
+| **③ Sensory Stream** | Qualia texture match | Sensory-rich memories |
+| **④ Intuition Stream** | Semantic graph patterns | Pattern recognition |
+| **⑤ Emotion Stream** | **Physio-congruent match** | **Memories matching current body state** |
+| **⑥ Temporal Stream** | Time-based + recency bias | Temporal context |
+| **⑦ Reflection Stream** | Meta-cognitive insights | Self-awareness |
+
+---
+
+### 💾 Memory & Soul Passport (MSP)
+
+#### Memory Encoding
+
+| Component | Input | Output | Role |
+|-----------|-------|--------|------|
+| **Resonance Memory System (RMS)** | LLM response + physio state | Encoded memory structure | Adds emotional texture (core_color, resonance_textures) |
+
+#### Memory Persistence (MSP Authority)
+
+| Collection | Storage Format | Purpose |
+|------------|----------------|---------|
+| **Episodic Memory (User)** | `episodes_user/` | Lightweight user data for fast RAG queries |
+| **Episodic Memory (LLM)** | `episodes_llm/` | Detailed LLM response + full physio trace |
+| **Session Memory** | JSON Snapshots | Compressed snapshots (8 sessions → 1 Core) |
+| **Search Index** | `episodic_log.jsonl` | Fast keyword/tag search |
+
+---
+
+### 🎭 Identity Layer (Soul & Persona)
+
+| Component | Format | Content | Role |
+|-----------|--------|---------|------|
+| **Prompt Rule Layer (PMT)** | YAML | Cognitive immunity, Master Blocks | Framework for identity constraints |
+| **Soul (Identity)** | Markdown | Develop ID: `THA-01-S003` | Core identity and lineage |
+| **Persona** | YAML | Name: `EVA` | Personality, voice, and behavior rules |
+
+---
+
+## 4. System Invariants
+
+1. **One LLM Inference Only**: The LLM pauses during The Gap and resumes with the function result.
+2. **Physiology First**: Body state updates before cognitive reasoning (60% weight).
+3. **CIN Never Summarizes**: Context summary must come from the LLM in Phase 2.
+4. **Context Continuity**: `context_id` (e.g., `ctx_v8_251231_...`) stays constant across both phases.
+
+---
+
+## 5. Performance Goals
+
+| Metric | Target | Notes |
+|--------|--------|-------|
+| **Total Latency** | ~600ms | Single API call overhead |
+| **Memory Sync** | 30Hz | Real-time physiological simulation |
+| **I/O Optimization** | 62% Reduction | Using split episodic storage |
+
+---
+
+**Validated Source**: `operation_system/docs/archive/ARCHITECTURE_FLOW_VALIDATED.md`
+**Last Updated**: 2026-01-03
+**Status**: ✅ **OFFICIAL SYSTEM MAP**

@@ -24,7 +24,7 @@ class EVAMatrixSystem:
     def __init__(self, base_path: Path = None, msp=None):
         self.base_path = base_path or Path(".")
         self.msp = msp
-        self.state_file = self.base_path / "Consciousness/10_state/eva_matrix_state.json"
+        self.state_file = self.base_path / "consciousness/10_state/eva_matrix_state.json"
 
         # Owned state (system authority)
         self.axes_9d = {}

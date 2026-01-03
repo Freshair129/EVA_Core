@@ -21,6 +21,10 @@ class AutonomicResponseEngine:
             "parasympathetic": 0.0
         }
 
+    def get_state(self) -> Dict[str, float]:
+        """Return current autonomic state."""
+        return self.state
+
     def step(
         self,
         receptor_signals: Dict[str, Dict[str, float]],

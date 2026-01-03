@@ -1,10 +1,10 @@
 # Artifact Qualia Output Contract
-# Version: 8.1.0
+# version: 8.1.0-R1
 # Date: 2026-01-03
 # Status: Aligned with EVA 8.1.0 Implementation
 
 schema: EVA-Artifact-Qualia-Output-Contract-v8.1
-version: 8.1.0
+version: 8.1.0-R1
 updated: 2026-01-03
 
 # ============================================================
@@ -328,7 +328,7 @@ metadata:
   serialization: "JSON-compatible dict"
 
   compatibility:
-    eva_version: "8.1.0"
+    eva_version: 8.1.0-R1
     downstream_contracts:
       - "RMS v6 (texture vector compatible)"
       - "MSP episodic schema (via RMS)"

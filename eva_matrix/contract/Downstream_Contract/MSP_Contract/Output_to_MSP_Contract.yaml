@@ -1,6 +1,6 @@
 # Output to MSP Contract
 # Component: EVA Matrix -> MSP Integration
-# Version: 1.0.0
+# version: 8.1.0-R1
 # Description: Specifies the exact payload EVA Matrix sends OUT to MSP for the 'state_snapshot' field.
 
 schema: EVA-Output-to-MSP-Contract-v1.1 (Aligned with EVA_Matrix_State_Schema_01.json)

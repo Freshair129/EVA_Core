@@ -1,0 +1,866 @@
+# PhysioController Comprehensive Specification
+# version: 8.1.0-R1
+# Date: 2026-01-03
+# Status: Complete Documentation for Implemented System
+
+schema: EVA-PhysioController-Spec-v8.1
+version: 8.1.0-R1
+updated: 2026-01-03
+
+# ============================================================
+# SPECIFICATION SCOPE
+# ============================================================
+description: >
+  Comprehensive specification for PhysioController in EVA 8.1.0.
+
+  PhysioController orchestrates the complete physiological pipeline
+  from stimulus input to autonomic nervous system output, simulating
+  human-like embodied responses through biological signal processing.
+
+  This is the "body" of EVA - pure physiological simulation with
+  NO cognition, NO memory, NO persona logic.
+
+component_id: "SYS-PHYSIO-8.1"
+component_type: "Physiological Orchestrator"
+role: "Body State Simulation"
+analogy: "Hypothalamus & Central Autonomic Network (ศูนย์ควบคุมระบบประสาทและต่อมไร้ท่อ)"
+
+# ============================================================
+# DESIGN PRINCIPLES
+# ============================================================
+design_principles:
+  separation_of_concerns:
+    principle: "Physiology First, Cognition Later"
+    description: >
+      PhysioController operates independently of cognitive processes.
+      It receives stimulus vectors and produces physiological states
+      without any awareness of persona, memory, or higher reasoning.
+
+    strict_rules:
+      - "NO cognition - No decision making, no intent analysis"
+      - "NO memory - No episodic recall, no learning"
+      - "NO persona logic - No personality traits, no preferences"
+      - "Pure physiology - Only biological signal processing"
+
+  one_way_flow:
+    principle: "Unidirectional Pipeline"
+    description: >
+      Data flows in one direction through the pipeline:
+      Stimulus → HPA → Circadian → Endocrine → Blood → Receptor → ANS
+
+      No backwards propagation. Each stage reads from previous,
+      writes to next. Clean separation of concerns.
+
+  deterministic_streaming:
+    principle: "Reproducible Simulation"
+    description: >
+      Given identical inputs and initial state, PhysioController
+      produces identical outputs. Essential for debugging and testing.
+
+    implementation:
+      - "Fixed random seeds (if needed)"
+      - "Deterministic time stepping"
+      - "No external I/O during computation"
+      - "Lazy evaluation for performance"
+
+  conservation_laws:
+    principle: "Mass Conservation"
+    description: >
+      Hormones don't vanish or appear magically.
+      Production, transport, and clearance must balance.
+
+    invariants:
+      - "Gland inventory cannot go negative"
+      - "Blood concentration = mass / volume"
+      - "Clearance removes mass exponentially"
+      - "Total system mass is tracked"
+
+# ============================================================
+# PIPELINE ARCHITECTURE
+# ============================================================
+pipeline:
+  description: "6-stage physiological processing pipeline"
+
+  execution_order:
+    step_1:
+      name: "HPA Axis Regulator"
+      purpose: "Stress modulation and homeostatic feedback"
+      input: "Stimulus vector + plasma hormone snapshot"
+      output: "Modulated endocrine stimuli"
+      processing_time: "< 1ms"
+
+    step_2:
+      name: "Circadian Controller"
+      purpose: "Time-of-day adjustments"
+      input: "Zeitgeber signals (light, activity, etc.)"
+      output: "Circadian modulation vector"
+      processing_time: "< 1ms"
+
+    step_3:
+      name: "Endocrine System"
+      purpose: "Hormone production from glands"
+      input: "Merged HPA + Circadian stimuli"
+      output: "Released hormone masses (pg)"
+      processing_time: "< 2ms"
+      subsystems:
+        - "Gland inventory management"
+        - "Drive accumulation"
+        - "Surge detection"
+        - "Adaptation (fatigue/recovery)"
+
+    step_4:
+      name: "Blood Engine"
+      purpose: "Hormone transport and clearance"
+      input: "Hormone influx from endocrine"
+      output: "Blood concentration snapshot (pg/mL)"
+      processing_time: "< 2ms"
+      subsystems:
+        - "Distribution (instant plasma mixing)"
+        - "Exponential decay (half-life based)"
+        - "Compartment flow (minimal)"
+
+    step_5:
+      name: "Receptor Engine"
+      purpose: "Signal transduction (hormones → neural signals)"
+      input: "Blood concentrations + nerve surges (from reflex)"
+      output: "Receptor activation signals"
+      processing_time: "< 2ms"
+      algorithm: "Receptor binding (Kd, max_density, efficacy)"
+
+    step_6:
+      name: "Autonomic Nervous System (ANS)"
+      purpose: "Sympathetic/Parasympathetic integration"
+      input: "Receptor signals + reflex surges"
+      output: "ANS state {sympathetic, parasympathetic, balance}"
+      processing_time: "< 1ms"
+      algorithm: "Weighted sum + temporal smoothing (EMA alpha=0.2)"
+
+  parallel_subsystem:
+    name: "Internal Reflex Engine (IRE)"
+    purpose: "Immediate reflexive responses (bypass blood)"
+    timing: "Runs in parallel with receptor step"
+    input: "Raw stimuli + gland status"
+    output: "Nerve surges (rapid signals)"
+    latency: "< 1ms"
+
+# ============================================================
+# STAGE 1: HPA AXIS REGULATOR
+# ============================================================
+hpa_regulator:
+  description: >
+    Hypothalamic-Pituitary-Adrenal (HPA) Axis regulation.
+    Modulates stress responses and provides homeostatic feedback.
+
+  purpose:
+    - "Stress amplification (cortisol positive feedback)"
+    - "Negative feedback (high cortisol suppresses CRH)"
+    - "Safety signal dampening"
+
+  algorithm:
+    name: "Stress Modulation with Feedback"
+
+    steps:
+      1_read_plasma:
+        description: "Read current cortisol (COR) from plasma"
+        formula: "cortisol_level = plasma['COR']"
+
+      2_negative_feedback:
+        description: "High cortisol suppresses further CRH release"
+        formula: "feedback_suppression = 1.0 - (cortisol / threshold)"
+        threshold: "COR > 50.0 pg/mL triggers suppression"
+        clamp: "[0.0, 1.0]"
+
+      3_stress_amplification:
+        description: "Acute stress signals amplified"
+        formula: "stress_mod = stress_input * (1.0 + cortisol_boost)"
+        cortisol_boost_range: "[0.0, 0.5]"
+
+      4_safety_dampening:
+        description: "Safety signals reduce stress drive"
+        formula: "safety_dampening = -0.8 * safety_signal"
+
+    output_range: "[-1.0, 1.0]"
+    config_file: "EndocrineRegulation config.yaml"
+
+# ============================================================
+# STAGE 2: CIRCADIAN CONTROLLER
+# ============================================================
+circadian_controller:
+  description: >
+    Time-of-day modulation of hormone baselines.
+    Simulates natural circadian rhythm effects.
+
+  purpose:
+    - "Cortisol peaks in morning (awakening response)"
+    - "Melatonin rises at night"
+    - "Activity-dependent modulation"
+
+  algorithm:
+    name: "Zeitgeber-Based Modulation"
+
+    zeitgebers:
+      light:
+        description: "Light exposure (lux)"
+        effect: "Suppresses melatonin, boosts cortisol"
+
+      activity:
+        description: "Physical activity level"
+        effect: "Increases catecholamines"
+
+      time_of_day:
+        description: "Clock time (24h)"
+        effect: "Natural hormone rhythms"
+
+    formula: "modulation = f(zeitgebers, time_of_day)"
+    output_range: "[-0.5, 0.5]"
+    config_file: "EndocrineRegulation config.yaml"
+
+# ============================================================
+# STAGE 3: ENDOCRINE SYSTEM
+# ============================================================
+endocrine_system:
+  description: >
+    Hormone production from glands with inventory management,
+    drive accumulation, surge detection, and adaptation.
+
+  gland_model:
+    description: "Each hormone has a dedicated gland"
+
+    components:
+      inventory:
+        description: "Stored hormone ready for release (pg)"
+        max_capacity: "1000.0 - 5000.0 pg (hormone-dependent)"
+        refill_rate: "1.0 - 2.0 pg/sec (baseline production)"
+        depletion: "Released hormone reduces inventory"
+        recovery: "Refill rate restores inventory over time"
+
+      drive:
+        description: "Accumulated secretion pressure (0-10)"
+        accumulation: "drive += stimulus * gain * dt"
+        decay: "drive *= exp(-dt / latency)"
+        surge_threshold: "drive > surge_threshold triggers burst"
+        max_drive: "10.0 (saturates at this level)"
+
+      adaptation:
+        description: "Gland fatigue and recovery (0.1 - 1.0)"
+        fatigue: "adaptation -= fatigue_rate * stimulus * dt"
+        recovery: "adaptation += recovery_rate * dt (when idle)"
+        effect: "Scales secretion output (low adaptation = exhausted)"
+        min_adaptation: "0.1 (10% baseline even when exhausted)"
+
+  secretion_algorithm:
+    name: "Drive-Based Release"
+
+    modes:
+      tonic_release:
+        description: "Steady baseline secretion"
+        condition: "stimulus > tonic_threshold (0.05)"
+        formula: "mass = drive * adaptation * max_output_dt * dt"
+
+      surge_release:
+        description: "Burst secretion on acute stress"
+        condition: "stimulus > surge_threshold (0.8)"
+        formula: "mass = inventory * max_release_fraction * adaptation"
+        max_release_fraction: "0.40 (40% of inventory per surge)"
+        cooldown: "drive resets after surge"
+
+    safety_limits:
+      min_inventory_pct: "0.01 (1% reserve always kept)"
+      max_output_dt: "10.0 - 25.0 pg/sec (hormone-dependent)"
+      fatigue_threshold: "inventory < 15% triggers fatigue"
+
+  core_hormones:
+    description: "5 core hormones tracked in EVA 8.1.0"
+
+    ESC_H01_ADRENALINE:
+      name: "Adrenaline (AD)"
+      gland: "Adrenal Medulla"
+      max_capacity: "1500.0 pg"
+      max_output_dt: "25.0 pg/sec"
+      latency_sec: "2.0 sec"
+      primary_stimuli: ["acute_threat", "panic_event", "high_arousal"]
+      inhibitory_stimuli: ["safety_signal", "deep_breathing"]
+
+    ESC_H02_CORTISOL:
+      name: "Cortisol (COR)"
+      gland: "Adrenal Cortex"
+      max_capacity: "5000.0 pg"
+      max_output_dt: "15.0 pg/sec"
+      latency_sec: "15.0 sec"
+      primary_stimuli: ["chronic_stress", "hpa_activation"]
+      negative_feedback: true
+
+    ESC_H05_DOPAMINE:
+      name: "Dopamine (DA)"
+      gland: "Ventral Tegmental Area (VTA)"
+      max_capacity: "1200.0 pg"
+      max_output_dt: "20.0 pg/sec"
+      latency_sec: "5.0 sec"
+      primary_stimuli: ["reward", "novelty", "motivation"]
+
+    ESC_H06_SEROTONIN:
+      name: "Serotonin (5-HT)"
+      gland: "Raphe Nuclei"
+      max_capacity: "3000.0 pg"
+      max_output_dt: "12.0 pg/sec"
+      latency_sec: "10.0 sec"
+      primary_stimuli: ["contentment", "social_safety"]
+
+    ESC_H09_OXYTOCIN:
+      name: "Oxytocin (OXT)"
+      gland: "Hypothalamus (PVN)"
+      max_capacity: "800.0 pg"
+      max_output_dt: "18.0 pg/sec"
+      latency_sec: "3.0 sec"
+      primary_stimuli: ["bonding", "trust", "affection"]
+
+  config_file: "Endocrine System Configuration.yaml"
+
+# ============================================================
+# STAGE 4: BLOOD ENGINE
+# ============================================================
+blood_engine:
+  description: >
+    Hormone transport, distribution, and clearance in bloodstream.
+    Simulates pharmacokinetics (one-compartment model).
+
+  distribution_model:
+    name: "Instant Plasma Mixing"
+    description: >
+      Hormones released into blood instantly distribute
+      throughout plasma volume (simplified model).
+
+    formula: "concentration = mass / distribution_volume"
+    distribution_volume: "5000 mL (total blood volume)"
+    mixing_time: "~0 seconds (instant approximation)"
+
+  clearance_model:
+    name: "Exponential Decay (First-Order Kinetics)"
+    description: >
+      Hormones are cleared from blood via metabolism and excretion.
+      Half-life based exponential decay.
+
+    formula: "C(t) = C0 * exp(-k * t)"
+    decay_constant: "k = ln(2) / half_life"
+
+    half_lives:
+      AD: "2.0 minutes (rapid clearance)"
+      COR: "60.0 minutes (slow clearance)"
+      DA: "1.0 minutes (very rapid)"
+      SER: "10.0 minutes (moderate)"
+      OXT: "3.0 minutes (rapid)"
+
+    lazy_evaluation:
+      description: "Decay calculated on-read (performance optimization)"
+      formula: "C_now = C_last * exp(-k * (t_now - t_last))"
+
+  compartment_flow:
+    description: "Minimal multi-compartment simulation"
+    compartments: ["arterial", "capillary", "venous"]
+    flow_model: "delta_pressure / resistance"
+
+    mixing:
+      base_flow_ml_sec: "80.0 mL/sec"
+      min_mix_factor: "0.5"
+      max_mix_factor: "2.0"
+
+    note: "Full hemodynamics simplified for performance"
+
+  config_file: "Circulation & Blood Physiology Configuration.yaml"
+
+# ============================================================
+# STAGE 5: RECEPTOR ENGINE
+# ============================================================
+receptor_engine:
+  description: >
+    Receptor binding and signal transduction.
+    Converts blood hormone concentrations to neural activation signals.
+
+  receptor_binding_model:
+    name: "Competitive Binding (Simplified Michaelis-Menten)"
+
+    formula: "activation = (C / (C + Kd)) * max_density * efficacy"
+
+    parameters:
+      C:
+        description: "Hormone concentration (pg/mL)"
+        source: "BloodEngine.get_concentrations()"
+
+      Kd:
+        description: "Dissociation constant (affinity)"
+        unit: "pg/mL"
+        meaning: "Kd = concentration at 50% receptor occupancy"
+        typical_range: "[20.0, 200.0]"
+        interpretation:
+          - "Low Kd = high affinity (tight binding)"
+          - "High Kd = low affinity (weak binding)"
+
+      max_density:
+        description: "Maximum receptor density"
+        typical_range: "[50.0, 500.0]"
+        meaning: "Number of receptors per tissue"
+
+      efficacy:
+        description: "Signal amplification factor"
+        typical_range: "[0.5, 2.0]"
+        meaning: "How strongly bound receptor signals downstream"
+
+    example:
+      hormone: "AD (Adrenaline)"
+      region: "Amygdala"
+      parameters:
+        Kd: "20.0 pg/mL"
+        max_density: "150.0"
+        efficacy: "1.2"
+      calculation: >
+        If blood AD = 60 pg/mL:
+        activation = (60 / (60 + 20)) * 150 * 1.2
+                  = (60 / 80) * 150 * 1.2
+                  = 0.75 * 150 * 1.2
+                  = 135.0
+
+  receptor_regions:
+    description: "Neural regions with receptor populations"
+
+    Amygdala:
+      function: "Threat detection, fear processing"
+      receptors: ["AD", "COR", "5-HT"]
+      high_affinity: "AD (Kd=20.0)"
+
+    Prefrontal_Cortex:
+      function: "Executive control, regulation"
+      receptors: ["DA", "5-HT", "COR"]
+      high_affinity: "DA (Kd=30.0)"
+
+    Hippocampus:
+      function: "Memory encoding, context"
+      receptors: ["COR", "5-HT", "OXT"]
+      high_affinity: "OXT (Kd=25.0)"
+
+    Ventral_Striatum:
+      function: "Reward, motivation"
+      receptors: ["DA", "OXT"]
+      high_affinity: "DA (Kd=35.0)"
+
+  nerve_surges:
+    description: "Fast reflex signals bypass blood (from FastReflexEngine)"
+    purpose: "Immediate responses before hormones circulate"
+    integration: "Added to receptor signals"
+    latency: "< 1ms"
+
+  config_file: "receptor_config.yaml"
+
+# ============================================================
+# STAGE 6: AUTONOMIC NERVOUS SYSTEM (ANS)
+# ============================================================
+autonomic_nervous_system:
+  description: >
+    Integration of receptor signals into sympathetic/parasympathetic
+    balance. The final output of PhysioController.
+
+  algorithm:
+    name: "Weighted Sum with Temporal Smoothing"
+
+    step_1_weighted_sum:
+      description: "Calculate raw sympathetic and parasympathetic drives"
+
+      formula_sympathetic: >
+        sympathetic_raw = Σ(receptor_signal[hormone] * weight[hormone].sympathetic)
+
+      formula_parasympathetic: >
+        parasympathetic_raw = Σ(receptor_signal[hormone] * weight[hormone].parasympathetic)
+
+      weights:
+        AD:
+          sympathetic: "0.9 (strong sympathetic)"
+          parasympathetic: "0.0 (no parasympathetic)"
+
+        NA:
+          sympathetic: "0.8"
+          parasympathetic: "0.0"
+
+        COR:
+          sympathetic: "0.6 (moderate sympathetic)"
+          parasympathetic: "0.1 (weak parasympathetic)"
+
+        OXT:
+          sympathetic: "0.0"
+          parasympathetic: "0.8 (strong parasympathetic)"
+
+        GABA:
+          sympathetic: "0.0"
+          parasympathetic: "0.9"
+
+    step_2_reflex_integration:
+      description: "Add fast reflex surges to ANS drives"
+      formula: "sympathetic += reflex_surges['threat'] * 0.7"
+
+    step_3_temporal_smoothing:
+      description: "Exponential moving average (prevent jitter)"
+      formula: "ANS_smooth = alpha * ANS_new + (1 - alpha) * ANS_old"
+      alpha: "0.2 (smoothing factor)"
+      interpretation: "80% old value + 20% new value"
+
+    step_4_balance_calculation:
+      description: "ANS balance metric"
+      formula: "balance = (parasympathetic - sympathetic) / (parasympathetic + sympathetic + epsilon)"
+      range: "[-1.0, 1.0]"
+      interpretation:
+        - "balance = -1.0 → pure sympathetic (fight/flight)"
+        - "balance = 0.0 → balanced"
+        - "balance = +1.0 → pure parasympathetic (rest/digest)"
+
+  output_structure:
+    sympathetic:
+      description: "Sympathetic nervous system activation"
+      range: "[0.0, ∞]"
+      typical_range: "[0.0, 10.0]"
+      interpretation: "Higher = more arousal, stress, fight/flight"
+
+    parasympathetic:
+      description: "Parasympathetic nervous system activation"
+      range: "[0.0, ∞]"
+      typical_range: "[0.0, 10.0]"
+      interpretation: "Higher = more calm, rest, digest"
+
+    balance:
+      description: "SNS/PNS balance"
+      range: "[-1.0, 1.0]"
+      interpretation: "Negative = sympathetic dominant, Positive = parasympathetic dominant"
+
+  config_file: "AutonomicResponse.config.yaml"
+
+# ============================================================
+# PARALLEL SUBSYSTEM: FAST REFLEX ENGINE
+# ============================================================
+fast_reflex_engine:
+  description: >
+    Internal Reflex Engine (IRE) - bypasses blood circulation
+    for ultra-fast reflexive responses (e.g., startle, freeze).
+
+  purpose:
+    - "Startle reflex (< 100ms latency)"
+    - "Freeze response (acute threat)"
+    - "Fight-or-flight initiation"
+
+  algorithm:
+    name: "Stimulus-Direct Neural Surge"
+
+    formula: "surge = f(stimulus, gland_status)"
+
+    inputs:
+      stimuli:
+        description: "Raw stimulus vector (same as HPA input)"
+        example: "{acute_threat: 0.9, panic_event: 0.8}"
+
+      gland_status:
+        description: "Current gland inventory and adaptation"
+        purpose: "Reflexes weaker if glands exhausted"
+
+    output:
+      nerve_surges:
+        description: "Direct neural activation (bypasses blood)"
+        latency: "< 1ms"
+        example: "{threat_surge: 0.85, freeze_reflex: 0.6}"
+
+  integration:
+    description: "Nerve surges fed to both Receptor and ANS"
+    receptor_integration: "Added to receptor signals"
+    ans_integration: "Directly boost sympathetic drive"
+
+  config_file: "reflex_config.yaml"
+
+# ============================================================
+# MAIN API SPECIFICATION
+# ============================================================
+api:
+  primary_method:
+    signature: >
+      def step(
+          self,
+          eva_stimuli: Dict[str, float],
+          zeitgebers: Dict[str, float],
+          dt: float,
+          now: datetime | None = None
+      ) -> Dict[str, Any]
+
+    description: "Run one full physiological tick (30Hz nominal)"
+
+    inputs:
+      eva_stimuli:
+        type: "Dict[str, float]"
+        description: "Stimulus vector from EVA Matrix or perception layer"
+        required_keys: ["stress", "arousal", "valence", "intensity"]
+        optional_keys: ["acute_threat", "safety_signal", "bonding", ...]
+        range: "[0.0, 1.0] for most stimuli"
+
+      zeitgebers:
+        type: "Dict[str, float]"
+        description: "Environmental time cues (light, activity)"
+        optional_keys: ["light_lux", "activity_level", "social_cues"]
+        default: "{} (empty if not provided)"
+
+      dt:
+        type: "float"
+        description: "Time step in seconds"
+        typical: "0.033 sec (30Hz)"
+        range: "[0.01, 1.0] sec"
+
+      now:
+        type: "datetime | None"
+        description: "Current time (for circadian calculation)"
+        default: "datetime.now()"
+
+    output:
+      type: "Dict[str, Any]"
+
+      structure:
+        blood_levels:
+          type: "Dict[str, float]"
+          description: "Hormone concentrations (pg/mL)"
+          example: "{AD: 45.2, COR: 67.8, DA: 23.1, ...}"
+
+        ans_state:
+          type: "Dict[str, float]"
+          description: "ANS activation"
+          structure:
+            sympathetic: "float (0.0+)"
+            parasympathetic: "float (0.0+)"
+            balance: "float [-1.0, 1.0]"
+
+        receptor_signals:
+          type: "Dict[str, Dict[str, float]]"
+          description: "Receptor activation by region"
+          example: "{Amygdala: {AD: 135.0, ...}, ...}"
+
+        gland_status:
+          type: "Dict[str, Dict[str, float]]"
+          description: "Gland inventory and adaptation"
+          example: "{AD: {inventory: 1200.0, adaptation: 0.85}, ...}"
+
+        reflex_surges:
+          type: "Dict[str, float]"
+          description: "Fast reflex responses"
+          example: "{threat_surge: 0.7, freeze_reflex: 0.4}"
+
+  utility_methods:
+    get_snapshot:
+      signature: "def get_snapshot(self, **kwargs) -> Dict[str, Any]"
+      description: "Quick state snapshot for CIN (Context Injection Node)"
+      returns: "{ans_state, blood_levels}"
+
+    reset_to_baseline:
+      signature: "def reset_to_baseline(self)"
+      description: "Reset all subsystems to resting state"
+      use_case: "New session initialization"
+
+# ============================================================
+# INTEGRATION PATTERNS
+# ============================================================
+integration:
+  upstream_modules:
+    description: "Modules that call PhysioController"
+
+    Main_Orchestrator:
+      usage: "Calls step() during The Gap"
+      timing: "After Phase 1 LLM, before memory retrieval"
+      data_flow: "stimulus_vector → PhysioController.step() → physio_state"
+
+    CIN_Phase_1:
+      usage: "Calls get_snapshot() for rough context"
+      timing: "Phase 1 context injection"
+      data_flow: "PhysioController.get_snapshot() → baseline physio"
+
+  downstream_modules:
+    description: "Modules that consume PhysioController output"
+
+    EVA_Matrix:
+      usage: "Reads receptor_signals to compute 9D psychological state"
+      data_flow: "receptor_signals → EVA axes (stress, warmth, drive, ...)"
+
+    Artifact_Qualia:
+      usage: "Reads ANS state for phenomenological intensity"
+      data_flow: "ans_state → qualia.intensity"
+
+    Hept_Stream_RAG:
+      usage: "Emotion Stream matches ANS + blood levels to memories"
+      data_flow: "ans_state + blood_levels → physio-congruent recall"
+
+    RMS:
+      usage: "Encodes blood levels into memory color/texture"
+      data_flow: "blood_levels → resonance_color, resonance_texture"
+
+# ============================================================
+# PERFORMANCE CHARACTERISTICS
+# ============================================================
+performance:
+  update_rate:
+    nominal: "30 Hz (33ms per tick)"
+    minimum: "10 Hz (100ms per tick)"
+    maximum: "100 Hz (10ms per tick)"
+
+  latency:
+    target: "< 10ms per step()"
+    breakdown:
+      HPA: "< 1ms"
+      Circadian: "< 1ms"
+      Endocrine: "< 2ms"
+      Blood: "< 2ms"
+      Receptor: "< 2ms"
+      Reflex: "< 1ms"
+      ANS: "< 1ms"
+
+  determinism:
+    guaranteed: true
+    seed_control: "Optional random seed for reproducibility"
+    lazy_evaluation: "Blood decay computed on-read (performance optimization)"
+
+# ============================================================
+# STATE MANAGEMENT
+# ============================================================
+state_management:
+  internal_state:
+    description: "PhysioController maintains stateful subsystems"
+
+    components:
+      endocrine_glands:
+        state: "inventory, drive, adaptation per gland"
+        persistence: "Required across ticks"
+
+      blood_engine:
+        state: "hormone masses, last update timestamps"
+        persistence: "Required for decay calculation"
+
+      autonomic_engine:
+        state: "previous ANS values (for smoothing)"
+        persistence: "Required for temporal smoothing"
+
+  persistence:
+    description: "State can be saved/loaded for session continuity"
+
+    methods:
+      get_full_state:
+        description: "Export complete internal state"
+        returns: "Dict with all subsystem states"
+
+      load_state:
+        description: "Restore from exported state"
+        input: "State dict from get_full_state()"
+
+  reset:
+    description: "Reset to baseline resting state"
+    method: "reset_to_baseline()"
+    effect: "All glands at full inventory, adaptation=1.0, blood cleared"
+
+# ============================================================
+# VALIDATION & TESTING
+# ============================================================
+validation:
+  invariant_checks:
+    mass_conservation:
+      check: "Total system mass doesn't increase without influx"
+      formula: "Δmass_total = influx - clearance"
+
+    inventory_bounds:
+      check: "Gland inventory never negative"
+      formula: "0.0 <= inventory <= max_capacity"
+
+    adaptation_bounds:
+      check: "Adaptation stays in valid range"
+      formula: "0.1 <= adaptation <= 1.0"
+
+  test_scenarios:
+    acute_stress:
+      stimulus: "{acute_threat: 0.9}"
+      expected: "AD surge, sympathetic spike, cortisol rise"
+
+    safety_signal:
+      stimulus: "{safety_signal: 0.8}"
+      expected: "Parasympathetic rise, sympathetic fall"
+
+    chronic_stress:
+      stimulus: "{chronic_stress: 0.6} (sustained 10+ minutes)"
+      expected: "Cortisol plateau, gland adaptation decline"
+
+    circadian_rhythm:
+      test: "Run 24h simulation with light zeitgeber"
+      expected: "Cortisol peaks at 8am, melatonin rises at 8pm"
+
+# ============================================================
+# CONFIGURATION FILES
+# ============================================================
+configuration:
+  required_files:
+    - file: "Endocrine System Configuration.yaml"
+      purpose: "Gland parameters, hormone specs"
+
+    - file: "EndocrineRegulation config.yaml"
+      purpose: "HPA and Circadian rules"
+
+    - file: "Circulation & Blood Physiology Configuration.yaml"
+      purpose: "Blood transport, clearance half-lives"
+
+    - file: "receptor_config.yaml"
+      purpose: "Receptor binding parameters (Kd, density, efficacy)"
+
+    - file: "reflex_config.yaml"
+      purpose: "Fast reflex rules"
+
+    - file: "AutonomicResponse.config.yaml"
+      purpose: "ANS weights, smoothing parameters"
+
+# ============================================================
+# ERROR HANDLING
+# ============================================================
+error_handling:
+  graceful_degradation:
+    missing_configs:
+      behavior: "Load with default parameters"
+      warning: "Log warning to console"
+
+    invalid_stimulus:
+      behavior: "Clamp to valid range [0.0, 1.0]"
+      warning: "Log out-of-range values"
+
+    negative_dt:
+      behavior: "Raise ValueError"
+      reason: "Time cannot go backwards"
+
+  safety_limits:
+    max_dt_sec: "0.2 sec (prevent instability)"
+    min_inventory_pct: "0.01 (always keep 1% reserve)"
+    clamp_all_outputs: "Ensure outputs are finite and in valid ranges"
+
+# ============================================================
+# FUTURE ENHANCEMENTS
+# ============================================================
+future_enhancements:
+  planned:
+    - "Multi-compartment blood flow (full hemodynamics)"
+    - "Receptor desensitization (chronic exposure)"
+    - "Immune system integration (cytokines)"
+    - "Metabolic state (glucose, insulin)"
+    - "Sleep pressure (adenosine)"
+
+  research:
+    - "Neural network surrogate for faster simulation"
+    - "Real-time biometric input (heart rate, GSR)"
+    - "Personalized hormone profiles"
+
+# ============================================================
+# METADATA
+# ============================================================
+metadata:
+  contract_type: "COMPREHENSIVE_SPEC"
+  eva_version: 8.1.0-R1
+  module_location: "physio_core/physio_controller.py"
+
+  contract_status: "COMPLETE"
+  last_validated: "2026-01-03"
+
+  related_contracts:
+    - "PhysioController_Interface.yaml"
+    - "PhysioController_Input_Contract.yaml"
+    - "PhysioController_Output_Contract.yaml"
+
+  documentation_completeness: "4/4 contracts (Interface, Input, Output, Spec)"

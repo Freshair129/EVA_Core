@@ -1,0 +1,35 @@
+{
+  "episode_id": "EVA_EP07",
+  "timestamp": "2026-01-03T04:51:35.530034",
+  "session_id": null,
+  "event_label": null,
+  "episode_tag": null,
+  "episode_type": null,
+  "compression_meta": {
+    "session_seq": 4,
+    "core_seq": 1,
+    "sphere_seq": 0
+  },
+  "situation_context": null,
+  "turn_1": {
+    "speaker": "Human",
+    "content": "ขอบคุณนะที่วันนี้มาส่งที่สนามบิน น่ารักมากๆเลย",
+    "summary": "ขอบคุณนะที่วันนี้มาส่งที่สนามบิน น่ารักมากๆเลย",
+    "semantic_frames": [
+      "gratitude",
+      "affection",
+      "airport"
+    ]
+  },
+  "state_snapshot": {
+    "EVA_matrix": {
+      "stress_load": 0.0,
+      "social_warmth": 0.0,
+      "drive_level": 0.0,
+      "cognitive_clarity": 0.0,
+      "joy_level": 0.0,
+      "emotion_label": "Unknown"
+    },
+    "Resonance_index": 0.75
+  }
+}

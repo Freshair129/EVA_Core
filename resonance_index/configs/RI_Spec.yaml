@@ -1,0 +1,681 @@
+# Resonance Index (RI) Engine Comprehensive Specification
+# version: 8.1.0-R1
+# Date: 2026-01-03
+# Status: Complete Documentation for Implemented System
+
+schema: EVA-RI-Spec-v8.1
+version: 8.1.0-R1
+updated: 2026-01-03
+
+# ============================================================
+# SPECIFICATION SCOPE
+# ============================================================
+description: >
+  Comprehensive specification for Resonance Index (RI) Engine in EVA 8.1.0.
+
+  RI calculates cognitive resonance - a measure of how well an interaction
+  "resonates" across emotional, intentional, semantic, and contextual dimensions.
+  High RI indicates harmonious, well-aligned interaction. Low RI indicates
+  misalignment or friction.
+
+  RI = (ER × 0.25) + (IF × 0.30) + (SR × 0.30) + (CR × 0.15)
+
+  Where:
+    ER = Emotional Resonance (user ↔ EVA emotion match)
+    IF = Intent Fit (dialogue intent ↔ cognitive state alignment)
+    SR = Semantic Resonance (LLM summary ↔ episodic memory similarity)
+    CR = Contextual Resonance (social flow + personalization quality)
+
+component_id: "SYS-RI-8.1"
+component_type: "Cognitive Resonance Calculator"
+role: "Interaction Quality Assessment"
+analogy: "Resonance Detector (เครื่องตรวจจับความสอดคล้อง)"
+
+# ============================================================
+# DESIGN PRINCIPLES
+# ============================================================
+design_principles:
+  multi_dimensional_resonance:
+    principle: "Harmony Across Layers"
+    description: >
+      True resonance requires alignment across multiple dimensions.
+      Emotional match alone is insufficient - intent, semantics, and
+      context must also align.
+
+    layers:
+      emotional: "Do we feel similar?"
+      intentional: "Is my cognitive state suitable for your intent?"
+      semantic: "Are we talking about the same thing?"
+      contextual: "Does the conversation flow naturally?"
+
+  weighted_integration:
+    principle: "Not All Dimensions Equal"
+    description: >
+      RI weights emphasize semantic and intentional alignment over
+      purely emotional or contextual factors.
+
+    weights_rationale:
+      ER_0_25: "Emotions matter, but not everything"
+      IF_0_30: "Intent-state fit is critical for helpful responses"
+      SR_0_30: "Semantic alignment ensures we're on the same page"
+      CR_0_15: "Flow and personalization enhance but don't define resonance"
+
+  bounded_output:
+    principle: "Normalized Score [0.0, 1.0]"
+    description: >
+      All components and final RI are clamped to [0.0, 1.0] for
+      consistency and interpretability.
+
+# ============================================================
+# ARCHITECTURE
+# ============================================================
+architecture:
+  description: "4-component calculation with weighted sum"
+
+  data_flow:
+    inputs:
+      user_emotion:
+        fields: ["arousal", "valence", "tension"]
+        source: "User input analysis or perception layer"
+
+      llm_emotion_estimate:
+        fields: ["arousal", "valence", "tension"]
+        source: "EVA Matrix or LLM self-assessment"
+
+      intent:
+        enum: ["DEFINE", "EXPLAIN", "ANALYZE", "REASSURE", "SAFETY", "OTHER"]
+        source: "Intent classifier"
+
+      clarity:
+        source: "EVA Matrix axes_9d.clarity"
+
+      tension:
+        source: "EVA Matrix axes_9d.stress"
+
+      llm_summary_vector:
+        source: "LLM embedding (Gemini, OpenAI, etc.)"
+
+      episodic_context_vector:
+        source: "MSP episodic memory retrieval (averaged)"
+
+      flow_score:
+        source: "CIN or conversation flow analyzer"
+
+      personalization_score:
+        source: "CIN or persona alignment analyzer"
+
+    processing:
+      stage_1:
+        name: "Compute ER (Emotional Resonance)"
+        operation: "Calculate emotion match between user and EVA"
+        output: "ER [0.0, 1.0]"
+
+      stage_2:
+        name: "Compute IF (Intent Fit)"
+        operation: "Check if EVA's cognitive state fits user's intent"
+        output: "IF [0.0, 1.0]"
+
+      stage_3:
+        name: "Compute SR (Semantic Resonance)"
+        operation: "Cosine similarity between summary and episodic vectors"
+        output: "SR [0.0, 1.0]"
+
+      stage_4:
+        name: "Compute CR (Contextual Resonance)"
+        operation: "Weighted sum of flow and personalization"
+        output: "CR [0.0, 1.0]"
+
+      stage_5:
+        name: "Compute RI Total"
+        operation: "Weighted sum of all 4 components"
+        output: "RI_total [0.0, 1.0]"
+
+    outputs:
+      RI_result:
+        type: "Dict[str, float]"
+        fields: ["ER", "IF", "SR", "CR", "RI_total"]
+
+# ============================================================
+# COMPONENT 1: ER (EMOTIONAL RESONANCE)
+# ============================================================
+emotional_resonance:
+  description: >
+    Measures how well user's emotional state matches EVA's expected emotional state.
+    High ER indicates emotional synchrony.
+
+  algorithm:
+    name: "Mean Absolute Difference (Inverted)"
+
+    formula: "ER = 1.0 - mean(|user.arousal - eva.arousal|, |user.valence - eva.valence|, |user.tension - eva.tension|)"
+
+    steps:
+      1_extract_emotions:
+        user: "{arousal, valence, tension}"
+        eva: "{arousal, valence, tension}"
+
+      2_calculate_differences:
+        arousal_diff: "|user.arousal - eva.arousal|"
+        valence_diff: "|user.valence - eva.valence|"
+        tension_diff: "|user.tension - eva.tension|"
+
+      3_mean_difference:
+        formula: "mean_diff = (arousal_diff + valence_diff + tension_diff) / 3"
+
+      4_invert_to_similarity:
+        formula: "ER = 1.0 - mean_diff"
+        interpretation: "Low difference → high resonance"
+
+      5_clamp:
+        formula: "ER = clamp(ER, 0.0, 1.0)"
+
+  parameters:
+    arousal:
+      description: "Activation level (calm → energized)"
+      range: "[0.0, 1.0]"
+
+    valence:
+      description: "Affective tone (negative → positive)"
+      range: "[-1.0, 1.0]"
+
+    tension:
+      description: "Stress/pressure level"
+      range: "[0.0, 1.0]"
+
+  example:
+    user_emotion:
+      arousal: 0.7
+      valence: -0.3
+      tension: 0.6
+
+    eva_emotion:
+      arousal: 0.5
+      valence: 0.2
+      tension: 0.4
+
+    calculation:
+      arousal_diff: "|0.7 - 0.5| = 0.2"
+      valence_diff: "|-0.3 - 0.2| = 0.5"
+      tension_diff: "|0.6 - 0.4| = 0.2"
+      mean_diff: "(0.2 + 0.5 + 0.2) / 3 = 0.3"
+      ER: "1.0 - 0.3 = 0.7"
+
+    interpretation: "Moderate emotional resonance (70% match)"
+
+# ============================================================
+# COMPONENT 2: IF (INTENT FIT)
+# ============================================================
+intent_fit:
+  description: >
+    Measures how well EVA's cognitive state (clarity, tension) fits
+    the user's dialogue intent. Different intents require different states.
+
+  algorithm:
+    name: "Intent-Dependent State Mapping"
+
+    rules:
+      cognitive_intents:
+        intents: ["DEFINE", "EXPLAIN", "ANALYZE"]
+        requirement: "High cognitive clarity needed"
+        formula: "IF = clarity"
+        rationale: "Explaining requires clear thinking"
+
+      supportive_intents:
+        intents: ["REASSURE", "SAFETY"]
+        requirement: "Low tension needed"
+        formula: "IF = 1.0 - tension"
+        rationale: "Reassurance requires calm presence"
+
+      general_intent:
+        intents: ["OTHER"]
+        requirement: "Balanced state"
+        formula: "IF = (clarity + (1.0 - tension)) / 2.0"
+        rationale: "General conversation benefits from clarity and calm"
+
+  parameters:
+    intent:
+      type: "string (enum)"
+      values: ["DEFINE", "EXPLAIN", "ANALYZE", "REASSURE", "SAFETY", "OTHER"]
+
+    clarity:
+      type: "float"
+      range: "[0.0, 1.0]"
+      source: "EVA Matrix axes_9d.clarity"
+
+    tension:
+      type: "float"
+      range: "[0.0, 1.0]"
+      source: "EVA Matrix axes_9d.stress"
+
+  example_1_cognitive:
+    intent: "EXPLAIN"
+    clarity: 0.8
+    tension: 0.3
+
+    calculation:
+      rule: "Cognitive intent → IF = clarity"
+      IF: "0.8"
+
+    interpretation: "High clarity (0.8) suits explanation intent well"
+
+  example_2_supportive:
+    intent: "REASSURE"
+    clarity: 0.6
+    tension: 0.2
+
+    calculation:
+      rule: "Supportive intent → IF = 1.0 - tension"
+      IF: "1.0 - 0.2 = 0.8"
+
+    interpretation: "Low tension (0.2) suits reassurance intent well"
+
+  example_3_general:
+    intent: "OTHER"
+    clarity: 0.7
+    tension: 0.4
+
+    calculation:
+      rule: "General intent → IF = (clarity + (1 - tension)) / 2"
+      IF: "(0.7 + 0.6) / 2 = 0.65"
+
+    interpretation: "Balanced state adequate for general conversation"
+
+# ============================================================
+# COMPONENT 3: SR (SEMANTIC RESONANCE)
+# ============================================================
+semantic_resonance:
+  description: >
+    Measures semantic similarity between LLM's summary/response and
+    episodic memory context. Uses cosine similarity on embedding vectors.
+
+  algorithm:
+    name: "Cosine Similarity"
+
+    formula: "SR = (a · b) / (||a|| * ||b||)"
+
+    steps:
+      1_extract_vectors:
+        llm_summary_vector: "List[float] (e.g., 768 dimensions)"
+        episodic_context_vector: "List[float] (same dimensions)"
+
+      2_validate_dimensions:
+        check: "a.shape == b.shape"
+        error_handling: "If mismatch, return SR = 0.0"
+
+      3_compute_dot_product:
+        formula: "dot = sum(a[i] * b[i] for all i)"
+
+      4_compute_magnitudes:
+        mag_a: "sqrt(sum(a[i]^2 for all i))"
+        mag_b: "sqrt(sum(b[i]^2 for all i))"
+
+      5_compute_similarity:
+        formula: "SR = dot / (mag_a * mag_b)"
+        range: "[-1.0, 1.0] (theoretical)"
+
+      6_clamp:
+        formula: "SR = clamp(SR, 0.0, 1.0)"
+        note: "Negative similarity treated as 0.0"
+
+  parameters:
+    llm_summary_vector:
+      type: "List[float]"
+      description: "Embedding of LLM's summary or response"
+      source: "Gemini embedding API, OpenAI ada-002, etc."
+      dimensions: "Variable (typically 768 or 1536)"
+
+    episodic_context_vector:
+      type: "List[float]"
+      description: "Embedding of episodic memory context"
+      source: "MSP episodic retrieval (averaged or concatenated)"
+      dimensions: "Must match llm_summary_vector"
+
+  edge_cases:
+    empty_vectors:
+      condition: "len(a) == 0 or len(b) == 0"
+      result: "SR = 0.0"
+
+    dimension_mismatch:
+      condition: "a.shape != b.shape"
+      result: "SR = 0.0"
+
+    zero_magnitude:
+      condition: "||a|| == 0 or ||b|| == 0"
+      result: "SR = 0.0"
+
+  example:
+    llm_summary_vector: "[0.23, -0.15, 0.67, 0.89, -0.42]"  # 5-dim for illustration
+    episodic_context_vector: "[0.19, -0.22, 0.71, 0.85, -0.38]"
+
+    calculation:
+      dot_product: "0.23*0.19 + (-0.15)*(-0.22) + 0.67*0.71 + 0.89*0.85 + (-0.42)*(-0.38)"
+      dot_result: "0.0437 + 0.033 + 0.4757 + 0.7565 + 0.1596 = 1.4685"
+
+      mag_a: "sqrt(0.23^2 + (-0.15)^2 + 0.67^2 + 0.89^2 + (-0.42)^2)"
+      mag_a_result: "sqrt(0.0529 + 0.0225 + 0.4489 + 0.7921 + 0.1764) = sqrt(1.4928) = 1.222"
+
+      mag_b: "sqrt(0.19^2 + (-0.22)^2 + 0.71^2 + 0.85^2 + (-0.38)^2)"
+      mag_b_result: "sqrt(0.0361 + 0.0484 + 0.5041 + 0.7225 + 0.1444) = sqrt(1.4555) = 1.206"
+
+      SR: "1.4685 / (1.222 * 1.206) = 1.4685 / 1.474 = 0.996"
+
+    interpretation: "Very high semantic similarity (99.6% match)"
+
+# ============================================================
+# COMPONENT 4: CR (CONTEXTUAL RESONANCE)
+# ============================================================
+contextual_resonance:
+  description: >
+    Measures conversational flow and personalization quality.
+    Combines social flow smoothness with user-specific adaptation.
+
+  algorithm:
+    name: "Weighted Flow + Personalization"
+
+    formula: "CR = (flow_score * 0.6) + (personalization_score * 0.4)"
+
+    rationale:
+      flow_weight_0_6: "Flow is slightly more important - smooth conversation matters"
+      personalization_weight_0_4: "Personalization enhances but doesn't define flow"
+
+  parameters:
+    flow_score:
+      type: "float"
+      range: "[0.0, 1.0]"
+      description: "Conversational flow quality score"
+      source: "CIN or flow analyzer"
+
+      components:
+        turn_taking: "Smooth transitions between user/EVA"
+        topic_continuity: "Coherent topic progression"
+        response_latency: "Timely responses (not too slow/fast)"
+        coherence: "Logical connection to previous turns"
+
+    personalization_score:
+      type: "float"
+      range: "[0.0, 1.0]"
+      description: "Personalization quality score"
+      source: "CIN or persona alignment analyzer"
+
+      components:
+        persona_consistency: "Aligned with persona identity"
+        memory_reference: "Uses relevant past memories"
+        preference_alignment: "Matches user preferences/history"
+        relationship_depth: "Reflects relationship quality"
+
+  example:
+    flow_score: 0.75
+    personalization_score: 0.60
+
+    calculation:
+      CR: "(0.75 * 0.6) + (0.60 * 0.4)"
+      CR_result: "0.45 + 0.24 = 0.69"
+
+    interpretation: "Good contextual resonance (69%) - smooth flow with decent personalization"
+
+# ============================================================
+# RI TOTAL CALCULATION
+# ============================================================
+ri_total_calculation:
+  description: "Weighted sum of all 4 components"
+
+  formula: "RI_total = (ER × 0.25) + (IF × 0.30) + (SR × 0.30) + (CR × 0.15)"
+
+  weights:
+    ER: 0.25  # Emotional Resonance
+    IF: 0.30  # Intent Fit
+    SR: 0.30  # Semantic Resonance
+    CR: 0.15  # Contextual Resonance
+
+  weight_rationale:
+    semantic_intentional_priority:
+      description: "SR and IF weighted highest (0.30 each)"
+      reason: "Semantic alignment and intent-state fit are most critical for useful interaction"
+
+    emotional_secondary:
+      description: "ER weighted moderately (0.25)"
+      reason: "Emotional match matters but isn't sufficient alone"
+
+    contextual_supporting:
+      description: "CR weighted lowest (0.15)"
+      reason: "Flow and personalization enhance but don't define resonance"
+
+  range: "[0.0, 1.0]"
+
+  interpretation:
+    RI_high:
+      range: "[0.75, 1.0]"
+      meaning: "Excellent resonance - harmonious, well-aligned interaction"
+
+    RI_medium:
+      range: "[0.50, 0.75)"
+      meaning: "Good resonance - functional but some friction"
+
+    RI_low:
+      range: "[0.25, 0.50)"
+      meaning: "Poor resonance - misalignment, awkward interaction"
+
+    RI_very_low:
+      range: "[0.0, 0.25)"
+      meaning: "Very poor resonance - severe misalignment"
+
+  example:
+    components:
+      ER: 0.70
+      IF: 0.80
+      SR: 0.95
+      CR: 0.69
+
+    calculation:
+      RI_total: "(0.70 * 0.25) + (0.80 * 0.30) + (0.95 * 0.30) + (0.69 * 0.15)"
+      breakdown:
+        ER_contribution: "0.70 * 0.25 = 0.175"
+        IF_contribution: "0.80 * 0.30 = 0.240"
+        SR_contribution: "0.95 * 0.30 = 0.285"
+        CR_contribution: "0.69 * 0.15 = 0.104"
+      result: "0.175 + 0.240 + 0.285 + 0.104 = 0.804"
+
+    interpretation: "High resonance (80.4%) - excellent alignment across all dimensions"
+
+# ============================================================
+# OUTPUT STRUCTURE
+# ============================================================
+output_structure:
+  description: "RI Engine returns Dict with all components + total"
+
+  fields:
+    ER:
+      type: "float"
+      range: "[0.0, 1.0]"
+      description: "Emotional Resonance score"
+
+    IF:
+      type: "float"
+      range: "[0.0, 1.0]"
+      description: "Intent Fit score"
+
+    SR:
+      type: "float"
+      range: "[0.0, 1.0]"
+      description: "Semantic Resonance score"
+
+    CR:
+      type: "float"
+      range: "[0.0, 1.0]"
+      description: "Contextual Resonance score"
+
+    RI_total:
+      type: "float"
+      range: "[0.0, 1.0]"
+      description: "Total Cognitive Resonance (weighted sum)"
+
+  example:
+    ER: 0.70
+    IF: 0.80
+    SR: 0.95
+    CR: 0.69
+    RI_total: 0.804
+
+# ============================================================
+# INTEGRATION PATTERNS
+# ============================================================
+integration:
+  upstream_modules:
+    Perception_Layer:
+      data: "user_emotion {arousal, valence, tension}"
+
+    EVA_Matrix:
+      data: "llm_emotion_estimate, clarity, tension"
+
+    Intent_Classifier:
+      data: "intent (DEFINE, EXPLAIN, etc.)"
+
+    LLM_Bridge:
+      data: "llm_summary_vector (embedding)"
+
+    MSP:
+      data: "episodic_context_vector (embedding)"
+
+    CIN:
+      data: "flow_score, personalization_score"
+
+  downstream_modules:
+    RIM:
+      usage: "ri_delta calculation for impact evaluation"
+      data_flow: "current_RI_total - previous_RI_total"
+
+    MSP:
+      usage: "Memory salience weighting (high RI → higher memory priority)"
+
+    Hept_Stream_RAG:
+      usage: "Salience Stream uses RI for retrieval prioritization"
+
+    RMS:
+      usage: "Optional RI value in episodic snapshot"
+
+# ============================================================
+# PERFORMANCE CHARACTERISTICS
+# ============================================================
+performance:
+  latency:
+    target: "< 2ms per compute_RI()"
+    breakdown:
+      ER: "< 0.5ms"
+      IF: "< 0.1ms"
+      SR: "< 1.0ms (vector operations)"
+      CR: "< 0.1ms"
+      total: "< 0.3ms"
+
+  determinism:
+    guaranteed: true
+    note: "Given same inputs, always produces same output"
+
+  memory_overhead:
+    negligible: "< 1KB (no internal state)"
+
+# ============================================================
+# CONFIGURATION
+# ============================================================
+configuration:
+  weights:
+    ER: 0.25
+    IF: 0.30
+    SR: 0.30
+    CR: 0.15
+    adjustable: true
+    config_file: "ri_config.yaml"
+
+# ============================================================
+# ERROR HANDLING
+# ============================================================
+error_handling:
+  missing_inputs:
+    behavior: "Use safe defaults"
+    defaults:
+      user_emotion: "{arousal: 0.0, valence: 0.0, tension: 0.0}"
+      llm_emotion_estimate: "{arousal: 0.0, valence: 0.0, tension: 0.0}"
+      intent: "OTHER"
+      clarity: 0.5
+      tension: 0.5
+      llm_summary_vector: "[] → SR = 0.0"
+      episodic_context_vector: "[] → SR = 0.0"
+      flow_score: 0.5
+      personalization_score: 0.5
+
+  dimension_mismatch:
+    condition: "llm_summary_vector.shape != episodic_context_vector.shape"
+    behavior: "SR = 0.0"
+    warning: "Log dimension mismatch"
+
+  invalid_ranges:
+    behavior: "Clamp all outputs to [0.0, 1.0]"
+
+# ============================================================
+# VALIDATION & TESTING
+# ============================================================
+validation:
+  test_scenarios:
+    perfect_alignment:
+      inputs:
+        user_emotion: "{arousal: 0.7, valence: 0.5, tension: 0.3}"
+        llm_emotion_estimate: "{arousal: 0.7, valence: 0.5, tension: 0.3}"
+        intent: "EXPLAIN"
+        clarity: 0.9
+        flow_score: 0.95
+        personalization_score: 0.90
+      expected:
+        ER: 1.0
+        IF: 0.9
+        SR: ">0.8 (assuming good vector match)"
+        CR: ">0.9"
+        RI_total: ">0.85"
+
+    complete_misalignment:
+      inputs:
+        user_emotion: "{arousal: 0.9, valence: -0.8, tension: 0.9}"
+        llm_emotion_estimate: "{arousal: 0.2, valence: 0.7, tension: 0.1}"
+        intent: "REASSURE"
+        clarity: 0.3
+        flow_score: 0.2
+      expected:
+        ER: "<0.3"
+        IF: "<0.3"
+        CR: "<0.3"
+        RI_total: "<0.4"
+
+# ============================================================
+# PHILOSOPHICAL GROUNDING
+# ============================================================
+philosophical_grounding:
+  resonance_concept:
+    question: "What is cognitive resonance?"
+    answer: >
+      Resonance occurs when two systems vibrate at compatible frequencies.
+      In conversation, resonance means alignment of emotional states, intents,
+      semantics, and social context. High resonance feels "in sync."
+
+  weight_distribution:
+    question: "Why prioritize semantic and intentional over emotional?"
+    answer: >
+      While emotional match feels good, it's insufficient for useful interaction.
+      If EVA is confused (low clarity) but emotionally resonant, it can't help.
+      Semantic alignment ensures mutual understanding; intent fit ensures
+      EVA's state suits the user's need.
+
+# ============================================================
+# METADATA
+# ============================================================
+metadata:
+  contract_type: "COMPREHENSIVE_SPEC"
+  eva_version: 8.1.0-R1
+  module_location: "resonance_index/ri_engine.py"
+  implementation_version: 8.1.0-R1
+
+  contract_status: "COMPLETE"
+  last_validated: "2026-01-03"
+
+  related_contracts:
+    - "RI_Interface.yaml"
+    - "RI_Input_Contract.yaml"
+    - "RI_Output_Contract.yaml"
+
+  documentation_completeness: "4/4 contracts (Interface, Input, Output, Spec)"

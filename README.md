@@ -3,7 +3,7 @@
 > [!IMPORTANT]
 > **CRITICAL STANDARD COMPLIANCE**
 > All module development MUST strictly adhere to the guidelines in:
-> `Operation_System/docs/MODULE_STRUCTURE_STANDARD.md`
+> `operation_system/docs/MODULE_STRUCTURE_STANDARD.md`
 > This document is the **CORE LAW** for directory structure, contract definitions, and integration patterns. Deviations are strictly forbidden without explicit authorization.
 
 **Version:** 8.1.0
@@ -98,7 +98,7 @@ EVA 8.1.0/
 ├── eva_matrix/              # 📊 9D psychological state
 ├── Artifact_Qualia/         # 🎨 Phenomenological experience
 ├── Resonance_Memory_System/ # 🎵 Memory encoding (RMS)
-└── Consciousness/           # 🧠 State persistence
+└── consciousness/           # 🧠 State persistence
 ```
 
 ---

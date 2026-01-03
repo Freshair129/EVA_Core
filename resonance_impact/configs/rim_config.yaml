@@ -1,3 +1,4 @@
+version: 8.1.0-R1
 # RIM Engine Configuration
 baseline: 0.5
 decay_halflife_sec: 90.0 # Time for impact to decay by half

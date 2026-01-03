@@ -1,3 +1,4 @@
+version: 8.1.0-R1
 parameters:
   chunking:
     semantic_boundary_regex: "[。？！?.!\\n]"

@@ -1,6 +1,6 @@
 # Input from PhysioController Contract
 # Component: PhysioController -> EVA Matrix
-# Version: 1.0.0
+# version: 8.1.0-R1
 # Description: Specifies the autonomic and reflexive state data EVA Matrix expects to receive.
 
 schema: EVA-Input-from-Physio-Contract-v1.0

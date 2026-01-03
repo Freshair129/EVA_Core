@@ -1,0 +1,17 @@
+# MSP Input Contract Registry
+# version: 8.1.0-R1
+
+schema: EVA-MSP-Input-Contract-v1
+
+sources:
+  - module: "EVA Matrix"
+    contract: "../contract/upstream/EVA_Matrix_Contract/Input_from_EVA_Matrix_Contract.yaml"
+    required: true
+  
+  - module: "RMS (Resonance Memory System)"
+    contract: "../contract/upstream/RMS_Contract/Input_from_RMS_Contract.yaml"
+    required: true
+
+  - module: "LLM (via Orchestrator)"
+    contract: "../contract/upstream/LLM_Proposal_Contract/Episodic_LLM_Proposal_Contract.yaml"
+    required: true

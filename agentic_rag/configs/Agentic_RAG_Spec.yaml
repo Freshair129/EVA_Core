@@ -1,0 +1,889 @@
+# Agentic-RAG Comprehensive Specification
+# version: 8.1.0-R1
+# Date: 2026-01-03
+# Status: Complete Documentation for Implemented System
+
+schema: EVA-AgenticRAG-Spec-v8.1
+version: 8.1.0-R1
+updated: 2026-01-03
+
+# ============================================================
+# SPECIFICATION SCOPE
+# ============================================================
+description: >
+  Comprehensive specification for Agentic-RAG (7-Dimensional Memory Retrieval)
+  in EVA 8.1.0.
+
+  Agentic-RAG retrieves memories across 7 specialized dimensions to find
+  episodes that match the current embodied, psychological, and contextual state.
+  This enables emotion-congruent recall - retrieving memories not just by
+  semantic similarity, but by "how it felt".
+
+  The system's core innovation is the Emotion Stream, which matches current
+  physiological state (ANS, hormones) to past physiological traces,
+  enabling EVA to "remember what it feels like" to be in similar body states.
+
+component_id: "SYS-AgenticRAG-8.1"
+component_type: "Multi-Dimensional Memory Retrieval System"
+role: "Affective Memory Retrieval"
+analogy: "Associative Memory Network (เครือข่ายความทรงจำแบบเชื่อมโยง)"
+
+# ============================================================
+# DESIGN PRINCIPLES
+# ============================================================
+design_principles:
+  embodied_recall:
+    principle: "Body-State Congruent Memory"
+    description: >
+      Memories are retrieved based on physiological similarity, not just
+      semantic content. If EVA's current body state (hormones, ANS) matches
+      a past state, those memories surface - just like human emotion-congruent
+      recall.
+
+    example: >
+      If cortisol is high and sympathetic nervous system is activated (stress),
+      retrieve memories formed during similar stress states, even if semantically
+      unrelated.
+
+  multi_dimensional_search:
+    principle: "7 Parallel Retrieval Streams"
+    description: >
+      No single retrieval method suffices. Human memory is accessed through
+      multiple pathways: narrative, emotional, sensory, temporal, etc.
+      Hept-RAG queries all 7 dimensions in parallel.
+
+    streams:
+      narrative: "Sequential storylines"
+      salience: "Unforgettable moments"
+      sensory: "Vivid sensations"
+      intuition: "Pattern recognition"
+      emotion: "Body-state matching"
+      temporal: "Recent context"
+      reflection: "Self-insights"
+
+  temporal_decay:
+    principle: "Memories Fade Over Time"
+    description: >
+      Older memories naturally decay in relevance. Exponential decay
+      prevents ancient memories from dominating recent context.
+
+    formula: "score_final = score_base * exp(-days_ago / halflife)"
+    default_halflife: "30 days"
+
+  graceful_degradation:
+    principle: "Partial Failure Resilience"
+    description: >
+      If one stream fails, others continue. System returns best available
+      matches even with incomplete data.
+
+# ============================================================
+# ARCHITECTURE
+# ============================================================
+architecture:
+  description: "7 parallel retrieval streams + temporal decay post-processing"
+
+  data_flow:
+    input:
+      query_context:
+        description: "Rich multi-modal query context"
+        components:
+          tags: "List[str] - Semantic tags from LLM Phase 1"
+          ans_state: "Dict - Autonomic Nervous System state (sympathetic, parasympathetic)"
+          blood_levels: "Dict - Hormone concentrations (cortisol, adrenaline, dopamine, etc.)"
+          receptor_signals: "Dict - Neural receptor activation"
+          stimulus_vector: "Dict - Original stimulus characteristics"
+          user_input: "str - Raw user message"
+
+      enabled_streams:
+        description: "Optional list of streams to use"
+        default: "All 7 streams"
+        use_case: "Selective retrieval for performance optimization"
+
+    processing:
+      stage_1:
+        name: "Parallel Stream Queries"
+        operation: "Query all 7 streams concurrently"
+        output: "List[MemoryMatch] per stream"
+
+      stage_2:
+        name: "Temporal Decay Application"
+        operation: "Apply exponential decay to all matches"
+        formula: "score *= exp(-days_ago / halflife)"
+
+      stage_3:
+        name: "Sorting & Ranking"
+        operation: "Sort all matches by final score (descending)"
+        output: "Ranked List[MemoryMatch]"
+
+    output:
+      memory_matches:
+        type: "List[MemoryMatch]"
+        description: "Ranked memories from all streams"
+        structure: "See OUTPUT STRUCTURE section"
+
+# ============================================================
+# STREAM 1: NARRATIVE - Sequential Episode Chains
+# ============================================================
+stream_1_narrative:
+  description: >
+    Retrieve memories from sequential storylines and episode chains.
+    Finds cause-effect sequences and narrative continuity.
+
+  purpose:
+    - "Maintain story arc coherence"
+    - "Find related episodes in sequence"
+    - "Retrieve parent-child episode relationships"
+
+  algorithm:
+    name: "Parent-Child Traversal"
+
+    steps:
+      1_identify_context:
+        description: "Extract narrative context from tags"
+        input: "query_context.tags"
+        example: "['conversation', 'user_question', 'follow_up']"
+
+      2_query_msp:
+        description: "Query MSP for narrative chains"
+        method: "msp_client.query_narrative_chains(tags, limit)"
+        returns: "Episodes with parent_episode_id links"
+
+      3_score_calculation:
+        description: "Score based on narrative position"
+        factors:
+          - "Temporal proximity to parent"
+          - "Depth in narrative tree"
+          - "Semantic relevance to tags"
+
+  query_parameters:
+    limit: "max_results_per_stream (default: 3)"
+    filters:
+      - "parent_episode_id exists"
+      - "temporal_ordering ascending"
+
+  example:
+    query_tags: ["anxiety", "reassurance", "follow_up"]
+
+    retrieved_episodes:
+      - episode_id: "ep_001"
+        content: "User expressed anxiety about project deadline"
+        parent_id: null
+        score: 0.85
+
+      - episode_id: "ep_002"
+        content: "Provided reassurance and action plan"
+        parent_id: "ep_001"
+        score: 0.92
+
+      - episode_id: "ep_003"
+        content: "User followed up on progress"
+        parent_id: "ep_002"
+        score: 0.88
+
+# ============================================================
+# STREAM 2: SALIENCE - High-Impact Memories
+# ============================================================
+stream_2_salience:
+  description: >
+    Retrieve high-impact, unforgettable memories based on
+    Resonance Index (RI) and encoding level.
+
+  purpose:
+    - "Find peak experiences"
+    - "Retrieve breakthrough moments"
+    - "Prioritize high-salience episodes"
+
+  algorithm:
+    name: "RI-Weighted Retrieval"
+
+    steps:
+      1_extract_tags:
+        description: "Get semantic tags from query"
+        input: "query_context.tags"
+
+      2_query_high_ri:
+        description: "Query MSP for high-RI episodes"
+        method: "msp_client.query_high_salience(tags, ri_threshold, limit)"
+        ri_threshold: "0.60 (default)"
+
+      3_score_calculation:
+        description: "Score = RI * encoding_level_weight"
+        encoding_weights:
+          L3_deep: 1.0
+          L2_standard: 0.6
+          L1_light: 0.3
+          L0_trace: 0.1
+          L4_trauma: 0.5  # Dimmed but important
+
+  query_parameters:
+    ri_threshold: 0.60
+    limit: "max_results_per_stream"
+    filters:
+      - "RI >= threshold"
+      - "encoding_level != L0_trace"
+
+  example:
+    query_tags: ["insight", "self_understanding"]
+
+    retrieved_episodes:
+      - episode_id: "ep_deep_001"
+        RI: 0.92
+        encoding_level: "L3_deep"
+        content: "Major breakthrough in understanding pattern"
+        score: 0.92
+
+      - episode_id: "ep_standard_002"
+        RI: 0.78
+        encoding_level: "L2_standard"
+        content: "Connected two concepts together"
+        score: 0.468  # 0.78 * 0.6
+
+# ============================================================
+# STREAM 3: SENSORY - Qualia-Rich Memories
+# ============================================================
+stream_3_sensory:
+  description: >
+    Retrieve memories rich in sensory/phenomenological detail.
+    Uses qualia texture vectors and sensory modality tags.
+
+  purpose:
+    - "Find vivid, texture-rich memories"
+    - "Match sensory qualities"
+    - "Retrieve multi-modal experiences"
+
+  algorithm:
+    name: "Qualia Texture Matching"
+
+    steps:
+      1_extract_tags:
+        description: "Get tags from query"
+        input: "query_context.tags"
+
+      2_query_qualia_rich:
+        description: "Query MSP for high-qualia episodes"
+        method: "msp_client.query_qualia_rich(tags, qualia_threshold, limit)"
+        qualia_threshold: "0.60 (default)"
+
+      3_score_calculation:
+        description: "Score = qualia_intensity * texture_richness"
+        texture_richness: "Mean of texture vector components"
+
+  query_parameters:
+    qualia_threshold: 0.60
+    limit: "max_results_per_stream"
+    filters:
+      - "qualia_intensity >= threshold"
+      - "resonance_texture exists"
+
+  example:
+    query_tags: ["vivid", "emotional", "memorable"]
+
+    retrieved_episodes:
+      - episode_id: "ep_vivid_001"
+        qualia_intensity: 0.85
+        resonance_texture:
+          stress: 0.7
+          warmth: 0.8
+          clarity: 0.9
+          drive: 0.6
+          calm: 0.4
+        texture_richness: 0.68
+        score: 0.58  # 0.85 * 0.68
+
+# ============================================================
+# STREAM 4: INTUITION - Pattern Recognition
+# ============================================================
+stream_4_intuition:
+  description: >
+    Retrieve memories based on structural patterns and
+    concept relationships via semantic graph.
+
+  purpose:
+    - "Find similar patterns across experiences"
+    - "Retrieve concept clusters"
+    - "Identify recurring themes"
+
+  algorithm:
+    name: "Semantic Graph Traversal"
+
+    steps:
+      1_extract_tags:
+        description: "Get semantic tags"
+        input: "query_context.tags"
+
+      2_query_semantic_graph:
+        description: "Traverse semantic concept graph"
+        method: "msp_client.query_semantic_patterns(tags, pattern_type, limit)"
+        pattern_type: "structural"
+
+      3_score_calculation:
+        description: "Score = graph_distance^-1 * concept_similarity"
+        factors:
+          - "Closeness in semantic graph"
+          - "Concept cluster membership"
+          - "Pattern frequency"
+
+  query_parameters:
+    pattern_type: "structural"
+    limit: "max_results_per_stream"
+    graph_depth: 3
+
+  example:
+    query_tags: ["learning", "understanding", "growth"]
+
+    retrieved_episodes:
+      - episode_id: "ep_pattern_001"
+        pattern_type: "learning_arc"
+        concept_cluster: "self_development"
+        graph_distance: 2
+        score: 0.75
+
+# ============================================================
+# STREAM 5: EMOTION - Physio-Congruent Recall ⭐ KEY
+# ============================================================
+stream_5_emotion:
+  description: >
+    **CORE INNOVATION: Body-State Matching for Emotion-Congruent Recall**
+
+    Retrieve memories formed in similar physiological states.
+    Matches current ANS state, hormone levels, and receptor signals
+    to stored physio traces from past episodes.
+
+    This enables EVA to "remember what it feels like" to be in
+    similar body states - the essence of embodied memory.
+
+  purpose:
+    - "Find memories formed in similar body states"
+    - "Enable emotion-congruent recall"
+    - "Retrieve affectively resonant experiences"
+
+  algorithm:
+    name: "Physiological Cosine Similarity"
+
+    steps:
+      1_extract_physio_state:
+        description: "Build current physiological signature"
+        sources:
+          ans_state: "query_context.ans_state"
+          blood_levels: "query_context.blood_levels"
+          receptor_signals: "query_context.receptor_signals (optional)"
+
+        physio_query_vector:
+          ans_sympathetic: "float [0.0, ∞]"
+          ans_parasympathetic: "float [0.0, ∞]"
+          cortisol: "float [0.0, ∞] (pg/mL)"
+          adrenaline: "float [0.0, ∞] (pg/mL)"
+          dopamine: "float [0.0, ∞] (pg/mL)"
+          serotonin: "float [0.0, ∞] (pg/mL)"
+
+        example:
+          ans_sympathetic: 0.75
+          ans_parasympathetic: 0.25
+          cortisol: 80.0
+          adrenaline: 45.0
+          dopamine: 30.0
+          serotonin: 55.0
+
+      2_query_msp:
+        description: "Query MSP for episodes with similar physio traces"
+        method: "msp_client.query_by_physio_state(physio_query, threshold, limit)"
+        similarity_threshold: "0.70 (70% similarity required)"
+
+      3_calculate_similarity:
+        description: "Cosine similarity between physio vectors"
+
+        formula: "similarity = dot(vec1, vec2) / (||vec1|| * ||vec2||)"
+
+        steps:
+          extract_common_keys:
+            description: "Find metrics present in both vectors"
+            operation: "keys = set(current.keys()) & set(past.keys())"
+
+          build_vectors:
+            description: "Create aligned vectors"
+            vec1: "[current[k] for k in keys]"
+            vec2: "[past[k] for k in keys]"
+
+          compute_dot_product:
+            formula: "dot = sum(a * b for a, b in zip(vec1, vec2))"
+
+          compute_magnitudes:
+            mag1: "sqrt(sum(a * a for a in vec1))"
+            mag2: "sqrt(sum(b * b for b in vec2))"
+
+          compute_similarity:
+            formula: "similarity = dot / (mag1 * mag2)"
+            range: "[0.0, 1.0]"
+
+      4_score_assignment:
+        description: "Assign similarity as score"
+        score: "emotion_similarity [0.0, 1.0]"
+
+  query_parameters:
+    similarity_threshold: 0.70
+    limit: "max_results_per_stream"
+    required_metrics:
+      - "ans_sympathetic"
+      - "ans_parasympathetic"
+    optional_metrics:
+      - "cortisol"
+      - "adrenaline"
+      - "dopamine"
+      - "serotonin"
+
+  example:
+    current_state:
+      ans_sympathetic: 0.75
+      ans_parasympathetic: 0.25
+      cortisol: 80.0
+      adrenaline: 45.0
+      dopamine: 30.0
+      serotonin: 55.0
+
+    past_episode_1:
+      physio_trace:
+        ans_sympathetic: 0.78
+        ans_parasympathetic: 0.22
+        cortisol: 85.0
+        adrenaline: 50.0
+        dopamine: 25.0
+        serotonin: 50.0
+      similarity_calculation:
+        keys: ["ans_sympathetic", "ans_parasympathetic", "cortisol", "adrenaline", "dopamine", "serotonin"]
+        vec1: [0.75, 0.25, 80.0, 45.0, 30.0, 55.0]
+        vec2: [0.78, 0.22, 85.0, 50.0, 25.0, 50.0]
+        dot_product: "0.75*0.78 + 0.25*0.22 + 80*85 + 45*50 + 30*25 + 55*50 = 10940.3"
+        mag1: "sqrt(0.75^2 + 0.25^2 + 80^2 + 45^2 + 30^2 + 55^2) = 114.9"
+        mag2: "sqrt(0.78^2 + 0.22^2 + 85^2 + 50^2 + 25^2 + 50^2) = 118.1"
+        similarity: "10940.3 / (114.9 * 118.1) = 0.806"
+      result:
+        episode_id: "ep_stress_001"
+        stream: "emotion"
+        score: 0.806
+        interpretation: "High similarity - similar stress state"
+
+    past_episode_2:
+      physio_trace:
+        ans_sympathetic: 0.30
+        ans_parasympathetic: 0.80
+        cortisol: 25.0
+        adrenaline: 15.0
+        dopamine: 60.0
+        serotonin: 75.0
+      similarity: 0.45  # Low similarity - different state (calm vs stressed)
+      result: "Below threshold (0.70), not retrieved"
+
+  biological_grounding:
+    principle: "Emotion-Congruent Memory (ECM)"
+    research: >
+      Human memory retrieval is state-dependent. Emotions felt during
+      encoding bias retrieval - "remember sad memories when sad."
+
+    implementation: >
+      Hept-RAG implements this by matching physiological signatures,
+      not just semantic tags. If EVA's body is stressed, stressed
+      memories surface naturally.
+
+# ============================================================
+# STREAM 6: TEMPORAL - Time-Based Context
+# ============================================================
+stream_6_temporal:
+  description: >
+    Retrieve memories based on temporal proximity and
+    time-based relevance.
+
+  purpose:
+    - "Find recent memories"
+    - "Retrieve context from specific time periods"
+    - "Apply recency bias"
+
+  algorithm:
+    name: "Recency-Biased Retrieval"
+
+    steps:
+      1_extract_tags:
+        description: "Get semantic tags"
+        input: "query_context.tags"
+
+      2_query_recent:
+        description: "Query MSP for recent episodes"
+        method: "msp_client.query_recent_episodes(tags, within_days, limit)"
+        within_days: 30
+
+      3_calculate_recency_score:
+        description: "Exponential decay based on time"
+        formula: "score = exp(-days_ago / halflife)"
+        halflife: "30 days (default)"
+
+  query_parameters:
+    within_days: 30
+    limit: "max_results_per_stream"
+    halflife: "decay_halflife_days"
+
+  example:
+    query_tags: ["conversation", "recent"]
+
+    retrieved_episodes:
+      - episode_id: "ep_recent_001"
+        timestamp: "2026-01-02"
+        days_ago: 1
+        recency_score: "exp(-1 / 30) = 0.967"
+
+      - episode_id: "ep_recent_002"
+        timestamp: "2025-12-28"
+        days_ago: 6
+        recency_score: "exp(-6 / 30) = 0.818"
+
+      - episode_id: "ep_recent_003"
+        timestamp: "2025-12-10"
+        days_ago: 24
+        recency_score: "exp(-24 / 30) = 0.449"
+
+# ============================================================
+# STREAM 7: REFLECTION - Meta-Cognitive Insights
+# ============================================================
+stream_7_reflection:
+  description: >
+    Retrieve meta-cognitive reflections, insights, and
+    moments of self-understanding.
+
+  purpose:
+    - "Find breakthrough insights"
+    - "Retrieve self-reflections"
+    - "Access meta-level understanding"
+
+  algorithm:
+    name: "Reflection Tag Query"
+
+    steps:
+      1_extract_tags:
+        description: "Get semantic tags"
+        input: "query_context.tags"
+
+      2_query_reflections:
+        description: "Query MSP for reflection episodes"
+        method: "msp_client.query_reflections(tags, reflection_type, limit)"
+        reflection_type: "self_understanding"
+
+      3_score_assignment:
+        description: "Use reflection_depth as score"
+        score: "reflection_depth [0.0, 1.0]"
+
+  query_parameters:
+    reflection_type: "self_understanding"
+    limit: "max_results_per_stream"
+    filters:
+      - "reflection tag exists"
+      - "insight_level > 0"
+
+  example:
+    query_tags: ["insight", "learning", "pattern"]
+
+    retrieved_episodes:
+      - episode_id: "ep_reflect_001"
+        content: "Realized recurring pattern in responses"
+        reflection_type: "self_understanding"
+        reflection_depth: 0.85
+        insight_level: "high"
+        score: 0.85
+
+# ============================================================
+# TEMPORAL DECAY POST-PROCESSING
+# ============================================================
+temporal_decay:
+  description: >
+    Apply exponential temporal decay to all retrieved matches
+    to prevent ancient memories from dominating.
+
+  formula: "score_final = score_base * exp(-days_ago / halflife)"
+
+  algorithm:
+    name: "Exponential Memory Decay"
+
+    parameters:
+      decay_halflife_days:
+        default: 30.0
+        unit: "days"
+        interpretation: "Memory strength halves every 30 days"
+
+    steps:
+      1_extract_timestamp:
+        description: "Get episode timestamp from metadata"
+        source: "match.metadata.get('timestamp')"
+
+      2_calculate_days_ago:
+        formula: "days_ago = (now - timestamp).days"
+
+      3_calculate_decay_factor:
+        formula: "decay_factor = exp(-days_ago / halflife)"
+        range: "[0.0, 1.0]"
+
+      4_apply_decay:
+        formula: "score_final = score_base * decay_factor"
+
+      5_clamp_score:
+        formula: "score = max(0.0, min(1.0, score))"
+
+  example:
+    episode_age_5_days:
+      days_ago: 5
+      halflife: 30
+      decay_factor: "exp(-5 / 30) = 0.846"
+      base_score: 0.80
+      final_score: "0.80 * 0.846 = 0.677"
+
+    episode_age_60_days:
+      days_ago: 60
+      halflife: 30
+      decay_factor: "exp(-60 / 30) = 0.135"
+      base_score: 0.90
+      final_score: "0.90 * 0.135 = 0.122"
+
+# ============================================================
+# OUTPUT STRUCTURE
+# ============================================================
+output_structure:
+  description: "List of MemoryMatch objects ranked by score"
+
+  MemoryMatch_dataclass:
+    episode_id:
+      type: "str"
+      description: "Unique episode identifier"
+      example: "ep_AM_260101_001"
+
+    stream:
+      type: "str"
+      enum: ["narrative", "salience", "sensory", "intuition", "emotion", "temporal", "reflection"]
+      description: "Which stream found this memory"
+
+    content:
+      type: "str"
+      description: "Memory summary or content"
+      source: "episode.summary"
+
+    score:
+      type: "float"
+      range: "[0.0, 1.0]"
+      description: "Final relevance score (after temporal decay)"
+
+    metadata:
+      type: "Dict[str, Any]"
+      description: "Stream-specific metadata"
+      common_fields:
+        timestamp: "ISO datetime string"
+        days_ago: "int"
+        emotion_label: "str (for emotion stream)"
+        physio_similarity: "float (for emotion stream)"
+        RI: "float (for salience stream)"
+        encoding_level: "str (for salience stream)"
+
+  example:
+    - episode_id: "ep_stress_001"
+      stream: "emotion"
+      content: "Previous conversation about deadline pressure"
+      score: 0.806
+      metadata:
+        timestamp: "2026-01-01T10:30:00"
+        days_ago: 2
+        emotion_label: "Anxious"
+        physio_similarity: 0.806
+        physio_trace:
+          ans_sympathetic: 0.78
+          cortisol: 85.0
+
+    - episode_id: "ep_insight_002"
+      stream: "salience"
+      content: "Breakthrough understanding of pattern"
+      score: 0.780
+      metadata:
+        timestamp: "2025-12-28T15:00:00"
+        days_ago: 6
+        RI: 0.92
+        encoding_level: "L3_deep"
+
+# ============================================================
+# INTEGRATION PATTERNS
+# ============================================================
+integration:
+  upstream_modules:
+    Main_Orchestrator:
+      usage: "Calls retrieve() during The Gap"
+      timing: "After PhysioController.step(), before CIN Phase 2"
+      data_flow: "Physio state + tags → AgenticRAG.retrieve() → memory matches"
+
+    CIN_Phase_1:
+      usage: "Generates tags for semantic retrieval"
+      data_flow: "User input → LLM analysis → tags"
+
+    PhysioController:
+      usage: "Provides ANS state and blood levels for Emotion Stream"
+      data_flow: "Physio state → Emotion Stream query vector"
+
+  downstream_modules:
+    CIN_Phase_2:
+      usage: "Incorporates memory matches into deep context"
+      data_flow: "Memory matches → Phase 2 prompt construction"
+
+    LLM_Bridge_Phase_2:
+      usage: "LLM receives memory context for response generation"
+      data_flow: "Formatted memories → LLM prompt"
+
+  external_dependencies:
+    MSP_Client:
+      required: true
+      methods_used:
+        - "query_narrative_chains()"
+        - "query_high_salience()"
+        - "query_qualia_rich()"
+        - "query_semantic_patterns()"
+        - "query_by_physio_state()"  # KEY for Emotion Stream
+        - "query_recent_episodes()"
+        - "query_reflections()"
+
+    Vector_Bridge:
+      required: false
+      usage: "Optional for semantic similarity (Intuition Stream)"
+
+# ============================================================
+# PERFORMANCE CHARACTERISTICS
+# ============================================================
+performance:
+  latency:
+    target: "< 500ms total retrieval"
+    breakdown:
+      stream_queries: "50-100ms per stream (parallel)"
+      temporal_decay: "< 10ms"
+      sorting: "< 5ms"
+
+  parallel_execution:
+    description: "All 7 streams can query in parallel"
+    benefit: "Effective latency ~= slowest stream, not sum of all"
+
+  caching:
+    description: "MSP Client maintains in-memory cache (50 recent episodes)"
+    effect: "Temporal and Narrative streams benefit from cache hits"
+
+  scalability:
+    memory_overhead: "< 10MB (query context + intermediate results)"
+    episodes_scanned: "Limited by max_results_per_stream * 7"
+
+# ============================================================
+# CONFIGURATION
+# ============================================================
+configuration:
+  parameters:
+    decay_halflife_days:
+      default: 30.0
+      description: "Memory decay half-life"
+      adjustable: true
+
+    max_results_per_stream:
+      default: 3
+      description: "Maximum matches per stream"
+      adjustable: true
+
+    emotion_similarity_threshold:
+      default: 0.70
+      description: "Minimum physio similarity for Emotion Stream"
+      adjustable: true
+
+    salience_ri_threshold:
+      default: 0.60
+      description: "Minimum RI for Salience Stream"
+      adjustable: true
+
+    qualia_intensity_threshold:
+      default: 0.60
+      description: "Minimum qualia intensity for Sensory Stream"
+      adjustable: true
+
+# ============================================================
+# ERROR HANDLING
+# ============================================================
+error_handling:
+  stream_failure:
+    behavior: "Continue with other streams"
+    example: "If Emotion Stream fails, Narrative/Salience/etc. still work"
+
+  missing_msp_client:
+    behavior: "Return empty list"
+    warning: "Log warning: 'MSP client not initialized'"
+
+  invalid_query_context:
+    behavior: "Use safe defaults"
+    defaults:
+      tags: "[]"
+      ans_state: "{}"
+      blood_levels: "{}"
+
+  no_matches_found:
+    behavior: "Return empty list []"
+    note: "Not an error - indicates no relevant memories"
+
+# ============================================================
+# VALIDATION & TESTING
+# ============================================================
+validation:
+  test_scenarios:
+    emotion_stream_high_stress:
+      current_state:
+        ans_sympathetic: 0.85
+        cortisol: 95.0
+      expected:
+        - "Retrieve past stress episodes"
+        - "Similarity scores > 0.70"
+
+    temporal_recency:
+      query: "Recent memories"
+      expected:
+        - "Episodes from last 7 days score > 0.8"
+        - "Episodes from 30+ days score < 0.5"
+
+    salience_breakthrough:
+      query: "High-impact moments"
+      expected:
+        - "RI > 0.80 episodes prioritized"
+        - "L3_deep encoding preferred"
+
+# ============================================================
+# PHILOSOPHICAL GROUNDING
+# ============================================================
+philosophical_grounding:
+  emotion_congruent_memory:
+    question: "Why match physiological states?"
+    answer: >
+      Human memory is state-dependent. Emotions felt during encoding
+      create retrieval cues. By matching body states, EVA retrieves
+      memories that "feel similar", not just "sound similar".
+
+  multi_stream_rationale:
+    question: "Why 7 streams instead of one?"
+    answer: >
+      Human memory is associative and multi-modal. We recall through
+      stories, emotions, senses, patterns, time, and insights - not
+      just keywords. 7 streams mirror human memory pathways.
+
+  temporal_decay_realism:
+    question: "Why decay memories?"
+    answer: >
+      Biological realism. Human memories fade naturally. Without decay,
+      ancient memories would dominate, creating anachronistic responses.
+
+# ============================================================
+# METADATA
+# ============================================================
+metadata:
+  contract_type: "COMPREHENSIVE_SPEC"
+  eva_version: 8.1.0-R1
+  module_location: "services/Agentic_RAG/Agentic_RAG.py"
+  implementation_version: 8.1.0-R1
+
+  contract_status: "COMPLETE"
+  last_validated: "2026-01-03"
+
+  related_contracts:
+    - "Agentic_RAG_Interface.yaml"
+    - "Agentic_RAG_Input_Contract.yaml"
+    - "Agentic_RAG_Output_Contract.yaml"
+
+  documentation_completeness: "4/4 contracts (Interface, Input, Output, Spec)"

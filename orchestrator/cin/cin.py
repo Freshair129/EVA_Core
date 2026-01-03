@@ -210,32 +210,24 @@ class ContextInjectionNode:
         self.token_counter = TokenCounter(model=token_model)
         print(f"[CIN] ✅ Token counter initialized (method: {self.token_counter.method})")
 
-        # Token budgets (from spec)
-        self.token_budgets = {
-            "phase_1": {
-                "identity_anchor": 500,
-                "physio_baseline": 100,
-                "pmt_rules": 200,
-                "memory_buffer": 250,
-                "semantic_knowledge": 150,
-                "conversation_history": 1500,  # MAX - hard limit
-                "perception_directive": 150,
-                "total_max": 3000
-            },
-            "phase_2": {
-                "embodied_sensation": 200,
-                "eva_matrix_9d": 300,
-                "artifact_qualia": 300,
-                "physio_delta": 150,
-                "hept_stream_recall": 1000,  # MAX
-                "cognitive_rules": 200,
-                "context_summary_template": 150,
-                "final_directive": 150,
-                "total_max": 2500
-            }
-        }
+        # 1. Load External Configs (Standard Compliance)
+        cfg_path = Path(__file__).parent / "configs" / "CIN_configs.yaml"
+        if cfg_path.exists():
+            try:
+                with open(cfg_path, 'r', encoding='utf-8') as f:
+                    self.config_data = yaml.safe_load(f)
+                    self.token_budgets = {
+                        "phase_1": self.config_data.get("phase_1_budget", {}),
+                        "phase_2": self.config_data.get("phase_2_budget", {})
+                    }
+                    print(f"[CIN] ✅ Loaded runtime budgets from {cfg_path.name}")
+            except Exception as e:
+                print(f"[CIN] ⚠️ Error loading configs: {e}. Using internal defaults.")
+                self._set_default_budgets()
+        else:
+            self._set_default_budgets()
 
-        # Auto-discover Persona & Soul
+        # 2. Auto-discover Identity & Behavioral Rules
         self.persona_data = self._load_persona()
         self.soul_data = self._load_soul()
         self.pmt_rules = self._load_pmt_rules()
@@ -243,6 +235,15 @@ class ContextInjectionNode:
         # Context ID tracking
         self.current_context_id = None
         self.turn_index = 0
+
+    def _set_default_budgets(self):
+        """Internal fallback budgets if YAML is missing"""
+        self.token_budgets = {
+            "phase_1": {
+                "identity_anchor": 500, "physio_baseline": 100, "pmt_rules": 200,
+                "memory_buffer": 250, "conversation_history": 1500, "total_max": 3000
+            }
+        }
 
     # ================================================================
     # AUTO-DISCOVERY & FILE LOADING
@@ -387,10 +388,10 @@ class ContextInjectionNode:
             # Physiological baseline
             "physio_baseline": self._get_physio_baseline(),
 
-            # Memory components
+            # Memory components (Intuition Layer)
             "turn_cache": self._get_turn_cache(limit=5),
             "session_memory": self._get_session_memory(),
-            "quick_recall": self._get_quick_keyword_recall(user_input),
+            "intuition_flashes": self._get_intuition_flashes(user_input),
 
             # Conversation history
             "conversation_history": self._get_conversation_history(),
@@ -437,8 +438,8 @@ Develop ID: {context['soul']['Deverlop_id']}
 - Atmosphere: {context['turn_cache'].get('atmosphere', 'neutral')}
 - Previous Intent: {context['turn_cache'].get('intent', 'None')}
 
-## 🧩 EXTRACTED_SEMANTIC_CONCEPTS
-{context.get('semantic_anchors', 'No semantic concepts extracted')}
+## 🧩 INTUITION_FLASHES (แว๊บแรก)
+{context.get('intuition_flashes', 'No mental flashes triggered')}
 
 ## 💬 CONVERSATION_HISTORY (RAW_TURNS)
 [Format: Role: Content]
@@ -814,7 +815,7 @@ Required JSON Structure:
         Returns:
             dict: Session memory summary
         """
-        session_memory_path = self.base_path / "Consciousness" / "04_Session_Memory"
+        session_memory_path = self.base_path / "consciousness" / "04_Session_Memory"
 
         if not session_memory_path.exists():
             return {"summary": "No session memory available", "status": "unavailable"}
@@ -840,25 +841,28 @@ Required JSON Structure:
             print(f"[CIN] ⚠️ Session memory read error: {e}")
             return {"summary": "Error loading session memory", "status": "error"}
 
-    def _get_quick_keyword_recall(self, user_input: str) -> List[str]:
+    def _get_intuition_flashes(self, user_input: str) -> List[str]:
         """
-        Quick keyword-based memory recall (fast, low accuracy)
+        Intuition retrieval (First impression / แว๊บแรก).
+        Non-LLM keyword-based memory scan providing initial mental flashes.
 
         Args:
             user_input: User input string
 
         Returns:
-            list: Quick keyword matches (simplified)
+            list: Initial mental flashes (keywords/fragments)
         """
         if self.msp_client is None:
             return []
 
         try:
-            # Simple keyword extraction (can be enhanced)
+            # Intuition logic: Extract high-value keywords to trigger 'flashes'
+            # (In a full implementation, this might query an inverted index)
             keywords = [word for word in user_input.split() if len(word) > 3][:5]
+            print(f"[CIN] 🧠 Intuition triggered: {keywords}")
             return keywords
         except Exception as e:
-            print(f"[CIN] ⚠️ Keyword recall error: {e}")
+            print(f"[CIN] ⚠️ Intuition recall error: {e}")
             return []
 
     def _get_conversation_history(self, max_tokens: int = 1500) -> str:

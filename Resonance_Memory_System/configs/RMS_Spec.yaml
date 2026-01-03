@@ -1,10 +1,10 @@
 # RMS (Resonance Memory System) Comprehensive Specification
-# Version: 8.1.0
+# version: 8.1.0-R1
 # Date: 2026-01-03
 # Status: Complete Documentation for Implemented System
 
 schema: EVA-RMS-Spec-v8.1
-version: 8.1.0
+version: 8.1.0-R1
 updated: 2026-01-03
 
 # ============================================================
@@ -463,7 +463,7 @@ color_encoding:
         final_g: "int(clamp(g * multiplier, 0, 255))"
         final_b: "int(clamp(b * multiplier, 0, 255))"
 
-    step_4_hex_conversion:
+    step_4_hex_conversion: 8.1.0-R1
       description: "Convert RGB to hex string"
       formula: "hex_color = f'#{r:02x}{g:02x}{b:02x}'"
       format: "#RRGGBB (lowercase hex)"
@@ -914,9 +914,9 @@ future_enhancements:
 # ============================================================
 metadata:
   contract_type: "COMPREHENSIVE_SPEC"
-  eva_version: "8.1.0"
+  eva_version: 8.1.0-R1
   module_location: "Resonance_Memory_System/rms_v6.py"
-  implementation_version: "v6.2"
+  implementation_version: 8.1.0-R1
 
   contract_status: "COMPLETE"
   last_validated: "2026-01-03"

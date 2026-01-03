@@ -143,7 +143,7 @@ print(f"\n{'='*60}")
 print("Developer Config File")
 print(f"{'='*60}")
 
-developer_config_file = Path("Consciousness/09_state/developer_config.json")
+developer_config_file = Path("consciousness/09_state/developer_config.json")
 
 if developer_config_file.exists():
     with open(developer_config_file, 'r', encoding='utf-8') as f:
@@ -163,7 +163,7 @@ print(f"\n{'='*60}")
 print("Compression Counters File")
 print(f"{'='*60}")
 
-counters_file = Path("Consciousness/09_state/compression_counters.json")
+counters_file = Path("consciousness/09_state/compression_counters.json")
 
 if counters_file.exists():
     with open(counters_file, 'r', encoding='utf-8') as f:
@@ -190,7 +190,7 @@ print(f"\n{'='*60}")
 print("Session Memory Directory")
 print(f"{'='*60}")
 
-session_dir = Path("Consciousness/04_Session_memory")
+session_dir = Path("consciousness/04_Session_memory")
 
 if session_dir.exists():
     print(f"\n✅ Session memory directory exists: {session_dir}")

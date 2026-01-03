@@ -1,0 +1,31 @@
+schema: EVA-E-RAG-v8.0
+version: 8.1.0-R1
+updated: 2025-12-30
+module:
+  id: E-RAG
+  file: Agentic_RaG.py
+  name: Hept-Stream RAG (Retrieval-Augmented Generation) (Cognitive Recall)
+  description: >
+    สถาปัตยกรรม High-Fidelity RAG (Retrieval-Augmented Generation) 7 สายประสาน (Hept-Stream) 
+    ที่เลียนแบบการทำงานของสมองมนุษย์ในการระลึกถึงอดีต (Recollection)
+    โดยเพิ่มมิติของ 'เวลา' (Temporal Decay) และ 'การสะท้อนตัวตน' (Reflection)
+
+cognitive_pipeline:
+  - Phase 1: Planning (Weighting streams by arousal/intent)
+  - Phase 2: Parallel Hept-Stream RAG (Retrieval-Augmented Generation) Retrieval
+  - Phase 3: Synthesis (Resonance re-ranking + Temporal Decay adjustment)
+
+search_streams:
+  stream_a: Narrative (Parent-Child & Event Search)
+  stream_b: Salience (High RI (Resonance Index) / Resonance Anchors)
+  stream_c: Sensory (5D Emotion Texture Match)
+  stream_d: Intuitive (Temporal Patterns & 9D Echoes)
+  stream_e: Emotion (Direct Affective Label Match)
+  stream_f: Temporal (Recency Flow with Exponential Decay) [NEW]
+  stream_g: Reflection (Metacognitive Summaries & Core Beliefs) [NEW]
+
+features:
+  - Exponential Temporal Decay (math.exp(-lambda * days))
+  - Parent-Child Chunking Support
+  - Context Ledger Re-linking
+  - Explainable Reasoning Trace

@@ -43,7 +43,7 @@ System integration validation reveals **strong structural health** with **operat
 **Working Features:**
 - State retrieval: `get_full_state()` → returns {axes_9d, momentum, emotion_label}
 - Signal processing: `process_signals(signals)` → updates state correctly
-- State persistence: Saves/loads from `Consciousness/10_state/eva_matrix_state.json`
+- State persistence: Saves/loads from `consciousness/10_state/eva_matrix_state.json`
 
 **Test Output:**
 ```

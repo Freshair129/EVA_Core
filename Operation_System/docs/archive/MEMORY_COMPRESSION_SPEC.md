@@ -52,7 +52,7 @@
 │ - Represents 64 sessions (8 cores × 8 sessions)    │
 │ - Very long-term memory (months/years)             │
 │ - Core beliefs, patterns, worldview               │
-│ - Path: Consciousness/07_Sphere_memory/           │
+│ - Path: consciousness/07_Sphere_memory/           │
 └─────────────────────────────────────────────────────┘
                       ▲
                       │ (Compress 8 Cores)
@@ -62,7 +62,7 @@
 │ - Represents 8 sessions                            │
 │ - Medium-term memory (weeks)                       │
 │ - Key themes, recurring patterns                  │
-│ - Path: Consciousness/06_Core_memory/             │
+│ - Path: consciousness/06_Core_memory/             │
 └─────────────────────────────────────────────────────┘
                       ▲
                       │ (Compress 8 Sessions)
@@ -72,7 +72,7 @@
 │ - Individual episodes                              │
 │ - Short-term memory (days)                        │
 │ - Full detail, all context                        │
-│ - Path: Consciousness/01_Episodic_memory/         │
+│ - Path: consciousness/01_Episodic_memory/         │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -110,7 +110,7 @@
 
 ### Session (Existing)
 
-**Path:** `Consciousness/01_Episodic_memory/episodes/ep_{yymmdd}_{hash}.json`
+**Path:** `consciousness/01_Episodic_memory/episodes/ep_{yymmdd}_{hash}.json`
 
 **Format:** Full Schema V2 episode with all details
 
@@ -118,7 +118,7 @@
 
 ### Core Memory
 
-**Path:** `Consciousness/06_Core_memory/core_{sphere_seq:03d}_{core_seq:03d}.json`
+**Path:** `consciousness/06_Core_memory/core_{sphere_seq:03d}_{core_seq:03d}.json`
 
 **Example:** `core_000_001.json` (Sphere 0, Core 1)
 
@@ -174,7 +174,7 @@
 
 ### Sphere Memory
 
-**Path:** `Consciousness/07_Sphere_memory/sphere_{sphere_seq:03d}.json`
+**Path:** `consciousness/07_Sphere_memory/sphere_{sphere_seq:03d}.json`
 
 **Example:** `sphere_000.json` (First sphere)
 
@@ -234,7 +234,7 @@
 
 ### 1. Counter Management
 
-**File:** `Consciousness/09_state/compression_counters.json`
+**File:** `consciousness/09_state/compression_counters.json`
 
 ```json
 {

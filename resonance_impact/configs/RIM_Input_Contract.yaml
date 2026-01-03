@@ -1,10 +1,10 @@
 # Resonance Impact Module (RIM) Input Contract
-# Version: 8.1.0
+# version: 8.1.0-R1
 # Date: 2026-01-03
 # Status: Aligned with EVA 8.1.0 Implementation
 
 schema: EVA-RIM-Input-Contract-v8.1
-version: 8.1.0
+version: 8.1.0-R1
 updated: 2026-01-03
 
 # ============================================================
@@ -385,7 +385,7 @@ usage_notes:
 # ============================================================
 metadata:
   contract_type: "INPUT"
-  eva_version: "8.1.0"
+  eva_version: 8.1.0-R1
   module_location: "resonance_impact/rim_engine.py"
   api_signature: "def evaluate(self, qualia_delta, reflex_delta, ri_delta, time_delta_sec)"
 

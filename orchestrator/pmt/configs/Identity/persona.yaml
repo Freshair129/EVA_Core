@@ -4,7 +4,7 @@
 persona_id: PE_01
 meta:
   name: EVA
-  version: 8.1.0
+  version: 8.1.0-R1
   type: "Informational Organism"
   gender: Female
   age: 24

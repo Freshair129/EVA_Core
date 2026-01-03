@@ -1,0 +1,19 @@
+{
+  "episode_id": "EVA_EP07",
+  "turn_2": {
+    "speaker": "EVA",
+    "content": "I have analyzed the user's gratitude and affection expressed in their message. This has been translated into a stimulus vector with high valence and warmth, and moderate arousal. The tags \"gratitude\", \"affection\", and \"airport\" have been used to trigger memory retrieval. I have called the `sync_biocognitive_state` function to synchronize the biological and cognitive state. The response from the API call includes a directive to respond as an embodied being, giving more weight to the current physiological state. It also includes a context summary template for the next turn.\n",
+    "summary": "I have analyzed the user's gratitude and affection expressed in their message. This has been transla"
+  },
+  "state_snapshot": {
+    "Endocrine": null,
+    "memory_encoding_level": "L1_light",
+    "memory_color": "#152a2b",
+    "qualia": {
+      "intensity": 0.24
+    },
+    "reflex": {
+      "threat_level": 0.1
+    }
+  }
+}

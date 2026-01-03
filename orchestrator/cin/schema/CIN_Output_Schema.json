@@ -1,0 +1,39 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "CIN_Output_Schema",
+    "description": "Structure of prompts and context metadata emitted by CIN (Context Injection Node)",
+    "type": "object",
+    "required": [
+        "phase_1_prompt",
+        "phase_2_prompt",
+        "context_meta"
+    ],
+    "properties": {
+        "phase_1_prompt": {
+            "type": "string",
+            "description": "Formatted perception prompt for Phase 1"
+        },
+        "phase_2_prompt": {
+            "type": "string",
+            "description": "Formatted reasoning prompt (function result) for Phase 2"
+        },
+        "context_meta": {
+            "type": "object",
+            "required": [
+                "context_id",
+                "token_count"
+            ],
+            "properties": {
+                "context_id": {
+                    "type": "string"
+                },
+                "token_count": {
+                    "type": "integer"
+                },
+                "turn_index": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

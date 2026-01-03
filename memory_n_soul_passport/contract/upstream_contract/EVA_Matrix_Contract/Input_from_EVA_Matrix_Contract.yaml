@@ -1,0 +1,21 @@
+# Input from EVA Matrix Contract
+# Component: EVA Matrix -> MSP
+# version: 8.1.0-R1
+
+schema: EVA-Input-from-Matrix-Contract-v1.0
+
+required_inputs:
+  eva_matrix_state:
+    type: "object"
+    description: "9D Psychological State to be logged with every memory."
+    required: true
+    properties:
+      axes_9d:
+        stress: { type: "float", range: [0, 1] }
+        warmth: { type: "float", range: [0, 1] }
+        drive: { type: "float", range: [0, 1] }
+        clarity: { type: "float", range: [0, 1] }
+        joy: { type: "float", range: [0, 1] }
+        # ... others implied by schema
+      metadata:
+        emotion_label: { type: "string" }

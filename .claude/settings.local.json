@@ -15,7 +15,9 @@
       "Bash(for module in eva_matrix orchestrator services physio_core \"Memory_&_Soul_Passaport\" Resonance_Memory_System Artifact_Qualia resonance_index resonance_impact)",
       "Bash(do echo \"=== $module ===\")",
       "Bash(test:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(findstr:*)",
+      "Bash(dir /b \"E:\\The Human Algorithm\\T2\\EVA 8.1.0\\physio_core\\configs\")"
     ]
   }
 }

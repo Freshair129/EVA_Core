@@ -1,6 +1,6 @@
 # Input from Receptor Contract
 # Component: Receptor Layer -> EVA Matrix
-# Version: 1.0.0
+# version: 8.1.0-R1
 # Description: Specifies the raw neural signals (hormonal mapping) EVA Matrix expects.
 
 schema: EVA-Input-from-Receptor-Contract-v1.0

@@ -80,7 +80,7 @@ index_fields:
 ```yaml
 memory_index:
   description: "JSONL index for high-quality metadata querying"
-  storage: "Consciousness/memory_index.json"
+  storage: "consciousness/memory_index.json"
 ```
 
 **Current Implementation:**
@@ -97,7 +97,7 @@ memory_index:
 
 ```yaml
 - id: CONTEXT_STORAGE
-  path: "Consciousness/10_context_storage/"
+  path: "consciousness/10_context_storage/"
   format: "JSON"
   purpose: "Real-time synchronization of context. Delivery by CIN"
 ```
@@ -111,13 +111,13 @@ memory_index:
 
 ---
 
-### 5. Consciousness State Storage
+### 5. consciousness State Storage
 
 **Spec:** MSP_spec.yaml:34-37
 
 ```yaml
-- id: CONSCIOUSNESS_STATE
-  path: "Consciousness/09_state/"
+- id: consciousness_STATE
+  path: "consciousness/09_state/"
   format: "JSON"
   purpose: "Real-time synchronization of body and physio_state"
 ```
@@ -138,7 +138,7 @@ memory_index:
 ```yaml
 Evidence:
   description: "บันทึกไฟล์ต่างๆเช่นภาพ วิดีโอ ไฟล์เสียง"
-  storage: "Consciousness/03_Sensory_memory/Evidence/evidence_{sensory_id}.json"
+  storage: "consciousness/03_Sensory_memory/Evidence/evidence_{sensory_id}.json"
 ```
 
 **Current Implementation:**

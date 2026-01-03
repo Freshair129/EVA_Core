@@ -8,7 +8,7 @@ import time
 import math
 import yaml
 from collections import defaultdict
-from typing import Any
+from typing import Any, Dict, List
 
 LN2 = math.log(2)
 
@@ -46,8 +46,8 @@ class BloodEngine:
 
         # ---------------- Safety ----------------
         safety = self.cfg["safety"]["concentration"]
-        self.conc_min = safety["min_floor"]
-        self.conc_max = safety["max_cap"]
+        self.conc_min = float(safety["min_floor"])
+        self.conc_max = float(safety["max_cap"])
 
         # ---------------- Plasma State ----------
         self.plasma = defaultdict(float)          # hormone_id -> concentration
@@ -149,6 +149,15 @@ class BloodEngine:
     # ========================================================
     # Read API
     # ========================================================
+    def get_concentrations(self) -> Dict[str, float]:
+        """
+        Return all hormone concentrations after decay update.
+        """
+        now = time.time()
+        for h_id in list(self.plasma.keys()):
+            self._apply_decay(h_id, now, flow=self.base_flow_ml_sec)
+        return dict(self.plasma)
+
     def read_hormone(self, hormone_id: str) -> float:
         now = time.time()
         self._apply_decay(hormone_id, now, flow=self.base_flow_ml_sec)

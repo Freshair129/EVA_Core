@@ -1,0 +1,66 @@
+# Input from MSP (Memory & Soul Passport) Contract
+# Component: MSP (Memory & Soul Passport) -> CIN (Context Injection Node)
+# version: 8.1.0-R1
+# Date: 2026-01-03
+
+schema: EVA-Input-from-MSP-Contract-v1.0
+version: 8.1.0-R1
+schema_ref: "orchestrator/cin/validation/MSP_to_CIN_Data_Schema.json"
+
+required_inputs:
+  # PHASE 1: Perception Context (Intuition)
+  turn_context:
+    type: "object"
+    description: "Recent conversation history and summaries (แว๊บแรก / Intuition)."
+    required: true
+    properties:
+      last_5_turns_summary: { type: "string" }
+      interpersonal_atmosphere: { type: "string" }
+      previous_intent: { type: "string" }
+  
+  session_context:
+    type: "object"
+    description: "Long-term compressed session memory."
+    required: false
+    properties:
+      session_memory_summary: { type: "string" }
+
+  # PHASE 2: Reasoning Context (Deep RAG)
+  psychological_context:
+    type: "object"
+    description: "The latest 9D Matrix State (EVA_Matrix) logged by MSP."
+    required: true
+    properties:
+      eva_matrix_state:
+        type: "object"
+        properties:
+          axes_9d:
+            stress: { type: "float" }
+            warmth: { type: "float" }
+            drive: { type: "float" }
+            clarity: { type: "float" }
+            joy: { type: "float" }
+            alertness: { type: "float" }
+            connection: { type: "float" }
+            groundedness: { type: "float" }
+            openness: { type: "float" }
+          metadata:
+            emotion_label: { type: "string" }
+      
+  rag_context:
+    type: "object"
+    description: "AgenticRAG (Agentic Retrieval-Augmented Generation) Results."
+    required: true
+    properties:
+      hept_stream_matches:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            stream: { type: "string", enum: [Narrative, Salience, Sensory, Intuition, Emotion, Temporal, Reflection] }
+            content: { type: "string" }
+            score: { type: "float" }
+
+data_integrity:
+  - "MSP must return the LATEST available state (< 200ms latency)."
+  - "If psychological_context is missing, CIN must fallback to neutral baseline."

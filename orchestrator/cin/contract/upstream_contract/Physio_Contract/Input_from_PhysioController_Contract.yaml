@@ -1,0 +1,28 @@
+# Input from PhysioController (Physiological Controller) Contract
+# Component: PhysioController (Physiological Controller) -> CIN (Context Injection Node)
+# version: 8.1.0-R1
+# Date: 2026-01-03
+
+schema: EVA-Input-from-Physio-Contract-v1.0
+version: 8.1.0-R1
+schema_ref: "orchestrator/cin/validation/Physio_to_CIN_Data_Schema.json"
+
+required_inputs:
+  baseline_state:
+    type: "object"
+    description: "Snapshot of autonomic and hormonal baseline state (Phase 1 Perception)."
+    required: true
+    properties:
+      hr_index: { type: "float" }
+      autonomic_state: { type: "string" }
+      hormone_summary: { type: "string" }
+  
+  ans_delta:
+    type: "object"
+    description: "Change in physiological state after stimulus processing (Phase 2 Reasoning)."
+    required: false
+    properties:
+      sympathetic: { type: "float" }
+      parasympathetic: { type: "float" }
+      cortisol_delta: { type: "float" }
+      adrenaline_delta: { type: "float" }

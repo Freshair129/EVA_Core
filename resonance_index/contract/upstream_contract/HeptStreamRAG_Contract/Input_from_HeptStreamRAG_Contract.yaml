@@ -1,0 +1,37 @@
+# Input from Hept-Stream RAG Contract
+# version: 8.1.0-R1
+# Date: 2026-01-03
+# Description: Detailed agreement for memory candidates received from RAG.
+
+schema: EVA-Input-From-HeptStreamRAG-Contract-v1
+
+source:
+  module: Hept_Stream_RAG
+  component_id: SYS-HSR-8.1
+
+destination:
+  module: Resonance_Index
+  component_id: SYS-RI-8.1
+
+data:
+  format: yaml
+  fields:
+    result_set:
+      type: array
+      items:
+        type: object
+        required: [episode_id, content, score, stream_source]
+        properties:
+          episode_id: { type: string }
+          content: { type: string }
+          score: { type: float }
+          stream_source: { type: string }
+          metadata: { type: object }
+
+delivery:
+  method: function_call
+  frequency: on_demand
+
+validation:
+  required_fields:
+    - result_set

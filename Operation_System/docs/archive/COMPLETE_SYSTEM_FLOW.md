@@ -1279,7 +1279,7 @@ Orchestrator → Artifact_Qualia: process(eva_matrix_state, rim)
 }
 ```
 
-**Writes to:** `Consciousness/10_state/artifact_qualia_state.json`
+**Writes to:** `consciousness/10_state/artifact_qualia_state.json`
 
 #### Step Post.2: RMS Encoding
 
@@ -1318,7 +1318,7 @@ Orchestrator → RMS: process(eva_matrix, rim, reflex_state, ri)
 }
 ```
 
-**Writes to:** `Consciousness/10_state/rms_state.json`
+**Writes to:** `consciousness/10_state/rms_state.json`
 
 #### Step Post.3: MSP Storage
 

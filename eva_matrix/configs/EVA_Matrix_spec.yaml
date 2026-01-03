@@ -1,5 +1,5 @@
 # EVA Matrix System Specification
-# Version: 8.1.0
+# version: 8.1.0-R1
 # Status: GKS (Genesis Knowledge System) Standardized
 # Date: 2026-01-02
 
@@ -14,7 +14,7 @@ meta:
 # 1. ARCHITECTURAL POSITION
 # ============================================================
 architecture:
-  layer: "Consciousness / Psyche Layer"
+  layer: "consciousness / Psyche Layer"
   upstream_dependencies:
     - component: "PhysioController"
       data: "Neural signals (hormones, ANS (Autonomic Nervous System) state)"

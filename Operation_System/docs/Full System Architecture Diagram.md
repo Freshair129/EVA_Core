@@ -239,15 +239,15 @@ graph TB
 | Component | File Location | Storage Format | Purpose |
 |-----------|---------------|----------------|---------|
 | **MSP Client** | `services/msp_client.py` | MongoDB + Neo4j + Local JSON | Unified persistence layer |
-| **Episodic Memory (User)** | `Consciousness/01_Episodic_memory/episodes_user/` | `EVA_EP01_user.json` | Lightweight user data (~1.3 KB)<br/>Used for RAG queries (62% I/O reduction) |
-| **Episodic Memory (LLM)** | `Consciousness/01_Episodic_memory/episodes_llm/` | `EVA_EP01_llm.json` | Detailed LLM response (~2.1 KB)<br/>Full physiological trace |
-| **Search Index** | `Consciousness/01_Episodic_memory/episodic_log.jsonl` | JSONL | Fast keyword/tag search |
-| **Session Memory** | `Consciousness/04_Session_Memory/` | `THA-01-S003_SP1C2_SS2.json` | Compressed snapshots (8 sessions → 1 Core) |
+| **Episodic Memory (User)** | `consciousness/01_Episodic_memory/episodes_user/` | `EVA_EP01_user.json` | Lightweight user data (~1.3 KB)<br/>Used for RAG queries (62% I/O reduction) |
+| **Episodic Memory (LLM)** | `consciousness/01_Episodic_memory/episodes_llm/` | `EVA_EP01_llm.json` | Detailed LLM response (~2.1 KB)<br/>Full physiological trace |
+| **Search Index** | `consciousness/01_Episodic_memory/episodic_log.jsonl` | JSONL | Fast keyword/tag search |
+| **Session Memory** | `consciousness/04_Session_Memory/` | `THA-01-S003_SP1C2_SS2.json` | Compressed snapshots (8 sessions → 1 Core) |
 | **Semantic Memory** | Neo4j or local graph | Concept relationships | Knowledge graph |
 
 **Episode ID Format (v8.1.0)**: `{PERSONA}_EP{number}`
 - Example: `EVA_EP01`, `EVA_EP79`
-- Auto-increment counter in `Consciousness/09_state/episode_counter.json`
+- Auto-increment counter in `consciousness/09_state/episode_counter.json`
 
 **Session Memory Format (v8.1.0)**: `{develop_id}_SP{sphere}C{core}_SS{session}.json`
 - Example: `THA-01-S003_SP1C2_SS2.json` (Clone S003, Sphere 1, Core 2, Session 2)
@@ -466,7 +466,7 @@ EVA 8.1.0/
 ├── Resonance_Memory_System/
 │   └── rms_v6.py                       ← Emotional Texture Encoding
 │
-├── Consciousness/
+├── consciousness/
 │   ├── 01_Episodic_memory/
 │   │   ├── episodes_user/              ← Lightweight episodes (RAG)
 │   │   ├── episodes_llm/               ← Detailed episodes (Full)

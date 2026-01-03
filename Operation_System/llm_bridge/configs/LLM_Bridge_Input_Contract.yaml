@@ -1,0 +1,54 @@
+# LLM (Large Language Model) Bridge Input Contract
+# version: 8.1.0-R1
+# Date: 2026-01-02
+# Status: GKS (Genesis Knowledge System) Standardized
+
+schema: LLM-Bridge-Input-Contract-v1
+
+# ============================================================
+# 1. PROMPT & CONTEXT
+# ============================================================
+execution_context:
+  prompt_string:
+    type: "string"
+    description: "The fully assembled prompt from CIN (Context Injection Node)"
+    required: true
+  
+  context_id:
+    type: "string"
+    pattern: "^[A-Z0-9-]+$"
+    required: true
+
+# ============================================================
+# 2. TOOL DEFINITIONS
+# ============================================================
+tooling:
+  available_tools:
+    type: "array"
+    items: "object"
+    description: "Function definitions based on Gemini API standard"
+    required: true
+
+# ============================================================
+# 3. INFERENCE HYPERPARAMETERS
+# ============================================================
+parameters:
+  model_name:
+    type: "string"
+    default: "gemini-2.0-flash-exp"
+  
+  temperature:
+    type: "float"
+    range: [0.0, 1.0]
+    default: 0.7
+  
+  max_output_tokens:
+    type: "integer"
+    default: 4096
+
+# ============================================================
+# 4. CONSTRAINTS
+# ============================================================
+constraints:
+  - "Bilingual Policy: Input ต้องระบุภาษาหลักของผู้ใช้เพื่อให้ LLM (Large Language Model) ตอบกลับเป็นภาษาเดียวกัน"
+  - "Safety Filters: ต้องคงความเข้มงวดของ Gemini Safety Settings ในระดับสูงสุด"

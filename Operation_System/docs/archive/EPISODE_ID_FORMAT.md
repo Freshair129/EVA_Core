@@ -98,7 +98,7 @@ def _abbreviate_persona_name(self, name: str) -> str:
 
 Episode numbers increment automatically on every episode write.
 
-**Counter Storage**: `Consciousness/09_state/episode_counter.json`
+**Counter Storage**: `consciousness/09_state/episode_counter.json`
 
 **Structure**:
 ```json
@@ -156,7 +156,7 @@ Episode IDs now carry persona context:
 Episode IDs are used in file names for both user and LLM episodes:
 
 ```
-Consciousness/01_Episodic_memory/
+consciousness/01_Episodic_memory/
 ├── episodes_user/
 │   ├── EVA_EP01_user.json
 │   ├── EVA_EP02_user.json
@@ -248,7 +248,7 @@ meta:
 ### File Structure
 
 ```
-Consciousness/01_Episodic_memory/
+consciousness/01_Episodic_memory/
 ├── episodes/              # Legacy (deprecated, kept for compatibility)
 │   └── ep_260101_*.json
 ├── episodes_user/         # NEW: User episodes with new ID format
@@ -274,7 +274,7 @@ memory_layers:
       episode_number:
         format: "Zero-padded, minimum 2 digits"
         auto_increment: true
-        counter_file: "Consciousness/09_state/episode_counter.json"
+        counter_file: "consciousness/09_state/episode_counter.json"
       rationale: "Human-readable IDs for easy reference in memory recall"
 ```
 
@@ -289,7 +289,7 @@ episodic_write:
       max_length: 4
       rule: "Remove vowels, take first 4 consonants (English) or first 4 chars (Thai)"
     counter:
-      location: "Consciousness/09_state/episode_counter.json"
+      location: "consciousness/09_state/episode_counter.json"
       auto_increment: true
       zero_padding: "minimum 2 digits"
 ```

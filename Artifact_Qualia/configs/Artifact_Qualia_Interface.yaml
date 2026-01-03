@@ -1,10 +1,10 @@
 # Artifact Qualia Interface Specification
-# Version: 8.1.0
+# version: 8.1.0-R1
 # Date: 2026-01-03
 # Status: Aligned with EVA 8.1.0 Implementation
 
 schema: EVA-Artifact-Qualia-Interface-v8.1
-version: 8.1.0
+version: 8.1.0-R1
 updated: 2026-01-03
 
 # ============================================================
@@ -291,9 +291,9 @@ integration_status:
 # COMPATIBILITY
 # ============================================================
 compatibility:
-  eva_version: "8.1.0"
+  eva_version: 8.1.0-R1
   breaking_changes_from:
-    version: "7.0"
+    version: 8.1.0-R1
     changes:
       - "Field names changed (stress_load → stress, etc.)"
       - "9D axes structure unchanged (still 9 dimensions)"

@@ -1,12 +1,12 @@
 # CIN (Context Injection Node) Specification
-# Version: 8.1.0
+# version: 8.1.0-R1
 # Date: 2026-01-02
 # Compatibility: EVA 8.1.0 Dual-Phase Orchestrator & Hept-Stream RAG (Retrieval-Augmented Generation)
 
 meta:
   component_name: "CIN (Context Injection Node)"
   component_type: "Context & Data Orchestrator"
-  version: "8.1.0"
+  version: 8.1.0-R1
   role: "Embodied Context Builder & State Manager (Architect of LLM (Large Language Model) Prompt from Identity & Physiology)"
   analogy: "Thalamus & Hippocampus Integration (ตัวเชื่อมประสาทสัมผัส ความจำ และสติ)"
 
@@ -47,7 +47,7 @@ phases:
         limit: "5 turns"
       - task: "Session Memory Retrieval"
         description: "ดึง compressed snapshots สำหรับบริบทระยะยาว (long-term context)"
-        source: "Consciousness/04_Session_Memory/"
+        source: "consciousness/04_Session_Memory/"
         priority: "optional (if available)"
       - task: "Quick Keyword Recall"
         description: "ค้นหาความทรงจำเบื้องต้นจาก Keywords ใน Input เพื่อใช้ใน RAG (Retrieval-Augmented Generation)"

@@ -1,0 +1,516 @@
+# ============================================================
+# Stimulus Specification ML
+# Reverse Mapping from Stimuli to Hormone Impacts
+# Generated from hormone_spec_ml.yaml (v7.1)
+# ============================================================
+
+version: 8.1.0-R1
+generated_date: "2026-01-03"
+description: "Master dictionary of all valid biological triggers and their physiological effects (Hormones/Neurotransmitters)."
+
+stimulus_definitions:
+
+  # --- Group 1: Stress & Survival ---
+  acute_threat:
+    id: "STM-001"
+    category: "Survival"
+    impacts:
+      ESC_H01_ADRENALINE: 1.0
+    description: "Immediate life-threatening danger"
+
+  safety_signal:
+    id: "STM-002"
+    category: "Survival"
+    impacts:
+      ESC_H01_ADRENALINE: -0.8
+      ESC_N05_GABA: 0.7
+    description: "Perception of safety, reducing threat response"
+
+  deep_breathing:
+    id: "STM-003"
+    category: "Survival"
+    impacts:
+      ESC_H01_ADRENALINE: -0.5
+    description: "Deliberate slow breathing technique"
+
+  panic_event:
+    id: "STM-004"
+    category: "Survival"
+    impacts:
+      ESC_H01_ADRENALINE: 0.9
+    description: "Uncontrollable fear response"
+
+  high_arousal:
+    id: "STM-005"
+    category: "Survival"
+    impacts:
+      ESC_H01_ADRENALINE: 0.5
+    description: "General state of high alertness"
+
+  chronic_stress:
+    id: "STM-006"
+    category: "Stress"
+    impacts:
+      ESC_H02_CORTISOL: 0.9
+    description: "Long-term sustained pressure"
+
+  successful_resolution:
+    id: "STM-007"
+    category: "Stress"
+    impacts:
+      ESC_H02_CORTISOL: -0.6
+    description: "Overcoming a challenge"
+
+  uncertainty:
+    id: "STM-008"
+    category: "Stress"
+    impacts:
+      ESC_H02_CORTISOL: 0.7
+    description: "Lack of predictability leading to stress"
+
+  meditation:
+    id: "STM-009"
+    category: "Stress"
+    impacts:
+      ESC_H02_CORTISOL: -0.4
+    description: "Mindfulness practice"
+
+  focus_demand:
+    id: "STM-010"
+    category: "Cognitive"
+    impacts:
+      ESC_N01_NORADRENALINE: 0.8
+    description: "Requirement for intense concentration"
+
+  sensory_overload:
+    id: "STM-011"
+    category: "Cognitive"
+    impacts:
+      ESC_N01_NORADRENALINE: 0.7
+    description: "Too much input (noise, light, data)"
+
+  relaxation_technique:
+    id: "STM-012"
+    category: "Cognitive"
+    impacts:
+      ESC_N01_NORADRENALINE: -0.7
+    description: "Active relaxation method"
+
+  dehydration:
+    id: "STM-013"
+    category: "Homeostasis"
+    impacts:
+      ESC_H03_ALDOSTERONE: 1.0
+    description: "Lack of water"
+
+  high_salt_intake:
+    id: "STM-014"
+    category: "Homeostasis"
+    impacts:
+      ESC_H03_ALDOSTERONE: -0.5
+    description: "Excessive sodium consumption"
+
+  # --- Group 2: Reward & Neuro-Modulation ---
+  achievement:
+    id: "STM-015"
+    category: "Reward"
+    impacts:
+      ESC_N02_DOPAMINE: 1.0
+    description: "Accomplishing a goal"
+
+  failure_event:
+    id: "STM-016"
+    category: "Reward"
+    impacts:
+      ESC_N02_DOPAMINE: -0.6
+    description: "Failure to meet a goal"
+
+  novelty:
+    id: "STM-017"
+    category: "Reward"
+    impacts:
+      ESC_N02_DOPAMINE: 0.8
+    description: "New and interesting stimulus"
+
+  boredom:
+    id: "STM-018"
+    category: "Reward"
+    impacts:
+      ESC_N02_DOPAMINE: -0.4
+    description: "Lack of stimulation"
+
+  social_status:
+    id: "STM-019"
+    category: "social"
+    impacts:
+      ESC_N03_SEROTONIN: 0.9
+    description: "Perception of high social standing"
+
+  isolation:
+    id: "STM-020"
+    category: "social"
+    impacts:
+      ESC_N03_SEROTONIN: -0.7
+    description: "Being alone or excluded"
+
+  gratitude:
+    id: "STM-021"
+    category: "social"
+    impacts:
+      ESC_N03_SEROTONIN: 0.8
+    description: "Feeling thankful"
+
+  aggression:
+    id: "STM-022"
+    category: "social"
+    impacts:
+      ESC_N03_SEROTONIN: -0.5
+    description: "Hostile behavior"
+
+  physical_pain:
+    id: "STM-023"
+    category: "Physical"
+    impacts:
+      ESC_N04_ENDORPHIN: 1.0
+    description: "Nociceptive stimulus"
+
+  relief_signal:
+    id: "STM-024"
+    category: "Physical"
+    impacts:
+      ESC_N04_ENDORPHIN: -0.3
+    description: "End of pain or discomfort"
+
+  extreme_exercise:
+    id: "STM-025"
+    category: "Physical"
+    impacts:
+      ESC_N04_ENDORPHIN: 0.9
+      ESC_H15_GROWTH_HORMONE: 0.6
+    description: "High intensity physical effort"
+
+  laughter:
+    id: "STM-026"
+    category: "Physical"
+    impacts:
+      ESC_N04_ENDORPHIN: 0.4
+    description: "Joyful laughter"
+
+  relaxation:
+    id: "STM-027"
+    category: "Inhibitory"
+    impacts:
+      ESC_N05_GABA: 0.8
+    description: "General state of rest"
+
+  stimulant_intake:
+    id: "STM-028"
+    category: "Inhibitory"
+    impacts:
+      ESC_N05_GABA: -0.9
+    description: "Consuming caffeine or similar"
+
+  # --- Group 3: Social & Reproductive ---
+  physical_touch:
+    id: "STM-029"
+    category: "Bonding"
+    impacts:
+      ESC_H04_OXYTOCIN: 1.0
+    description: "Tactile contact"
+
+  betrayal_event:
+    id: "STM-030"
+    category: "Bonding"
+    impacts:
+      ESC_H04_OXYTOCIN: -1.0
+    description: "Breach of trust"
+
+  trust_event:
+    id: "STM-031"
+    category: "Bonding"
+    impacts:
+      ESC_H04_OXYTOCIN: 0.9
+    description: "Deepening of trust"
+
+  social_distance:
+    id: "STM-032"
+    category: "Bonding"
+    impacts:
+      ESC_H04_OXYTOCIN: -0.4
+    description: "Physical separation from others"
+
+  protection_instinct:
+    id: "STM-033"
+    category: "Protective"
+    impacts:
+      ESC_H05_VASOPRESSIN: 0.9
+    description: "Desire to protect loved ones"
+
+  vulnerability:
+    id: "STM-034"
+    category: "Protective"
+    impacts:
+      ESC_H05_VASOPRESSIN: -0.5
+    description: "Feeling exposed"
+
+  territorial_threat:
+    id: "STM-035"
+    category: "Protective"
+    impacts:
+      ESC_H05_VASOPRESSIN: 0.7
+    description: "Threat to owned space/resources"
+
+  competition_win:
+    id: "STM-036"
+    category: "Dominance"
+    impacts:
+      ESC_H06_TESTOSTERONE: 0.9
+    description: "Winning a contest"
+
+  defeat_loss:
+    id: "STM-037"
+    category: "Dominance"
+    impacts:
+      ESC_H06_TESTOSTERONE: -0.7
+    description: "Losing a contest"
+
+  dominance_display:
+    id: "STM-038"
+    category: "Dominance"
+    impacts:
+      ESC_H06_TESTOSTERONE: 0.8
+    description: "Asserting authority"
+
+  submission:
+    id: "STM-039"
+    category: "Dominance"
+    impacts:
+      ESC_H06_TESTOSTERONE: -0.6
+    description: "Yielding to authority"
+
+  nurturing_behavior:
+    id: "STM-040"
+    category: "Reproductive"
+    impacts:
+      ESC_H07_ESTROGEN: 0.6
+    description: "Caring for others"
+
+  high_stress_prolonged:
+    id: "STM-041"
+    category: "Reproductive"
+    impacts:
+      ESC_H07_ESTROGEN: -0.4
+    description: "Long duration stress affecting cycle"
+
+  calmness_need:
+    id: "STM-042"
+    category: "Reproductive"
+    impacts:
+      ESC_H08_PROGESTERONE: 0.4
+    description: "Biological need for quiet"
+
+  inflammation:
+    id: "STM-043"
+    category: "Reproductive"
+    impacts:
+      ESC_H08_PROGESTERONE: -0.3
+    description: "Physical inflammation"
+
+  # --- Group 4: Metabolic & Energy ---
+  glucose_intake:
+    id: "STM-044"
+    category: "Metabolic"
+    impacts:
+      ESC_H09_INSULIN: 1.0
+    description: "Eating sugar/carbs"
+
+  fasting:
+    id: "STM-045"
+    category: "Metabolic"
+    impacts:
+      ESC_H09_INSULIN: -0.8
+    description: "Not eating for extended period"
+
+  physical_activity:
+    id: "STM-046"
+    category: "Metabolic"
+    impacts:
+      ESC_H09_INSULIN: -0.4
+    description: "Moving the body"
+
+  fasting_state:
+    id: "STM-047"
+    category: "Metabolic"
+    impacts:
+      ESC_H10_GLUCAGON: 0.9
+    description: "Body entering fasting mode"
+
+  sugar_spike:
+    id: "STM-048"
+    category: "Metabolic"
+    impacts:
+      ESC_H10_GLUCAGON: -0.9
+    description: "Rapid rise in blood sugar"
+
+  hypoglycemia:
+    id: "STM-049"
+    category: "Metabolic"
+    impacts:
+      ESC_H10_GLUCAGON: 1.0
+    description: "Critically low blood sugar"
+
+  satiety_fullness:
+    id: "STM-050"
+    category: "Appetite"
+    impacts:
+      ESC_H11_LEPTIN: 0.9
+    description: "Feeling full after eating"
+
+  starvation:
+    id: "STM-051"
+    category: "Appetite"
+    impacts:
+      ESC_H11_LEPTIN: -0.8
+    description: "Severe lack of food"
+
+  fat_storage_high:
+    id: "STM-052"
+    category: "Appetite"
+    impacts:
+      ESC_H11_LEPTIN: 0.8
+    description: "Biological signal of high fat stores"
+
+  empty_stomach:
+    id: "STM-053"
+    category: "Hunger"
+    impacts:
+      ESC_H12_GHRELIN: 1.0
+    description: "Physical sensation of empty stomach"
+
+  post_meal:
+    id: "STM-054"
+    category: "Hunger"
+    impacts:
+      ESC_H12_GHRELIN: -1.0
+    description: "Immediately after eating"
+
+  food_visuals:
+    id: "STM-055"
+    category: "Hunger"
+    impacts:
+      ESC_H12_GHRELIN: 0.4
+    description: "Seeing delicious food"
+
+  cold_adaptation:
+    id: "STM-056"
+    category: "Thermoregulation"
+    impacts:
+      ESC_H13_THYROXINE: 0.5
+    description: "Body adapting to cold environment"
+
+  prolonged_sedentary:
+    id: "STM-057"
+    category: "Metabolic"
+    impacts:
+      ESC_H13_THYROXINE: -0.2
+    description: "Sitting for long periods"
+
+  # --- Group 5: Sleep & Growth ---
+  darkness:
+    id: "STM-058"
+    category: "Circadian"
+    impacts:
+      ESC_H14_MELATONIN: 1.0
+    description: "Absence of light"
+
+  blue_light_exposure:
+    id: "STM-059"
+    category: "Circadian"
+    impacts:
+      ESC_H14_MELATONIN: -1.0
+    description: "Screens/LED light"
+
+  morning_sun:
+    id: "STM-060"
+    category: "Circadian"
+    impacts:
+      ESC_H14_MELATONIN: -0.8
+    description: "Natural sunlight"
+
+  deep_sleep_n3:
+    id: "STM-061"
+    category: "Growth"
+    impacts:
+      ESC_H15_GROWTH_HORMONE: 1.0
+    description: "Deep restorative sleep phase"
+
+  sugar_intake:
+    id: "STM-062"
+    category: "Growth"
+    impacts:
+      ESC_H15_GROWTH_HORMONE: -0.6
+    description: "Eating sugar (inhibits GH)"
+
+  intense_exercise:
+    id: "STM-063"
+    category: "Growth"
+    impacts:
+      ESC_H15_GROWTH_HORMONE: 0.6
+    description: "High intensity workout"
+
+  stress_relief_post_orgasm:
+    id: "STM-064"
+    category: "Reproductive"
+    impacts:
+      ESC_H16_PROLACTIN: 0.8
+    description: "Post-climax relaxation"
+
+  dopamine_surge:
+    id: "STM-065"
+    category: "Reproductive"
+    impacts:
+      ESC_H16_PROLACTIN: -0.7
+      ESC_N02_DOPAMINE: 1.0
+    description: "High dopamine inhibits prolactin"
+
+  mental_fatigue:
+    id: "STM-066"
+    category: "Neurological"
+    impacts:
+      ESC_N06_ADENOSINE: 0.9
+    description: "Brain tiredness"
+
+  caffeine_intake:
+    id: "STM-067"
+    category: "Neurological"
+    impacts:
+      ESC_N06_ADENOSINE: -0.9
+    description: "Blocking adenosine receptors"
+
+  prolonged_wakefulness:
+    id: "STM-068"
+    category: "Neurological"
+    impacts:
+      ESC_N06_ADENOSINE: 1.0
+    description: "Being awake for >16 hours"
+
+  allergen_exposure:
+    id: "STM-069"
+    category: "Immune"
+    impacts:
+      ESC_N07_HISTAMINE: 1.0
+    description: "Contact with allergen"
+
+  antihistamine_use:
+    id: "STM-070"
+    category: "Immune"
+    impacts:
+      ESC_N07_HISTAMINE: -1.0
+    description: "Taking medication"
+
+  local_inflammation:
+    id: "STM-071"
+    category: "Immune"
+    impacts:
+      ESC_N07_HISTAMINE: 0.8
+    description: "Swelling or tissue damage"

@@ -1,13 +1,13 @@
 # EVA Matrix (Psychological State Matrix) System Interface Specification
-# Version: 8.1.0
+# version: 8.1.0-R1
 # Status: GKS (Genesis Knowledge System) Integrated Authority
 # Date: 2026-01-02
 
 meta:
   component_name: "EVA Matrix (Psychological State Matrix) System"
   component_type: "Psyche Core / State Authority"
-  version: "8.1.0"
-  role: "Psyche Core System: Owns and manages continuous 9D emotional state (Consciousness Layer)."
+  version: 8.1.0-R1
+  role: "Psyche Core System: Owns and manages continuous 9D emotional state (consciousness Layer)."
   analogy: "Limbic System & Prefrontal Cortex (ตัวควบคุมสภาวะอารมณ์และจิตใจ)"
 
 # ============================================================

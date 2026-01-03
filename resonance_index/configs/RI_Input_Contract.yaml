@@ -1,10 +1,10 @@
 # Resonance Index (RI) Engine Input Contract
-# Version: 8.1.0
+# version: 8.1.0-R1
 # Date: 2026-01-03
 # Status: Aligned with EVA 8.1.0 Implementation
 
 schema: EVA-RI-Input-Contract-v8.1
-version: 8.1.0
+version: 8.1.0-R1
 updated: 2026-01-03
 
 # ============================================================
@@ -402,7 +402,7 @@ downstream_usage:
 # ============================================================
 metadata:
   contract_type: "INPUT"
-  eva_version: "8.1.0"
+  eva_version: 8.1.0-R1
   module_location: "resonance_index/ri_engine.py"
   api_signature: "def compute_RI(self, inputs: Dict[str, Any]) -> Dict[str, float]"
 

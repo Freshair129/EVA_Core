@@ -1,0 +1,15 @@
+{
+  "episode_id": "EVA_EP04",
+  "timestamp": "2026-01-03T04:32:51.603941",
+  "session_id": null,
+  "event_label": null,
+  "episode_tag": null,
+  "episode_type": null,
+  "compression_meta": {
+    "session_seq": 2,
+    "core_seq": 1,
+    "sphere_seq": 0
+  },
+  "situation_context": null,
+  "turn_1": null
+}

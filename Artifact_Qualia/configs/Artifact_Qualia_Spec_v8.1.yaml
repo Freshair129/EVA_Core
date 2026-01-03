@@ -1,11 +1,11 @@
 # Artifact Qualia Comprehensive Specification
-# Version: 8.1.0
+# version: 8.1.0-R1
 # Date: 2026-01-03
 # Status: Production-Ready (with future enhancement roadmap)
 # Migration: Based on EVA 7.0 spec structure, updated for 8.1.0 implementation
 
 schema: EVA-Artifact-Qualia-Spec-v8.1
-version: 8.1.0
+version: 8.1.0-R1
 updated: 2026-01-03
 
 # ============================================================
@@ -613,12 +613,12 @@ usage_examples:
 # ============================================================
 metadata:
   contract_type: "COMPREHENSIVE_SPECIFICATION"
-  version: "8.1.0"
+  version: 8.1.0-R1
   based_on: "EVA 7.0 spec structure"
   updated_for: "EVA 8.1.0 field names and implementation"
 
   compatibility:
-    eva_version: "8.1.0"
+    eva_version: 8.1.0-R1
     breaking_changes_from: "7.0"
     changes:
       - "Field names updated (stress_load → stress, etc.)"

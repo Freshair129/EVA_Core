@@ -1,13 +1,13 @@
 """
-EVA 8.1.5: Main Orchestrator
-Integrates all components for Dual-Phase One-Inference (Official v8.1.0/v8.2.5 Logic)
+EVA 8.1.0-R1: Main Orchestrator (Refactored)
+Refactor Date: 2026-01-03
 
 Architecture:
     User Input
         ↓
     Phase 1: Perception (CIN + LLM extract stimulus)
         ↓
-    The Gap: PhysioController + EVA Matrix + Artifact Qualia + HeptRAG
+    The Gap: PhysioController + EVA Matrix + Artifact Qualia + AgenticRAG
         ↓
     Phase 2: Reasoning (CIN + LLM generate RESPONSE with 40/60 weighting)
         ↓
@@ -32,9 +32,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Import components
 from orchestrator.cin.cin import ContextInjectionNode
-from services.hept_stream_rag.hept_stream_rag import HeptStreamRAG
-from services.msp_client.msp_client import MSPClient
-from services.llm_bridge.llm_bridge import LLMBridge, SYNC_BIOCOGNITIVE_STATE_TOOL
+from agentic_rag.agentic_rag import AgenticRAG
+from memory_n_soul_passport.msp_client import MSPClient
+from operation_system.llm_bridge.llm_bridge import LLMBridge, SYNC_BIOCOGNITIVE_STATE_TOOL
 
 # Biological & Psychological Systems
 from physio_core.physio_controller import PhysioController
@@ -72,8 +72,8 @@ class EVAOrchestrator:
         print("  - Initializing MSP Client...")
         self.msp = MSPClient()
 
-        print("  - Initializing HeptStreamRAG...")
-        self.hept_rag = HeptStreamRAG(msp_client=self.msp)
+        print("  - Initializing AgenticRAG...")
+        self.agentic_rag = AgenticRAG(msp_client=self.msp)
 
         # --------------------------------------------------
         # 2. Initialize Biological & Psychological Mind (The Gap Modules)
@@ -112,7 +112,7 @@ class EVAOrchestrator:
         self.cin = ContextInjectionNode(
             physio_controller=self.physio,
             msp_client=self.msp,
-            hept_stream_rag=self.hept_rag
+            hept_stream_rag=self.agentic_rag
         )
 
         print("  - Initializing LLM Bridge...")
@@ -217,15 +217,15 @@ class EVAOrchestrator:
             qualia_snapshot = self.qualia.integrate(axes_9d, rim_semantic)
             qualitative_experience = self._format_qualia_for_llm(qualia_snapshot)
 
-        # 2d. Memory Retrieval (HeptStreamRAG)
-        print("  - Executing HeptStreamRAG...")
+        # 2d. Memory Retrieval (AgenticRAG)
+        print("  - Executing AgenticRAG...")
         query_ctx = {
             "tags": tags,
             "ans_state": ans_state,
             "blood_levels": blood_levels,
             "context_id": context_id
         }
-        memory_matches = self.hept_rag.retrieve(query_ctx)
+        memory_matches = self.agentic_rag.retrieve(query_ctx)
         
         # Flatten and serialize memory for Phase 2 injection
         memory_list = []

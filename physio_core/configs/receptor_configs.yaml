@@ -1,0 +1,260 @@
+# ============================================================
+# Receptor Configuration & Mapping (Consolidated)
+# version: 8.1.0-R1
+# Description: Defines receptor binding properties (Kd, Hill, Bmax) and their distribution across brain regions.
+# ============================================================
+
+version: 8.1.0-R1
+description: "Consolidated Receptor Definition and Regional Mapping"
+
+# ------------------------------------------------------------
+# Receptor Mapping
+# Structure: Hormone_ID -> Brain_Region -> Parameters
+# ------------------------------------------------------------
+receptor_mapping:
+
+  # --- Adrenaline (Fight/Flight) ---
+  ESC_H01_ADRENALINE:
+    Amygdala: 
+      kd: 45.0       # High sensitivity
+      hill_n: 2.2    # Switch-like response
+      bmax: 1.0
+      efficacy: 1.0  # Strong activation
+    Prefrontal_Cortex: 
+      kd: 60.0
+      hill_n: 1.8
+      bmax: 0.8
+      efficacy: 0.9
+
+  # --- Cortisol (Stress) ---
+  ESC_H02_CORTISOL:
+    Amygdala: 
+      kd: 120.0
+      hill_n: 1.2
+      bmax: 0.9
+      efficacy: 1.0
+    Hippocampus: 
+      kd: 150.0
+      hill_n: 1.0
+      bmax: 0.7
+      efficacy: 0.8  # Memory encoding context
+
+  # --- Noradrenaline (Focus/Arousal) ---
+  ESC_N01_NORADRENALINE:
+    Amygdala: 
+      kd: 60.0
+      hill_n: 1.8
+      bmax: 1.0
+      efficacy: 1.0
+    Locus_Coeruleus: 
+      kd: 50.0
+      hill_n: 2.0
+      bmax: 0.9
+      efficacy: 1.0
+
+  # --- Dopamine (Reward/Drive) ---
+  ESC_N02_DOPAMINE:
+    VTA: 
+      kd: 80.0
+      hill_n: 1.5
+      bmax: 1.0
+      efficacy: 1.0
+    Nucleus_Accumbens: 
+      kd: 70.0
+      hill_n: 1.6
+      bmax: 1.0
+      efficacy: 1.0  # Reward sensation
+    Prefrontal_Cortex: 
+      kd: 100.0
+      hill_n: 1.3
+      bmax: 0.8
+      efficacy: 0.9  # Planning/Motivation
+
+  # --- Serotonin (Mood/Stability) ---
+  ESC_N03_SEROTONIN:
+    Raphe_Nucleus: 
+      kd: 150.0
+      hill_n: 1.1
+      bmax: 0.8
+      efficacy: 1.0
+    Prefrontal_Cortex: 
+      kd: 180.0
+      hill_n: 1.0
+      bmax: 0.7
+      efficacy: 0.8
+    Amygdala: 
+      kd: 200.0
+      hill_n: 1.0
+      bmax: 0.6
+      efficacy: -0.5 # Inhibitory (reduces fear)
+
+  # --- Oxytocin (Bonding) ---
+  ESC_H04_OXYTOCIN:
+    Hypothalamus: 
+      kd: 300.0
+      hill_n: 1.0
+      bmax: 1.0
+      efficacy: 1.0
+    Amygdala: 
+      kd: 350.0
+      hill_n: 1.0
+      bmax: 0.8
+      efficacy: -0.6 # Reduces social threat
+    Nucleus_Accumbens: 
+      kd: 320.0
+      hill_n: 1.1
+      bmax: 0.9
+      efficacy: 0.8  # Social reward
+
+  # --- Vasopressin (Protection) ---
+  ESC_H05_VASOPRESSIN:
+    Hypothalamus: 
+      kd: 250.0
+      hill_n: 1.3
+      bmax: 0.9
+      efficacy: 1.0
+    Amygdala: 
+      kd: 280.0
+      hill_n: 1.2
+      bmax: 0.7
+      efficacy: 0.7
+
+  # --- GABA (Inhibition) ---
+  ESC_N05_GABA:
+    Amygdala: 
+      kd: 250.0
+      hill_n: 1.4
+      bmax: 0.9
+      efficacy: -1.0 # Strong inhibition
+    Prefrontal_Cortex: 
+      kd: 270.0
+      hill_n: 1.3
+      bmax: 0.8
+      efficacy: -0.8
+    Hippocampus: 
+      kd: 300.0
+      hill_n: 1.2
+      bmax: 0.7
+      efficacy: -0.7
+
+  # --- Melatonin (Sleep) ---
+  ESC_H14_MELATONIN:
+    Suprachiasmatic_Nucleus: 
+      kd: 100.0
+      hill_n: 2.0
+      bmax: 1.0
+      efficacy: 1.0
+    Pineal_Gland: 
+      kd: 90.0
+      hill_n: 2.1
+      bmax: 0.9
+      efficacy: 1.0
+
+  # --- Adenosine (Sleep Pressure) ---
+  ESC_N06_ADENOSINE:
+    Basal_Forebrain: 
+      kd: 700.0
+      hill_n: 1.6
+      bmax: 1.0
+      efficacy: -0.9 # Induces drowsiness/reduces arousal
+    Prefrontal_Cortex: 
+      kd: 750.0
+      hill_n: 1.5
+      bmax: 0.8
+      efficacy: -0.7
+
+  # --- Endorphin (Pain Relief) ---
+  ESC_N04_ENDORPHIN:
+    Periaqueductal_Gray: 
+      kd: 200.0
+      hill_n: 1.4
+      bmax: 1.0
+      efficacy: 1.0
+    Amygdala: 
+      kd: 250.0
+      hill_n: 1.3
+      bmax: 0.8
+      efficacy: -0.5
+
+  # --- Acetylcholine (Legacy Reference) ---
+  ESC_H16_ACETYLCHOLINE:
+    Basal_Forebrain: 
+      kd: 50.0
+      hill_n: 1.5
+      bmax: 1.0 
+      efficacy: 1.0
+    Prefrontal_Cortex: 
+      kd: 60.0 
+      hill_n: 1.4 
+      bmax: 0.9 
+      efficacy: 0.9
+    Hippocampus: 
+      kd: 70.0 
+      hill_n: 1.3 
+      bmax: 0.8 
+      efficacy: 0.8
+
+# Reference: Base Receptor Profiles (For Documentation)
+base_profiles:
+  ESC_H01_ADRENALINE: {kd: 45.0, hill_n: 2.2, bmax: 1.0}
+  ESC_N01_NORADRENALINE: {kd: 60.0, hill_n: 1.8, bmax: 1.0}
+  ESC_H02_CORTISOL: {kd: 120.0, hill_n: 1.2, bmax: 0.9}
+
+# ============================================================
+# Reflex Configuration (IRE)
+# ============================================================
+tuning:
+  Gain_Factor: 2.5
+  Saturation_Cutoff: 1.2
+  Reflex_Decay_Rate: 0.9
+  Inhibition_Threshold: 0.05
+
+pathway_mapping:
+  # --- [Group: Social & Bonding] ---
+  - path_id: "AFFILIATION_FAST"
+    stimulus_type: "praise"
+    target_receptor: "ESC_H04_OXYTOCIN"
+    gain_modifier: 1.5
+
+  - path_id: "VALIDATION_FAST"
+    stimulus_type: "validation"
+    target_receptor: "ESC_H04_OXYTOCIN"
+    gain_modifier: 1.5
+
+  # --- [Group: Reward & Drive] ---
+  - path_id: "REWARD_SURGE"
+    stimulus_type: "success"
+    target_receptor: "ESC_N02_DOPAMINE"
+    gain_modifier: 2.0
+
+  - path_id: "ACHIEVEMENT_SURGE"
+    stimulus_type: "achievement"
+    target_receptor: "ESC_N02_DOPAMINE"
+    gain_modifier: 2.0
+
+  # --- [Group: Survival & Crisis] ---
+  - path_id: "FIGHT_OR_FLIGHT_FAST"
+    stimulus_type: "threat"
+    target_receptor: "ESC_H01_ADRENALINE"
+    gain_modifier: 3.5
+
+  - path_id: "INSULT_FAST"
+    stimulus_type: "insult"
+    target_receptor: "ESC_H01_ADRENALINE"
+    gain_modifier: 3.5
+
+  - path_id: "ALERT_SIGNAL"
+    stimulus_type: "uncertainty"
+    target_receptor: "ESC_N01_NORADRENALINE"
+    gain_modifier: 1.8
+
+  # --- [Group: Distress & Inhibition] ---
+  - path_id: "SOCIAL_PAIN_REFLEX"
+    stimulus_type: "rejection"
+    target_receptor: "ESC_H16_PROLACTIN"
+    gain_modifier: 1.2
+
+  - path_id: "STRESS_INJECTION"
+    stimulus_type: "conflict"
+    target_receptor: "ESC_H02_CORTISOL"
+    gain_modifier: 1.0

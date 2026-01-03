@@ -1,5 +1,5 @@
 # Orchestrator Runtime Hookup Configuration
-# Version: 8.1.0
+# version: 8.1.0-R1
 # Date: 2026-01-03
 # Description: Main entry point and lifecycle hooks for the EVA Executive Layer.
 

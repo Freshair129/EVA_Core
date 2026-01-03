@@ -1,0 +1,68 @@
+# Agentic-RAG (Retrieval-Augmented Generation) Output Contract
+# version: 8.1.0-R1
+# Date: 2026-01-02
+# Status: GKS (Genesis Knowledge System) Standardized
+
+schema: Hept-Stream-RAG-Output-Contract-v1
+
+# ============================================================
+# 1. MEMORY MATCH OBJECT
+# ============================================================
+memory_match_schema:
+  type: "object"
+  required: [episode_id, content, score, stream_source]
+  properties:
+    episode_id:
+      type: "string"
+      pattern: "^[A-Z]+_EP[0-9]+$"
+      example: "EVA_EP125"
+    
+    content:
+      type: "string"
+      description: "Text content of the retrieved memory"
+    
+    score:
+      type: "float"
+      range: [0.0, 1.0]
+      description: "Relevance score after weighting and decay"
+    
+    stream_source:
+      type: "string"
+      enum: [narrative, salience, sensory, intuition, emotion, temporal, reflection]
+    
+    metadata:
+      type: "object"
+      properties:
+        timestamp: { type: "string", format: "date-time" }
+        resonance_index: { type: "float" }
+        tags: { type: "array", items: "string" }
+        physio_snapshot: { type: "object" }
+
+# ============================================================
+# 2. MERGED RESULT SET
+# ============================================================
+result_set:
+  type: "array"
+  items: { "$ref": "#/memory_match_schema" }
+  constraints:
+    max_length: 20
+    sorting: "Ordered by score (descending)"
+    deduplication: "Primary key: episode_id (ห้ามมี episode_id ซ้ำกันในชุดผลลัพธ์)"
+
+# ============================================================
+# 3. STREAM-SPECIFIC INVARIANTS
+# ============================================================
+stream_invariants:
+  emotion_stream:
+    rule: "Must be physio-congruent (cosine similarity threshold applied)"
+  narrative_stream:
+    rule: "Must maintain sequential links (parent_id/child_id presence)"
+  temporal_stream:
+    rule: "Must have exponential decay applied based on current_time"
+
+# ============================================================
+# 4. QUALITY ASSURANCE (QA)
+# ============================================================
+quality_gate:
+  - "Minimum Overall Score: 0.3 (Discard results below this threshold)"
+  - "Max Tokens: Total content size should not exceed 1000 tokens for Phase 2 injection"

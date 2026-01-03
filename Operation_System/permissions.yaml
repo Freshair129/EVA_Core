@@ -1,5 +1,5 @@
 schema: EVA-Permissions-v2
-version: 8.1.0
+version: 8.1.0-R1
 updated: 2025-12-31
 
 # Permission model for EVA 8.1.0
@@ -56,17 +56,17 @@ systems:
       - temporal_ref
       - resonance_log
     can_read_files:
-      - "Consciousness/01_Episodic_memory/**/*"
-      - "Consciousness/02_Semantic_memory/**/*"
-      - "Consciousness/03_Sensory_memory/**/*"
-      - "Consciousness/10_state/*"
+      - "consciousness/01_Episodic_memory/**/*"
+      - "consciousness/02_Semantic_memory/**/*"
+      - "consciousness/03_Sensory_memory/**/*"
+      - "consciousness/10_state/*"
       - "Memory_&_Soul_Passaport/**/*"
     can_write_files:
-      - "Consciousness/01_Episodic_memory/episodic_index.jsonl"
-      - "Consciousness/01_Episodic_memory/episodes/**/*.json"
-      - "Consciousness/02_Semantic_memory/**/*"
-      - "Consciousness/03_Sensory_memory/**/*"
-      - "Consciousness/10_state/msp_state.json"
+      - "consciousness/01_Episodic_memory/episodic_index.jsonl"
+      - "consciousness/01_Episodic_memory/episodes/**/*.json"
+      - "consciousness/02_Semantic_memory/**/*"
+      - "consciousness/03_Sensory_memory/**/*"
+      - "consciousness/10_state/msp_state.json"
     notes:
       - "MSP is the ONLY system allowed to write episodic memory"
       - "All memory writes must go through MSP"
@@ -89,13 +89,13 @@ systems:
       - ans_state
     can_read_files:
       - "physio_core/**/*"
-      - "Consciousness/10_state/body_state_history.jsonl"
+      - "consciousness/10_state/body_state_history.jsonl"
     can_write_files:
-      - "Consciousness/10_state/body_state_history.jsonl"
-      - "Consciousness/10_state/physio_state.json"
-      - "Consciousness/10_state/endocrine_state.json"
-      - "Consciousness/10_state/receptor_state.json"
-      - "Consciousness/10_state/ans_state.json"
+      - "consciousness/10_state/body_state_history.jsonl"
+      - "consciousness/10_state/physio_state.json"
+      - "consciousness/10_state/endocrine_state.json"
+      - "consciousness/10_state/receptor_state.json"
+      - "consciousness/10_state/ans_state.json"
     notes:
       - "PhysioController orchestrates full physiological pipeline"
       - "30Hz streaming simulation"
@@ -115,9 +115,9 @@ systems:
       - reflex_directives
     can_read_files:
       - "eva_matrix/**/*"
-      - "Consciousness/10_state/eva_matrix_state.json"
+      - "consciousness/10_state/eva_matrix_state.json"
     can_write_files:
-      - "Consciousness/10_state/eva_matrix_state.json"
+      - "consciousness/10_state/eva_matrix_state.json"
     notes:
       - "9D Psychological State Engine"
       - "Generates Safety Reflex directives"
@@ -131,9 +131,9 @@ systems:
       - qualia_state
     can_read_files:
       - "Artifact_Qualia/**/*"
-      - "Consciousness/10_state/artifact_qualia_state.json"
+      - "consciousness/10_state/artifact_qualia_state.json"
     can_write_files:
-      - "Consciousness/10_state/artifact_qualia_state.json"
+      - "consciousness/10_state/artifact_qualia_state.json"
     notes:
       - "Phenomenological experience integrator"
       - "Pure representation, no decision-making"
@@ -156,9 +156,9 @@ systems:
       - resonance_textures
     can_read_files:
       - "Resonance_Memory_System/**/*"
-      - "Consciousness/10_state/rms_state.json"
+      - "consciousness/10_state/rms_state.json"
     can_write_files:
-      - "Consciousness/10_state/rms_state.json"
+      - "consciousness/10_state/rms_state.json"
     notes:
       - "High-fidelity memory encoding"
       - "Trauma detection (threat > 0.85)"
@@ -184,7 +184,7 @@ systems:
       - reasoning_context     # WRITE: Phase 2 prompt
       - context_id            # WRITE: Context ID generation
     can_read_files:
-      - "Consciousness/**/*"            # READ-ONLY memory access
+      - "consciousness/**/*"            # READ-ONLY memory access
       - "Memory_&_Soul_Passaport/**/*"  # READ-ONLY MSP access
       - "User_profile/**/*"             # READ-ONLY persona access
       - "orchestrator/cin.py"
@@ -206,7 +206,7 @@ systems:
       - rag_query_context     # WRITE: Current query
       - memory_matches        # WRITE: Retrieved results
     can_read_files:
-      - "Consciousness/**/*"            # READ-ONLY memory access
+      - "consciousness/**/*"            # READ-ONLY memory access
       - "Memory_&_Soul_Passaport/**/*"  # READ-ONLY MSP access
       - "services/hept_stream_rag.py"
     can_write_files: []  # HeptRAG is STRICTLY READ-ONLY for files
@@ -231,7 +231,7 @@ systems:
     can_read_files:
       - "User_profile/**/*"
     can_write_files:
-      - "Consciousness/10_state/pmt_violations.log"
+      - "consciousness/10_state/pmt_violations.log"
     notes:
       - "Manages behavioral constraints and persona"
       - "Response weighting: Persona 40% + Physio 60%"
@@ -246,7 +246,7 @@ files:
   # Memory Files (MSP Only)
   # ----------------------------------------------------------
 
-  "Consciousness/01_Episodic_memory/episodic_index.jsonl":
+  "consciousness/01_Episodic_memory/episodic_index.jsonl":
     owner: MSP
     allowed_writers:
       - MSP
@@ -258,7 +258,7 @@ files:
       - "Primary episodic memory index. Only MSP can write."
       - "CIN and HeptRAG can read for retrieval"
 
-  "Consciousness/01_Episodic_memory/episodes/**/*.json":
+  "consciousness/01_Episodic_memory/episodes/**/*.json":
     owner: MSP
     allowed_writers:
       - MSP
@@ -273,7 +273,7 @@ files:
   # Physiological State Files
   # ----------------------------------------------------------
 
-  "Consciousness/10_state/body_state_history.jsonl":
+  "consciousness/10_state/body_state_history.jsonl":
     owner: PhysioController
     allowed_writers:
       - PhysioController
@@ -284,7 +284,7 @@ files:
       - "Physiological state log (30Hz)"
       - "CIN can read for Phase 1 baseline"
 
-  "Consciousness/10_state/physio_state.json":
+  "consciousness/10_state/physio_state.json":
     owner: PhysioController
     allowed_writers:
       - PhysioController
@@ -299,7 +299,7 @@ files:
   # Psychological State Files
   # ----------------------------------------------------------
 
-  "Consciousness/10_state/eva_matrix_state.json":
+  "consciousness/10_state/eva_matrix_state.json":
     owner: EVA_Matrix
     allowed_writers:
       - EVA_Matrix
@@ -311,7 +311,7 @@ files:
     notes:
       - "9D psychological state snapshot"
 
-  "Consciousness/10_state/artifact_qualia_state.json":
+  "consciousness/10_state/artifact_qualia_state.json":
     owner: Artifact_Qualia
     allowed_writers:
       - Artifact_Qualia
@@ -326,7 +326,7 @@ files:
   # Memory Encoding Files
   # ----------------------------------------------------------
 
-  "Consciousness/10_state/rms_state.json":
+  "consciousness/10_state/rms_state.json":
     owner: RMS
     allowed_writers:
       - RMS
@@ -352,19 +352,19 @@ validations:
 
   - name: CIN_cannot_write_memory_files
     description: "CIN builds prompts but CANNOT write memory files (READ-ONLY)"
-    assert: "CIN not in files['Consciousness/01_Episodic_memory/episodic_index.jsonl'].allowed_writers"
+    assert: "CIN not in files['consciousness/01_Episodic_memory/episodic_index.jsonl'].allowed_writers"
 
   - name: HeptRAG_cannot_write_memory_files
     description: "HeptRAG retrieves but CANNOT write memory files (READ-ONLY)"
-    assert: "HeptStreamRAG not in files['Consciousness/01_Episodic_memory/episodic_index.jsonl'].allowed_writers"
+    assert: "HeptStreamRAG not in files['consciousness/01_Episodic_memory/episodic_index.jsonl'].allowed_writers"
 
   - name: MSP_owns_episodic_memory
     description: "Only MSP can write to episodic memory"
-    assert: "MSP in files['Consciousness/01_Episodic_memory/episodic_index.jsonl'].allowed_writers"
+    assert: "MSP in files['consciousness/01_Episodic_memory/episodic_index.jsonl'].allowed_writers"
 
   - name: PhysioController_owns_body_state
     description: "PhysioController owns physiological state logs"
-    assert: "PhysioController in files['Consciousness/10_state/body_state_history.jsonl'].allowed_writers"
+    assert: "PhysioController in files['consciousness/10_state/body_state_history.jsonl'].allowed_writers"
 
   - name: core_libraries_strict_readonly
     description: "Systems with role=core_library cannot write to any slots or own any files"

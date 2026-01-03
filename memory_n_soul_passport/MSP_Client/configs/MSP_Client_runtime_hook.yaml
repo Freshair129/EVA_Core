@@ -1,0 +1,27 @@
+# MSP Client Runtime Hookup Configuration
+# version: 8.1.0-R1
+# Date: 2026-01-03
+# Description: Integration of the Persistence Layer (DB Bridges).
+
+runtime_hook:
+  component: "MSPClient"
+  module_path: "Memory_&_Soul_Passaport.MSP_Client.msp_client"
+  class_name: "MSPClient"
+  
+  # Initialization
+  initialization:
+    args:
+      configs: "Memory_&_Soul_Passaport/MSP_Client/configs/MSP_Client_configs.yaml"
+    
+  # Orchestrator bindings
+  orchestrator_bindings:
+    - trigger: "on:MSP.commit_episode"
+      action: "save"
+      mapping:
+        input: "payload"
+        output: "persistence.status"
+
+  # Resources
+  resources:
+    configs: "Memory_&_Soul_Passaport/MSP_Client/configs/"
+    contract: "Memory_&_Soul_Passaport/MSP_Client/configs/MSP_Client_Input_Contract.yaml"

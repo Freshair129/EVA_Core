@@ -232,11 +232,11 @@ E:\The Human Algorithm\T2\EVA 8.1.0\
 ├── services/ ✅
 │   └── hept_stream_rag.py ✅ (743 lines)
 │
-├── Consciousness/
+├── consciousness/
 ├── Artifact_Qualia/
 ├── eva_matrix/
 ├── Memory_&_Soul_Passaport/
-├── Operation_System/
+├── operation_system/
 ├── physio_core/
 ├── Resonance_Memory_System/
 └── ...

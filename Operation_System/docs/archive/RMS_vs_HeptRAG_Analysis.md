@@ -606,7 +606,7 @@ can_write_slots:
   - core_color
   - resonance_textures
 can_write_files:
-  - Consciousness/10_state/rms_state.json
+  - consciousness/10_state/rms_state.json
 ```
 
 **HeptStreamRAG:**

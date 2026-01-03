@@ -1,6 +1,6 @@
 schema: EVA-CoreSystems-v2
-version: 8.1.0
-updated: 2025-12-31
+version: 8.1.0-R2
+updated: 2026-01-03
 
 description: >
   Core operating systems for EVA 8.1.0.
@@ -19,6 +19,7 @@ core_systems:
 
   - id: MSP
     name: Memory_Soul_Passport
+    version: 8.1.0-R1
     role: core_system
     domain: memory_persistence
     description: >
@@ -28,17 +29,17 @@ core_systems:
       - memory_core
       - temporal_ref
     main_files:
-      - path: Consciousness/01_Episodic_memory/episodes/
+      - path: consciousness/01_Episodic_memory/episodes/
         purpose: episodic_memory_deep_storage
-      - path: Consciousness/01_Episodic_memory/episodic_index.jsonl
+      - path: consciousness/01_Episodic_memory/episodic_index.jsonl
         purpose: episodic_memory_index
-      - path: Consciousness/02_Semantic_memory/
+      - path: consciousness/02_Semantic_memory/
         purpose: semantic_graph
-      - path: Consciousness/03_Sensory_memory/
+      - path: consciousness/03_Sensory_memory/
         purpose: sensory_sidecars
-      - path: memory_n_soul_passaport/MSP/
+      - path: memory_n_soul_passport/MSP/
         purpose: msp_modules
-      - path: memory_n_soul_passaport/schema/
+      - path: memory_n_soul_passport/schema/
         purpose: memory_schemas
     collections:
       - episodes_v8
@@ -52,6 +53,7 @@ core_systems:
 
   - id: PhysioController
     name: Physiological_Controller
+    version: 8.1.0-R1
     role: system_authority
     domain: biological_simulation
     description: >
@@ -76,7 +78,7 @@ core_systems:
         purpose: fast_reflexes
       - path: physio_core/autonomic/
         purpose: ans_integration
-      - path: Consciousness/10_state/body_state_history.jsonl
+      - path: consciousness/10_state/body_state_history.jsonl
         purpose: physio_logs
     subsystems:
       - HPARegulator
@@ -93,6 +95,7 @@ core_systems:
 
   - id: EVA_Matrix
     name: Psychological_Engine
+    version: 8.1.0-R1
     role: core_system
     domain: psyche
     description: >
@@ -105,7 +108,7 @@ core_systems:
     main_files:
       - path: eva_matrix/eva_matrix_engine.py
         purpose: psyche_system
-      - path: Consciousness/10_state/eva_matrix_state.json
+      - path: consciousness/10_state/eva_matrix_state.json
         purpose: state_persistence
     dimensions:
       - Stress
@@ -120,6 +123,7 @@ core_systems:
 
   - id: Artifact_Qualia
     name: Phenomenological_Experience
+    version: 8.1.0-R1
     role: core_system
     domain: phenomenology
     description: >
@@ -131,7 +135,7 @@ core_systems:
     main_files:
       - path: artifact_qualia/Artifact_Qualia.py
         purpose: phenomenology_integration
-      - path: Consciousness/10_state/artifact_qualia_state.json
+      - path: consciousness/10_state/artifact_qualia_state.json
         purpose: state_persistence
     outputs:
       - intensity: "How strong the experience feels"
@@ -146,6 +150,7 @@ core_systems:
 
   - id: RMS
     name: Resonance_Memory_System
+    version: 8.1.0-R1
     role: core_system
     domain: encoding
     description: >
@@ -159,7 +164,7 @@ core_systems:
     main_files:
       - path: resonance_memory_system/rms_v6.py
         purpose: encoding_logic
-      - path: Consciousness/10_state/rms_state.json
+      - path: consciousness/10_state/rms_state.json
         purpose: state_persistence
     encoding_outputs:
       - core_color: "Hex color representing emotional state"
@@ -172,18 +177,19 @@ core_systems:
 
   - id: CIN
     name: Context_Injection_Node
+    version: 8.1.0-R1
     role: core_system
     domain: orchestration
     description: >
       Dual-phase context builder for One-Inference LLM pattern.
       Phase 1: Rough retrieval (physio baseline + recent history + quick recall).
-      Phase 2: Deep injection (embodied sensation + Hept-Stream RAG results).
+      Phase 2: Deep injection (embodied sensation + Agentic-RAG results).
     owns_slots:
       - perception_context
       - reasoning_context
       - context_id
     main_files:
-      - path: orchestrator/cin.py
+      - path: orchestrator/cin/cin.py
         purpose: context_injection
       - path: specs/Context Injection Node Specifica 8.0.yaml
         purpose: specification
@@ -195,8 +201,9 @@ core_systems:
       - "Graceful degradation (works with missing dependencies)"
       - "Auto-discovery for Persona_01.md"
 
-  - id: HeptStreamRAG
-    name: Seven_Stream_Memory_Retrieval
+  - id: AgenticRAG
+    name: Agentic_RAG
+    version: 8.1.0-R1
     role: core_system
     domain: memory_retrieval
     description: >
@@ -207,7 +214,7 @@ core_systems:
       - rag_query_context
       - memory_matches
     main_files:
-      - path: services/hept_stream_rag.py
+      - path: agentic_rag/agentic_rag.py
         purpose: 7stream_retrieval
     streams:
       - Narrative: "Sequential episode chains"
@@ -228,6 +235,7 @@ core_systems:
 
   - id: PMT
     name: Prompt_Rule_Layer
+    version: 8.1.0-R1
     role: core_system
     domain: behavioral_constraints
     description: >
@@ -325,11 +333,11 @@ slots:
 
   # Memory Retrieval
   rag_query_context:
-    owner: HeptStreamRAG
+    owner: AgenticRAG
     description: "Current RAG query context"
 
   memory_matches:
-    owner: HeptStreamRAG
+    owner: AgenticRAG
     description: "Retrieved memory matches from 7 streams"
 
   # Behavioral
@@ -349,6 +357,7 @@ core_libraries:
 
   - id: Endocrine
     name: Endocrine_Library
+    version: 8.1.0-R1
     role: core_library
     domain: hormone_kinetics
     description: >
@@ -361,6 +370,7 @@ core_libraries:
 
   - id: Receptor
     name: Receptor_Library
+    version: 8.1.0-R1
     role: core_library
     domain: signal_transduction
     description: >
@@ -373,6 +383,7 @@ core_libraries:
 
   - id: EVA_Matrix_Lib
     name: EVA_Matrix_Library
+    version: 8.1.0-R1
     role: core_library
     domain: psychological_calculation
     description: >
@@ -384,6 +395,7 @@ core_libraries:
 
   - id: Resonance
     name: Resonance_Library
+    version: 8.1.0-R1
     role: core_library
     domain: resonance_analytics
     description: >
@@ -404,7 +416,7 @@ system_constraints:
   inference_mode: "One-Inference (Sequential Tool Use via sync_biocognitive_state)"
   physio_rule: "Physiology first. Cognition later."
   response_weighting: "Persona 40% + Physio-State 60%"
-  memory_primacy: "All retrieval through Hept-Stream RAG"
+  memory_primacy: "All retrieval through Agentic-RAG"
   context_continuity: "context_id stays constant across both phases"
 
 # ============================================================

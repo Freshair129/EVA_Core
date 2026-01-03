@@ -1,5 +1,5 @@
 # PMT (Prompt Rule Layer) Interface
-# Version: 1.0.0
+# version: 8.1.0-R1
 # Description: Public API Specification for the Prompt Rule Layer.
 
 schema: EVA-PMT-Interface-v1

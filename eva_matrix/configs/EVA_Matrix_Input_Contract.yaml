@@ -1,5 +1,5 @@
 # EVA Matrix (Psychological State Matrix) Input Contract Registry
-# Version: 1.0.1
+# version: 8.1.0-R1
 # Description: Master registry of all allowed inputs into the EVA Matrix. Validates consolidated data from upstream sources.
 
 schema: EVA-Matrix-Master-Input-Registry-v1

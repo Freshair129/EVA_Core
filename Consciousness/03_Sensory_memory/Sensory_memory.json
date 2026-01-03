@@ -153,6 +153,39 @@
       "qualia": {
         "intensity": 0.0
       }
+    },
+    {
+      "sensory_id": "sen_260103_3bc3ea27",
+      "episode_id": "EVA_EP05",
+      "timestamp": "2026-01-03T04:33:51.931521",
+      "qualia": {
+        "intensity": 0.23,
+        "tone": "neutral",
+        "coherence": 0.675,
+        "depth": 0.0,
+        "texture": {
+          "emotional": 0.0,
+          "relational": 0.0,
+          "identity": 0.0,
+          "ambient": 0.0
+        }
+      }
+    },
+    {
+      "sensory_id": "sen_260103_403d1ca5",
+      "episode_id": "EVA_EP06",
+      "timestamp": "2026-01-03T04:51:05.990915",
+      "qualia": {
+        "intensity": 0.24
+      }
+    },
+    {
+      "sensory_id": "sen_260103_ed908627",
+      "episode_id": "EVA_EP07",
+      "timestamp": "2026-01-03T04:51:35.557856",
+      "qualia": {
+        "intensity": 0.24
+      }
     }
   ]
 }
