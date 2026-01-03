@@ -1,8 +1,10 @@
 # ============================================================
-# Circulation & Blood Physiology Configuration (cleaned v1.2)
-# Physiology Core + Scheduler + Interaction (Single File)
+# Circulation & Blood Physiology Configuration
+# version: 8.1.0-R1
+# Status: GKS Standardized
 # ============================================================
 
+schema: EVA-Blood-Physiology-v1
 version: 8.1.0-R1
 updated: "2025-12-31"
 engine_mode: "streaming_continuous"

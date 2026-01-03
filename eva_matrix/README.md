@@ -1,7 +1,5 @@
-# EVA Matrix (Psychological State Matrix)
-## Component ID: SYS-EVAMATRIX-8.1
-
-The **EVA Matrix** is the "Psyche Core" of the EVA system. It is responsible for maintaining a continuous, 9-dimensional psychological state (`axes_9d`) that evolves over time based on physiological inputs.
+# 🧠 EVA Matrix (Psyche Core)
+**Component ID:** `SYS-EVAMATRIX-8.1` | **Version:** `8.1.0-R1` | **Status:** GKS Standardized
 
 ### 📁 Directory Structure
 

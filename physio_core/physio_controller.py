@@ -14,8 +14,9 @@ STRICT RULES:
 """
 
 import yaml
+import time
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union
 
 # --- Endocrine ---
 from .logic.endocrine.EndocrineController import EndocrineController
@@ -123,13 +124,64 @@ class PhysioController:
 
     def step(
         self,
+        eva_stimuli: Union[Dict[str, float], List[Dict[str, Any]]],
+        zeitgebers: Dict[str, float],
+        dt: float,
+        now: datetime | None = None,
+    ) -> Dict[str, Any]:
+        """
+        Run physiological processing.
+        Supports both single stimulus and multi-chunk progressive injection.
+        
+        Args:
+            eva_stimuli: Single stimulus vector or list of chunks from CIN.
+            zeitgebers: External environmental inputs.
+            dt: Delta time for simulation.
+            now: Current timestamp.
+        """
+        if isinstance(eva_stimuli, list):
+            # Phase 5: Progressive Injection Logic
+            print(f"[Physio] 🌊 Processing {len(eva_stimuli)} stimulus chunks...")
+            last_result = {}
+            for i, chunk in enumerate(eva_stimuli):
+                # 500ms spacing (Digestion Time)
+                if i > 0:
+                    time.sleep(0.5)
+                
+                # Extract stimulus vector from chunk (CIN provides normalized chunks)
+                stimulus_vector = {
+                    "valence": chunk.get("valence", 0.5),
+                    "arousal": chunk.get("arousal", 0.3),
+                    "intensity": chunk.get("intensity", 0.3),
+                    "stress": chunk.get("stress", 0.3),
+                    "warmth": chunk.get("warmth", 0.5),
+                }
+                
+                print(f"  - Chunk {i+1}/{len(eva_stimuli)}: {chunk.get('salience_anchor', 'unknown')}")
+                last_result = self._run_tick(stimulus_vector, zeitgebers, dt, now)
+                
+                # Trajectory Tracking (Phase 5: Record to MSP)
+                if self.msp:
+                    self.msp.set_active_state("emotional_trajectory", {
+                        "chunk_index": i,
+                        "salience_anchor": chunk.get("salience_anchor"),
+                        "physio_impact": last_result["autonomic"],
+                        "timestamp": datetime.now().isoformat()
+                    })
+            
+            return last_result
+        else:
+            return self._run_tick(eva_stimuli, zeitgebers, dt, now)
+
+    def _run_tick(
+        self,
         eva_stimuli: Dict[str, float],
         zeitgebers: Dict[str, float],
         dt: float,
         now: datetime | None = None,
     ) -> Dict[str, Any]:
         """
-        Run one full physiological tick
+        Internal single-tick execution
         """
 
         if now is None:
@@ -201,10 +253,22 @@ class PhysioController:
         )
 
         # --------------------------------------------------
-        # 7) Dashboard Streaming (MSP Integration)
+        # 7) State Bus & Dashboard (MSP Integration)
         # --------------------------------------------------
         if self.msp:
-            # Stream Hormones
+            # PUSH to State Bus Slots (Phase 4)
+            self.msp.set_active_state("physio_state", {
+                "blood": blood_levels,
+                "receptors": receptor_out,
+                "reflex": reflex_surges,
+                "autonomic": ans_state,
+                "endocrine": endo_out["gland_state"]
+            })
+            self.msp.set_active_state("plasma_bus", blood_levels)
+            self.msp.set_active_state("neural_signals", receptor_out["signals"])
+            self.msp.set_active_state("ans_state", ans_state)
+
+            # Dashboard Streaming (Legacy Support)
             for h_id in self.CORE_HORMONES:
                 val = blood_levels.get(h_id, 0.0)
                 self.msp.register_dashboard_metric(
@@ -213,7 +277,6 @@ class PhysioController:
                     category="physiological_stream"
                 )
             
-            # Stream Heart Rate (from autonomic state)
             hr = ans_state.get("heart_rate", 60.0)
             self.msp.register_dashboard_metric(
                 metric_id="heart_rate",

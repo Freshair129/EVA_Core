@@ -1,0 +1,59 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Normalized Stimulus Chunk Schema",
+    "description": "Schema for validating normalized stimulus chunks before physiological injection.",
+    "type": "object",
+    "required": [
+        "valence",
+        "arousal",
+        "intensity",
+        "salience_anchor"
+    ],
+    "properties": {
+        "valence": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1
+        },
+        "arousal": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+        },
+        "intensity": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+        },
+        "stress": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+        },
+        "warmth": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+        },
+        "salience_anchor": {
+            "type": "string"
+        },
+        "tags": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "ri_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+        },
+        "rim_impact": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+        }
+    },
+    "additionalProperties": false
+}

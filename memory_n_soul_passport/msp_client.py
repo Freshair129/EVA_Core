@@ -140,9 +140,14 @@ class MSPClient:
 
         self._load_turn_cache()
 
+        # Active State Bus (Phase 4: State Bus Pattern)
+        self.active_state_dir = self.state_dir_10 / "active_state"
+        self.active_state_dir.mkdir(parents=True, exist_ok=True)
+        self._active_state_cache: Dict[str, Any] = {}
+
         print(f"[MSP] Initialized with root: {self.root_path}")
         print(f"[MSP] Episodic log: {self.episodic_log}")
-        print(f"[MSP] Episodes directory: {self.episodes_dir}")
+        print(f"[MSP] Active State Bus: {self.active_state_dir}")
 
     # ============================================================
     # EPISODIC MEMORY - READ OPERATIONS
@@ -1419,6 +1424,73 @@ class MSPClient:
             "category": category,
             "timestamp": datetime.now().isoformat()
         }
+
+    # ============================================================
+    # ACTIVE STATE BUS (STATE BUS PATTERN - PHASE 4)
+    # ============================================================
+
+    def set_active_state(self, slot: str, data: Any):
+        """
+        Set active state in the State Bus.
+        Used by components (Physio, Psyche) to broadcast their current state.
+
+        Args:
+            slot: State slot identifier (e.g., 'physio_state', 'matrix_state')
+            data: State data (dict or value)
+        """
+        # 1. Update In-memory cache
+        self._active_state_cache[slot] = {
+            "data": data,
+            "timestamp": datetime.now().isoformat()
+        }
+
+        # 2. Persist to transient file (for crash recovery)
+        try:
+            state_file = self.active_state_dir / f"{slot}.json"
+            with open(state_file, 'w', encoding='utf-8') as f:
+                json.dump(self._active_state_cache[slot], f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"[MSP] Error persisting active state {slot}: {e}")
+
+    def get_active_state(self, slot: str) -> Optional[Any]:
+        """
+        Get active state from the State Bus.
+        Used by components (Psyche, CIN) to pull the latest baseline.
+
+        Args:
+            slot: State slot identifier
+
+        Returns:
+            The latest state data or None
+        """
+        # 1. Check in-memory cache
+        if slot in self._active_state_cache:
+            return self._active_state_cache[slot]["data"]
+
+        # 2. Check transient file
+        state_file = self.active_state_dir / f"{slot}.json"
+        if state_file.exists():
+            try:
+                with open(state_file, 'r', encoding='utf-8') as f:
+                    cached = json.load(f)
+                    self._active_state_cache[slot] = cached
+                    return cached.get("data")
+            except Exception as e:
+                print(f"[MSP] Error loading active state {slot}: {e}")
+        
+        return None
+
+    def get_all_active_states(self) -> Dict[str, Any]:
+        """
+        Get all current active states.
+        """
+        # Load any missing states from files
+        for state_file in self.active_state_dir.glob("*.json"):
+            slot = state_file.stem
+            if slot not in self._active_state_cache:
+                self.get_active_state(slot)
+        
+        return {slot: item["data"] for slot, item in self._active_state_cache.items()}
 
 if __name__ == "__main__":
     """Test MSP Client with Filesystem Persistence"""

@@ -1,0 +1,59 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Physio State Snapshot Schema",
+    "description": "Schema for validating the physiological state snapshot returned by PhysioController.",
+    "type": "object",
+    "required": [
+        "blood",
+        "autonomic",
+        "endocrine_state"
+    ],
+    "properties": {
+        "blood": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "number"
+            }
+        },
+        "autonomic": {
+            "type": "object",
+            "required": [
+                "sympathetic",
+                "parasympathetic",
+                "heart_rate"
+            ],
+            "properties": {
+                "sympathetic": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                },
+                "parasympathetic": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                },
+                "heart_rate": {
+                    "type": "number"
+                },
+                "pupil_dilation": {
+                    "type": "number"
+                },
+                "skin_conductance": {
+                    "type": "number"
+                }
+            },
+            "additionalProperties": true
+        },
+        "receptors": {
+            "type": "object"
+        },
+        "reflex": {
+            "type": "object"
+        },
+        "endocrine_state": {
+            "type": "object"
+        }
+    },
+    "additionalProperties": false
+}

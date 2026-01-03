@@ -1,9 +1,10 @@
 # ============================================================
 # Autonomic Nervous System (ANS) Configuration
 # version: 8.1.0-R1
-# Maps Receptor Signals & Reflexes -> Sympathetic/Parasympathetic Balance
+# Status: GKS Standardized
 # ============================================================
 
+schema: EVA-Autonomic-Response-v1
 version: 8.1.0-R1
 system_id: "EVA_ANS_CORE"
 

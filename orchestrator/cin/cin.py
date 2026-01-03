@@ -449,13 +449,17 @@ Develop ID: {context['soul']['Deverlop_id']}
 ## ⚡ RAW_STIMULUS_INPUT
 User: {context['user_input']}
 
-## 🎯 PERCEPTION_DIRECTIVE
-1. วิเคราะห์เจตนา (Intent) และอารมณ์แฝงจาก Raw Input
-2. พิจารณาว่าเหตุการณ์นี้ส่งผลต่อร่างกายอย่างไร (Stimulus Vector: valence, arousal, intensity)
-3. ระบุคำค้นหา (Tags) สำหรับการดึงความจำที่เกี่ยวข้องใน Hept-Stream RAG
-4. เรียกใช้ฟังก์ชัน sync_biocognitive_state เพื่อเข้าสู่ระยะการประมวลผลทางกายภาพและความทรงจำ
+## 🎯 PERCEPTION_DIRECTIVE [MULTI-STAGE CHUNKING]
+1. แบ่ง Raw Input ออกเป็น 1-3 ลำดับเหตุการณ์ย่อย (Semantic Chunks) ตามจังหวะอารมณ์
+2. สำหรับแต่ละ Chunk:
+   - ระบุ `valence`, `arousal`, `intensity`, `stress`, `warmth`
+   - กำหนด `salience_anchor` (ประโยคสั้นๆ ที่เป็นจุดเกาะเกี่ยวทางอารมณ์)
+   - ระบุ `tags` สำหรับการค้นหาความจำ
+3. เรียกใช้ฟังก์ชัน `sync_biocognitive_state` โดยส่งข้อมูลเป็น List ของ Chunks เพื่อประมวลผลการตอบสนองขั้นสูง
 """
         return prompt
+
+
 
     # ================================================================
     # PHASE 2: DEEP CONTEXT INJECTION (Accurate, ~500ms)
@@ -1039,9 +1043,76 @@ Required JSON Structure:
             return "EVA_EP00"
 
 
-# ================================================================
-# TESTING & DEMO
-# ================================================================
+    # ================================================================
+    # COGNITIVE FIREWALL (PHASE 4)
+    # ================================================================
+
+    def normalize_stimulus(self, raw_data: Any) -> List[Dict[str, Any]]:
+        """
+        Cognitive Firewall: Normalize and validate LLM-driven stimulus triggers.
+        Processes both single stimulus objects and multi-chunk lists.
+
+        Args:
+            raw_data: Raw output from LLM tool call or dict.
+
+        Returns:
+            List[Dict]: Normalized stimulus chunks, each with salience_anchor.
+        """
+        normalized_chunks = []
+
+        # 1. Handle List of Chunks vs Single Chunk
+        if isinstance(raw_data, list):
+            raw_chunks = raw_data
+        elif isinstance(raw_data, dict):
+            # If it's a single dict with 'chunks', extract it; else wrap it
+            if "chunks" in raw_data and isinstance(raw_data["chunks"], list):
+                raw_chunks = raw_data["chunks"]
+            else:
+                raw_chunks = [raw_data]
+        else:
+            # Fallback for invalid data
+            print(f"[CIN] ⚠️ Invalid stimulus data type: {type(raw_data)}. Using neutral fallback.")
+            raw_chunks = [{"valence": 0.5, "arousal": 0.3, "intensity": 0.3}]
+
+        # 2. Normalize Each Chunk
+        for i, chunk in enumerate(raw_chunks):
+            if not isinstance(chunk, dict):
+                continue
+            
+            # Extract core vector (default to neutral)
+            # LLM might provide 'stimulus_vector' key or flat keys
+            if "stimulus_vector" in chunk and isinstance(chunk["stimulus_vector"], dict):
+                vector = chunk["stimulus_vector"]
+            else:
+                vector = chunk
+
+            norm_chunk = {
+                "valence": float(vector.get("valence", 0.5)),
+                "arousal": float(vector.get("arousal", 0.3)),
+                "intensity": float(vector.get("intensity", 0.3)),
+                "stress": float(vector.get("stress", 0.3)),
+                "warmth": float(vector.get("warmth", 0.5)),
+                "tags": list(chunk.get("tags", ["neutral"])),
+                "salience_anchor": str(chunk.get("salience_anchor") or f"chunk_{i}")
+            }
+
+            # Enforce RI/RIM scoring slots if provided (V2 logic)
+            if "ri_score" in chunk:
+                norm_chunk["ri_score"] = float(chunk["ri_score"])
+            if "rim_impact" in chunk:
+                norm_chunk["rim_impact"] = float(chunk["rim_impact"])
+
+            normalized_chunks.append(norm_chunk)
+
+        if not normalized_chunks:
+            normalized_chunks = [{
+                "valence": 0.5, "arousal": 0.3, "intensity": 0.3, 
+                "stress": 0.3, "warmth": 0.5, "tags": ["neutral"],
+                "salience_anchor": "default_anchor"
+            }]
+
+        print(f"[CIN] 🛡️ Normalized {len(normalized_chunks)} stimulus chunks")
+        return normalized_chunks
 
 if __name__ == "__main__":
     print("=" * 60)

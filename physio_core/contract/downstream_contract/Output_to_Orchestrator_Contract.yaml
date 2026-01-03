@@ -1,9 +1,16 @@
-# Output to Downstream Contract
-# Component: PhysioController -> EVA Matrix / MSP
+# Output to State Bus Contract
+# Component: PhysioController -> MSP (State Bus Registry)
 # version: 8.1.0-R1
-# Description: Defines the authentic physiological state stream exported to downstream systems.
+# Description: Defines the physiological state stream synchronized to MSP for centralized system retrieval.
 
-schema: EVA-Output-to-Downstream-Contract-v8.1
+schema: EVA-Output-to-StateBus-Contract-v8.1
+
+primary_destination: MSP
+retrieval_method: pull
+state_slots:
+  - physio_state (Biological state snapshot)
+  - plasma_bus (Current hormone concentrations)
+  - ans_state (Autonomic balance and HR)
 
 provided_outputs:
   physio_state:

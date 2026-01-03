@@ -1,9 +1,15 @@
-# Resonance Memory System (RMS)
-## Component ID: SYS-RMS-8.1
+# 🧬 RMS (Resonance Memory System)
+**Component ID:** `SYS-RMS-8.1` | **Version:** `8.1.0-R1` | **Status:** GKS Standardized
 
-The **Resonance Memory System** manages the long-term memory clusters and provides semantic context for the resonance calculation.
+## 📋 Overview
+The Resonance Memory System (RMS) is the memory encoding authority of EVA. It converts psychological and physiological states into consistent memory signatures (Core Color and Resonance Texture), ensuring all episodic memories are biologically anchored.
 
-### 📁 Directory Structure
+**Version 8.1.0-R1 Updates**:
+- **System Wrapper (`rms_system.py`)**: Acts as the system authority with MSP integration.
+- **MSP State Bus Integration**: Pulls consolidated state (Matrix, Qualia, Reflex) from MSP and pushes memory encoding buffers.
+- **GKS Standard Alignment**: Full synchronization with the 8.1.0 project structure.
+
+## 🗂️ Directory Structure
 
 - **`configs/`**: Configuration & Master Registries (SSOT).
   - `RMS_Interface.yaml`: Public API specification.

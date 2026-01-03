@@ -1,0 +1,50 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Emotional Trajectory Schema",
+    "description": "Schema for recording multi-chunk emotional trajectories in MSP.",
+    "type": "object",
+    "required": [
+        "chunk_index",
+        "salience_anchor",
+        "physio_impact",
+        "timestamp"
+    ],
+    "properties": {
+        "chunk_index": {
+            "type": "integer",
+            "minimum": 0
+        },
+        "salience_anchor": {
+            "type": "string"
+        },
+        "physio_impact": {
+            "type": "object",
+            "required": [
+                "sympathetic",
+                "parasympathetic"
+            ],
+            "properties": {
+                "sympathetic": {
+                    "type": "number"
+                },
+                "parasympathetic": {
+                    "type": "number"
+                },
+                "heart_rate": {
+                    "type": "number"
+                }
+            },
+            "additionalProperties": true
+        },
+        "intensity_arc": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+        },
+        "timestamp": {
+            "type": "string",
+            "format": "date-time"
+        }
+    },
+    "additionalProperties": false
+}

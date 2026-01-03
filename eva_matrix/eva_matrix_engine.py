@@ -34,23 +34,38 @@ class EVAMatrixSystem:
         self._load_state()
         print(f"[EVA Matrix System] Initialized (Psyche Core)")
     
-    def process_signals(self, signals: Dict[str, float]) -> Dict[str, Any]:
+    def process_signals(self, signals: Dict[str, float] = None) -> Dict[str, Any]:
         """
         Process neural signals and update psyche state.
 
         Args:
-            signals: Neural signals from receptor layer
+            signals: Optional override for neural signals. If None, pulled from MSP.
 
         Returns:
             Dict containing axes_9d, emotion_label, etc.
         """
-        # Use internal calculation method
-        result = self._calculate_state_transition(signals)
+        # 1. PULL from State Bus if signals not provided (Phase 4)
+        if signals is None and self.msp:
+            signals = self.msp.get_active_state("neural_signals") or {}
 
-        # Update owned state
+        # 2. Use internal calculation method
+        result = self._calculate_state_transition(signals or {})
+
+        # 3. Update owned state
         self.axes_9d = result.get("axes_9d", {})
         self.emotion_label = result.get("emotion_label", "Neutral")
         self.momentum = result.get("momentum", {})
+
+        # 4. PUSH to State Bus (Phase 4)
+        if self.msp:
+            self.msp.set_active_state("matrix_state", {
+                "axes_9d": self.axes_9d,
+                "emotion_label": self.emotion_label,
+                "momentum": self.momentum,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            })
+            # Also push reflex directives (Safety Reflex)
+            self.msp.set_active_state("reflex_directives", result.get("reflex_directives", {}))
 
         self._save_state()
         return result

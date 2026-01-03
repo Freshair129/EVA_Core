@@ -1,0 +1,416 @@
+# PhysioController Interface Specification
+# version: 8.1.0-R1
+# Date: 2026-01-03
+# Status: Production Interface Definition
+
+meta:
+  component_name: "PhysioController (Physiological Controller)"
+  component_type: "System Authority / Biological Simulation"
+  version: 8.1.0-R1
+  role: "Physio Core System: Owns and manages complete physiological pipeline (30Hz streaming)."
+  analogy: "Hypothalamus & Central Autonomic Network (ศูนย์ควบคุมระบบประสาทและต่อมไร้ท่อ)"
+
+# ============================================================
+# 1. POSITION IN ARCHITECTURE
+# ============================================================
+position:
+  layer: "Layer 3: Physiological Pipeline"
+  upstream:
+    - "Main Orchestrator (stimulus injection)"
+    - "CIN (normalized stimulus vectors)"
+  downstream:
+    - "EVA_Matrix (neural signals)"
+    - "Artifact_Qualia (ANS state)"
+    - "MSP (state persistence)"
+    - "CIN Phase 2 (physio snapshot)"
+
+# ============================================================
+# 2. CORE DATA STRUCTURES
+# ============================================================
+state_definition:
+  endocrine_state:
+    description: "Gland inventory and secretion rates"
+    fields:
+      - gland_inventory: "Dict[hormone_id, mass_pg]"
+      - drives: "Dict[hormone_id, drive_0_to_10]"
+      - adaptation: "Dict[hormone_id, fatigue_0_to_1]"
+
+  blood_state:
+    description: "Hormone concentrations in plasma"
+    fields:
+      - concentrations: "Dict[hormone_id, concentration_pg_per_mL]"
+      - clearance_log: "Dict[hormone_id, cumulative_clearance_pg]"
+
+  receptor_state:
+    description: "Neural signals from receptor binding"
+    fields:
+      - activations: "Dict[receptor_id, activation_0_to_1]"
+      - region_signals: "Dict[region_id, signal_vector]"
+
+  ans_state:
+    description: "Autonomic Nervous System state"
+    fields:
+      - sympathetic: "float (0.0 - 1.0)"
+      - parasympathetic: "float (0.0 - 1.0)"
+      - balance: "float (-1.0 to 1.0)"
+      - dominance: "string ('sympathetic' | 'parasympathetic' | 'balanced')"
+
+# ============================================================
+# 3. INTERFACE METHODS (PUBLIC API)
+# ============================================================
+interface_methods:
+  - method: "step(eva_stimuli, zeitgebers, dt, now)"
+    description: "Execute one physiological processing cycle through full pipeline"
+    signature: |
+      def step(
+          self,
+          eva_stimuli: Union[Dict[str, float], List[Dict[str, Any]]],
+          zeitgebers: Dict[str, float],
+          dt: float,
+          now: datetime | None = None
+      ) -> Dict[str, Any]
+
+    input:
+      eva_stimuli:
+        type: "Dict[str, float] | List[Dict[str, Any]]"
+        description: "Stimulus vector OR list of progressive chunks from CIN"
+        example: "{'threat': 0.7, 'trust': 0.3, 'novelty': 0.5}"
+
+      zeitgebers:
+        type: "Dict[str, float]"
+        description: "External environmental inputs (light, time, activity)"
+        example: "{'hour_of_day': 14.5, 'light_lux': 500.0}"
+
+      dt:
+        type: "float"
+        description: "Time delta for simulation step (seconds)"
+        range: "[0.01, 1.0]"
+        typical: "0.033 (30Hz)"
+
+      now:
+        type: "datetime | None"
+        description: "Current timestamp for circadian calculations"
+        optional: true
+
+    output:
+      type: "Dict[str, Any]"
+      description: "Complete physiological state snapshot"
+      structure:
+        blood_levels:
+          type: "Dict[str, float]"
+          description: "Hormone concentrations (pg/mL)"
+          core_hormones:
+            - "ESC_H01_ADRENALINE"
+            - "ESC_H02_CORTISOL"
+            - "ESC_N02_DOPAMINE"
+            - "ESC_N03_SEROTONIN"
+            - "ESC_H04_OXYTOCIN"
+
+        ans_state:
+          type: "Dict[str, float | str]"
+          fields:
+            - sympathetic: "float (0.0 - 1.0)"
+            - parasympathetic: "float (0.0 - 1.0)"
+            - balance: "float (-1.0 to 1.0)"
+            - dominance: "string"
+
+        receptor_signals:
+          type: "Dict[str, Dict[str, float]]"
+          description: "Neural signals by brain region"
+          regions:
+            - "amygdala"
+            - "prefrontal_cortex"
+            - "hippocampus"
+            - "ventral_striatum"
+
+        reflex_vector:
+          type: "Dict[str, float]"
+          description: "Fast reflex responses (bypass blood)"
+          reflexes:
+            - "freeze"
+            - "flee"
+            - "fight"
+            - "approach"
+
+        timestamp:
+          type: "datetime"
+          description: "Processing timestamp"
+
+    processing_stages:
+      1: "HPA Regulator (stress modulation)"
+      2: "Circadian Controller (time-based effects)"
+      3: "Endocrine System (hormone production)"
+      4: "Blood Engine (transport & clearance)"
+      5: "Receptor Engine (signal transduction)"
+      6: "Fast Reflex Engine (immediate responses)"
+      7: "Autonomic Engine (ANS integration)"
+
+  - method: "get_snapshot(**kwargs)"
+    description: "Return current physiological state snapshot (fast, read-only)"
+    signature: |
+      def get_snapshot(self, **kwargs) -> Dict[str, Any]
+
+    input:
+      kwargs:
+        type: "Dict[str, Any]"
+        description: "Optional filters for snapshot (currently unused)"
+        optional: true
+
+    output:
+      type: "Dict[str, Any]"
+      description: "Current state without processing"
+      structure:
+        ans_state:
+          type: "Dict[str, float | str]"
+          description: "Current ANS state"
+
+        blood_levels:
+          type: "Dict[str, float]"
+          description: "Current hormone concentrations"
+
+    performance: "< 1ms (no computation, just state read)"
+    use_case: "CIN Phase 1 rough retrieval, quick status checks"
+
+  - method: "get_full_state()"
+    description: "Export complete internal state for persistence"
+    signature: |
+      def get_full_state(self) -> Dict[str, Any]
+
+    output:
+      type: "Dict[str, Any]"
+      description: "Complete system state for save/restore"
+      structure:
+        endocrine:
+          inventory: "Gland masses (pg)"
+          drives: "Current drives (0-10)"
+          adaptation: "Fatigue levels (0-1)"
+
+        blood:
+          concentrations: "All hormone concentrations"
+          clearance_log: "Cumulative clearance"
+
+        receptor:
+          activations: "Receptor activation levels"
+          plasticity: "Long-term potentiation state"
+
+        autonomic:
+          sympathetic: "SNS level"
+          parasympathetic: "PNS level"
+          history: "Recent ANS history (smoothing)"
+
+    use_case: "State persistence to MSP, debugging, time-travel"
+
+  - method: "load_state(state_dict)"
+    description: "Restore internal state from persistence"
+    signature: |
+      def load_state(self, state_dict: Dict[str, Any])
+
+    input:
+      state_dict:
+        type: "Dict[str, Any]"
+        description: "State dictionary from get_full_state()"
+        source: "MSP state snapshots, consciousness/10_state/"
+
+    behavior:
+      - "Validates state structure"
+      - "Restores all subsystem states"
+      - "Resets internal clocks/timers"
+
+    use_case: "Session restoration, crash recovery, testing"
+
+# ============================================================
+# 4. SUBSYSTEMS (Internal Components)
+# ============================================================
+subsystems:
+  - id: "HPA_Regulator"
+    name: "HPA Axis Regulator"
+    file: "logic/endocrine/HPARegulator.py"
+    role: "Stress modulation and homeostatic feedback"
+    input: "Stimulus vector + plasma cortisol"
+    output: "Modulated endocrine stimuli"
+
+  - id: "Circadian_Controller"
+    name: "Circadian Controller"
+    file: "logic/endocrine/CircadianController.py"
+    role: "Time-of-day hormone adjustments"
+    input: "Zeitgeber signals (hour_of_day, light)"
+    output: "Circadian modulation vector"
+
+  - id: "Endocrine_System"
+    name: "Endocrine Controller"
+    file: "logic/endocrine/EndocrineController.py"
+    role: "Hormone production from glands"
+    input: "Drives + adaptation + modulation"
+    output: "Secretion rates (pg/sec)"
+
+  - id: "Blood_Engine"
+    name: "Blood Engine"
+    file: "logic/blood/BloodEngine.py"
+    role: "Hormone transport and clearance"
+    input: "Secretion rates"
+    output: "Blood concentrations (pg/mL)"
+    mechanism: "Exponential decay: C(t) = C0 * exp(-k*t)"
+
+  - id: "Receptor_Engine"
+    name: "Receptor Engine"
+    file: "logic/receptor/ReceptorEngine.py"
+    role: "Signal transduction (chemical → neural)"
+    input: "Blood hormone concentrations"
+    output: "Neural signals by brain region"
+    mechanism: "Hill equation: activation = C/(C + Kd)"
+
+  - id: "Fast_Reflex_Engine"
+    name: "Fast Reflex Engine (IRE)"
+    file: "logic/reflex/FastReflexEngine.py"
+    role: "Immediate threat responses (bypass blood)"
+    input: "Stimulus vector (direct)"
+    output: "Reflex vector (freeze/flee/fight/approach)"
+    latency: "< 1ms (parallel to blood pathway)"
+
+  - id: "Autonomic_Engine"
+    name: "Autonomic Response Engine"
+    file: "logic/autonomic/AutonomicResponseEngine.py"
+    role: "ANS integration (sympathetic/parasympathetic)"
+    input: "Receptor signals + reflex signals"
+    output: "ANS state (balance, dominance)"
+    smoothing: "EMA (alpha=0.2) to prevent jitter"
+
+# ============================================================
+# 5. PERFORMANCE TARGETS
+# ============================================================
+performance:
+  target_latency: "< 10ms per step() (excluding sleep for progressive injection)"
+  update_rate: "30 Hz nominal (dt=0.033s)"
+  deterministic: true
+  lazy_evaluation: true
+
+  subsystem_breakdown:
+    hpa_regulator: "< 1ms"
+    circadian: "< 1ms"
+    endocrine: "< 2ms"
+    blood: "< 2ms (lazy evaluation)"
+    receptor: "< 2ms"
+    reflex: "< 1ms (parallel)"
+    autonomic: "< 1ms"
+
+# ============================================================
+# 6. SAFETY & CONSTRAINTS
+# ============================================================
+safety_constraints:
+  strict_rules:
+    - id: "NO_COGNITION"
+      description: "PhysioController cannot make decisions or analyze intent"
+      enforcement: "No access to persona, memory, or LLM context"
+
+    - id: "NO_MEMORY"
+      description: "PhysioController cannot recall past episodes"
+      enforcement: "No episodic/semantic memory access"
+
+    - id: "NO_PERSONA_LOGIC"
+      description: "PhysioController cannot apply personality traits"
+      enforcement: "Pure biological simulation only"
+
+    - id: "ONE_WAY_FLOW"
+      description: "Pipeline flows forward only (no backwards propagation)"
+      enforcement: "Each subsystem reads from previous, writes to next"
+
+    - id: "MASS_CONSERVATION"
+      description: "Hormones cannot appear/vanish magically"
+      enforcement: "Production = secretion; Clearance = decay; Inventory tracked"
+
+  validation_rules:
+    - "Stimulus values must be in range [0.0, 1.0]"
+    - "dt must be positive and < 1.0 second"
+    - "Gland inventory cannot go negative"
+    - "Blood concentrations cannot be negative"
+
+# ============================================================
+# 7. SYSTEM INVARIANTS
+# ============================================================
+invariants:
+  - "Stateless Subsystems: All computation is deterministic given inputs"
+  - "State Ownership: PhysioController owns physio_state, plasma_bus, neural_signals, ans_state slots"
+  - "Persistence: State synchronized to MSP after each step()"
+  - "Authenticity: Output reflects true biological simulation (no fake/hardcoded values)"
+  - "Separation: Physiology first, cognition later (no cognitive contamination)"
+
+# ============================================================
+# 8. INTEGRATION NOTES
+# ============================================================
+integration:
+  upstream_dependencies:
+    - "CIN normalizes stimulus before calling step()"
+    - "Main Orchestrator provides zeitgebers (time, light)"
+    - "MSP provides state restoration on session start"
+
+  downstream_consumers:
+    - "EVA_Matrix reads receptor_signals to compute 9D state"
+    - "Artifact_Qualia reads ans_state for phenomenological tone"
+    - "CIN Phase 2 reads get_snapshot() for deep context"
+    - "RMS reads ans_state + blood_levels for memory encoding"
+    - "AgenticRAG Emotion Stream uses ans_state + blood for physio-matching"
+
+  state_synchronization:
+    - "After step(): PhysioController.get_full_state() → MSP"
+    - "Session start: MSP → PhysioController.load_state()"
+    - "Every turn: Snapshot saved to consciousness/10_state/physio_state.json"
+
+# ============================================================
+# 9. CONFIGURATION FILES
+# ============================================================
+configuration:
+  required_configs:
+    - path: "physio_core/configs/hormone_spec_ml.yaml"
+      purpose: "Gland specifications (max capacity, output rate, latency, half-life)"
+
+    - path: "physio_core/configs/endocrine_regulation.yaml"
+      purpose: "HPA regulation + circadian parameters"
+
+    - path: "physio_core/configs/blood_physiology.yaml"
+      purpose: "Blood volume, clearance rates, lazy evaluation settings"
+
+    - path: "physio_core/configs/receptor_configs.yaml"
+      purpose: "Receptor types, Kd values, efficacy, brain regions"
+
+    - path: "physio_core/configs/autonomic_response.yaml"
+      purpose: "ANS weights, smoothing parameters, dominance thresholds"
+
+# ============================================================
+# 10. TYPICAL USAGE EXAMPLE
+# ============================================================
+usage_example:
+  code: |
+    # Initialize
+    physio = PhysioController(
+        endocrine_cfg_path="physio_core/configs/hormone_spec_ml.yaml",
+        endocrine_reg_cfg_path="physio_core/configs/endocrine_regulation.yaml",
+        blood_cfg_path="physio_core/configs/blood_physiology.yaml",
+        receptor_cfg_path="physio_core/configs/receptor_configs.yaml",
+        reflex_cfg_path="physio_core/configs/receptor_configs.yaml",
+        autonomic_cfg_path="physio_core/configs/autonomic_response.yaml",
+        msp=msp_client
+    )
+
+    # Execute one step
+    stimulus = {
+        'threat': 0.7,    # High threat
+        'trust': 0.3,     # Low trust
+        'novelty': 0.5    # Medium novelty
+    }
+
+    zeitgebers = {
+        'hour_of_day': 14.5,  # 2:30 PM
+        'light_lux': 500.0    # Indoor lighting
+    }
+
+    result = physio.step(
+        eva_stimuli=stimulus,
+        zeitgebers=zeitgebers,
+        dt=0.033,  # 30Hz
+        now=datetime.now()
+    )
+
+    # Access results
+    print(f"Cortisol: {result['blood_levels']['ESC_H02_CORTISOL']:.2f} pg/mL")
+    print(f"SNS: {result['ans_state']['sympathetic']:.2f}")
+    print(f"Balance: {result['ans_state']['balance']:.2f}")

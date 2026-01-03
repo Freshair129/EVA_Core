@@ -1,0 +1,478 @@
+# PhysioController Output Contract
+# Version: 8.1.0-R1
+# Date: 2026-01-03
+# Status: Aligned with EVA 8.1.0 Implementation
+
+schema: EVA-PhysioController-Output-Contract-v8.1
+version: 8.1.0-R1
+updated: 2026-01-03
+
+# ============================================================
+# CONTRACT SCOPE
+# ============================================================
+description: >
+  Output contract for PhysioController in EVA 8.1.0.
+  Defines the structure and guarantees for physiological state
+  outputs consumed by downstream modules (EVA_Matrix, Artifact_Qualia,
+  CIN, MSP, AgenticRAG).
+
+# ============================================================
+# DOWNSTREAM CONSUMERS
+# ============================================================
+destinations:
+  - module: "EVA_Matrix"
+    contract_path: "contract/downstream/EVA_Matrix_Contract/"
+    required: true
+    description: "Consumes receptor_signals for 9D psychological state computation"
+    output_fields:
+      - receptor_signals
+      - blood_levels
+
+  - module: "Artifact_Qualia"
+    contract_path: "contract/downstream/Artifact_Qualia_Contract/"
+    required: true
+    description: "Consumes ANS state for phenomenological tone"
+    output_fields:
+      - ans_state
+      - blood_levels
+
+  - module: "CIN (Context Injection Node)"
+    contract_path: "contract/downstream/CIN_Contract/"
+    required: true
+    description: "Consumes physio snapshot for Phase 2 deep context"
+    output_fields:
+      - blood_levels
+      - ans_state
+
+  - module: "RMS (Resonance Memory System)"
+    contract_path: "contract/downstream/RMS_Contract/"
+    required: true
+    description: "Consumes ANS + blood for memory encoding"
+    output_fields:
+      - ans_state
+      - blood_levels
+
+  - module: "AgenticRAG (Emotion Stream)"
+    contract_path: "contract/downstream/AgenticRAG_Contract/"
+    required: true
+    description: "Consumes physio state for emotion-congruent memory retrieval"
+    output_fields:
+      - ans_state
+      - blood_levels
+
+  - module: "MSP (State Persistence)"
+    contract_path: "contract/downstream/MSP_Contract/"
+    required: true
+    description: "Persists full physiological state"
+    output_fields:
+      - "*"  # All fields
+
+# ============================================================
+# PRIMARY OUTPUT: step() RETURN VALUE
+# ============================================================
+step_output:
+  description: "Complete physiological state snapshot after processing"
+  type: "Dict[str, Any]"
+
+  guaranteed_fields:
+    blood_levels:
+      type: "Dict[str, float]"
+      description: "Hormone concentrations in plasma (pg/mL)"
+      required: true
+
+      core_hormones:
+        ESC_H01_ADRENALINE:
+          type: "float"
+          unit: "pg/mL"
+          range: [0.0, ∞]
+          typical: [0.0, 500.0]
+          description: "Adrenaline (epinephrine) concentration"
+
+        ESC_H02_CORTISOL:
+          type: "float"
+          unit: "pg/mL"
+          range: [0.0, ∞]
+          typical: [0.0, 200.0]
+          description: "Cortisol (stress hormone) concentration"
+
+        ESC_N02_DOPAMINE:
+          type: "float"
+          unit: "pg/mL"
+          range: [0.0, ∞]
+          typical: [0.0, 150.0]
+          description: "Dopamine (reward/motivation) concentration"
+
+        ESC_N03_SEROTONIN:
+          type: "float"
+          unit: "pg/mL"
+          range: [0.0, ∞]
+          typical: [0.0, 300.0]
+          description: "Serotonin (mood/calm) concentration"
+
+        ESC_H04_OXYTOCIN:
+          type: "float"
+          unit: "pg/mL"
+          range: [0.0, ∞]
+          typical: [0.0, 100.0]
+          description: "Oxytocin (bonding/trust) concentration"
+
+      additional_hormones:
+        description: "System may include additional hormones beyond core 5"
+        note: "Consumers should handle unknown hormone IDs gracefully"
+
+      guarantees:
+        - "All values are non-negative (>= 0.0)"
+        - "All values are finite (not NaN, not Inf)"
+        - "Core 5 hormones always present"
+
+      example:
+        ESC_H01_ADRENALINE: 45.2
+        ESC_H02_CORTISOL: 82.7
+        ESC_N02_DOPAMINE: 23.5
+        ESC_N03_SEROTONIN: 156.3
+        ESC_H04_OXYTOCIN: 12.8
+
+    ans_state:
+      type: "Dict[str, float | str]"
+      description: "Autonomic Nervous System state"
+      required: true
+
+      fields:
+        sympathetic:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "Sympathetic (fight/flight) activation"
+          interpretation:
+            low: "0.0 - 0.3 (rest state)"
+            medium: "0.3 - 0.7 (alert)"
+            high: "0.7 - 1.0 (emergency)"
+
+        parasympathetic:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "Parasympathetic (rest/digest) activation"
+          interpretation:
+            low: "0.0 - 0.3 (aroused)"
+            medium: "0.3 - 0.7 (balanced)"
+            high: "0.7 - 1.0 (deeply relaxed)"
+
+        balance:
+          type: "float"
+          range: [-1.0, 1.0]
+          description: "ANS balance: (PNS - SNS) / (PNS + SNS)"
+          interpretation:
+            sympathetic_dominant: "-1.0 to -0.3"
+            balanced: "-0.3 to 0.3"
+            parasympathetic_dominant: "0.3 to 1.0"
+
+        dominance:
+          type: "string"
+          enum: ["sympathetic", "parasympathetic", "balanced"]
+          description: "Which branch is dominant"
+          thresholds:
+            sympathetic: "balance < -0.2"
+            parasympathetic: "balance > 0.2"
+            balanced: "otherwise"
+
+      guarantees:
+        - "sympathetic + parasympathetic need not equal 1.0 (independent activation)"
+        - "balance is derived: (PNS - SNS) / (PNS + SNS + epsilon)"
+        - "dominance matches balance thresholds"
+
+      example:
+        sympathetic: 0.72
+        parasympathetic: 0.31
+        balance: -0.40
+        dominance: "sympathetic"
+
+    receptor_signals:
+      type: "Dict[str, Dict[str, float]]"
+      description: "Neural signals by brain region"
+      required: true
+
+      regions:
+        amygdala:
+          type: "Dict[str, float]"
+          description: "Threat detection & emotional salience"
+          signals:
+            - threat_signal: "Cortisol + adrenaline influence"
+            - arousal_signal: "Overall activation"
+
+        prefrontal_cortex:
+          type: "Dict[str, float]"
+          description: "Executive function & regulation"
+          signals:
+            - cognitive_control: "Clarity, focus"
+            - regulation: "Inhibitory control"
+
+        hippocampus:
+          type: "Dict[str, float]"
+          description: "Memory formation & context"
+          signals:
+            - encoding_strength: "Cortisol modulation"
+            - retrieval_signal: "Context binding"
+
+        ventral_striatum:
+          type: "Dict[str, float]"
+          description: "Reward & motivation"
+          signals:
+            - reward_signal: "Dopamine influence"
+            - motivation: "Drive level"
+
+      guarantees:
+        - "All signal values in range [0.0, 1.0]"
+        - "All 4 core regions always present"
+
+      example:
+        amygdala:
+          threat_signal: 0.68
+          arousal_signal: 0.72
+        prefrontal_cortex:
+          cognitive_control: 0.45
+          regulation: 0.52
+        hippocampus:
+          encoding_strength: 0.61
+          retrieval_signal: 0.48
+        ventral_striatum:
+          reward_signal: 0.23
+          motivation: 0.34
+
+    reflex_vector:
+      type: "Dict[str, float]"
+      description: "Fast reflex responses (bypass blood, < 1ms latency)"
+      required: true
+
+      reflexes:
+        freeze:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "Freeze reflex intensity (immobilization)"
+
+        flee:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "Flight reflex intensity (escape)"
+
+        fight:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "Fight reflex intensity (confrontation)"
+
+        approach:
+          type: "float"
+          range: [0.0, 1.0]
+          description: "Approach reflex intensity (engagement)"
+
+      guarantees:
+        - "All values in [0.0, 1.0]"
+        - "Reflexes can be active simultaneously (not mutually exclusive)"
+
+      example:
+        freeze: 0.12
+        flee: 0.68
+        fight: 0.05
+        approach: 0.01
+
+    timestamp:
+      type: "datetime"
+      description: "When this state was computed"
+      required: true
+      format: "Python datetime object"
+      use_case: "Temporal ordering, state history tracking"
+
+  optional_fields:
+    processing_time_ms:
+      type: "float"
+      description: "How long step() took to execute (milliseconds)"
+      use_case: "Performance monitoring"
+      typical: "< 10ms"
+
+    subsystem_times:
+      type: "Dict[str, float]"
+      description: "Breakdown of processing time by subsystem"
+      fields:
+        - hpa: "HPA Regulator time (ms)"
+        - circadian: "Circadian Controller time (ms)"
+        - endocrine: "Endocrine System time (ms)"
+        - blood: "Blood Engine time (ms)"
+        - receptor: "Receptor Engine time (ms)"
+        - reflex: "Fast Reflex Engine time (ms)"
+        - autonomic: "Autonomic Engine time (ms)"
+
+# ============================================================
+# SECONDARY OUTPUT: get_snapshot() RETURN VALUE
+# ============================================================
+snapshot_output:
+  description: "Quick state snapshot (no processing, just current state)"
+  type: "Dict[str, Any]"
+  performance: "< 1ms (read-only)"
+
+  guaranteed_fields:
+    ans_state:
+      type: "Dict[str, float | str]"
+      description: "Current ANS state (same structure as step() output)"
+      required: true
+
+    blood_levels:
+      type: "Dict[str, float]"
+      description: "Current hormone concentrations (same structure as step() output)"
+      required: true
+
+  use_case: "CIN Phase 1 rough retrieval, status checks"
+
+# ============================================================
+# TERTIARY OUTPUT: get_full_state() RETURN VALUE
+# ============================================================
+full_state_output:
+  description: "Complete internal state for persistence/restore"
+  type: "Dict[str, Any]"
+  use_case: "State save/load, debugging, time-travel"
+
+  structure:
+    endocrine:
+      inventory: "Dict[hormone_id, mass_pg]"
+      drives: "Dict[hormone_id, drive_0_to_10]"
+      adaptation: "Dict[hormone_id, fatigue_0_to_1]"
+
+    blood:
+      concentrations: "Dict[hormone_id, concentration_pg_per_mL]"
+      clearance_log: "Dict[hormone_id, cumulative_clearance_pg]"
+
+    receptor:
+      activations: "Dict[receptor_id, activation_0_to_1]"
+      plasticity: "Dict[receptor_id, ltp_state]"
+
+    autonomic:
+      sympathetic: "float"
+      parasympathetic: "float"
+      history: "List[Dict] (recent ANS states for smoothing)"
+
+    metadata:
+      last_step_time: "datetime"
+      total_steps: "int"
+      version: "str"
+
+# ============================================================
+# OUTPUT GUARANTEES
+# ============================================================
+guarantees:
+  consistency:
+    - "All values are deterministic given same inputs and initial state"
+    - "No random variation (unless explicitly seeded)"
+    - "State transitions follow mass conservation laws"
+
+  validity:
+    - "All numeric values are finite (not NaN, not Inf)"
+    - "All ranges respected (blood >= 0.0, ans in [0.0, 1.0], etc.)"
+    - "Required fields always present"
+
+  integrity:
+    - "Output reflects true biological simulation (no fake values)"
+    - "No cognitive contamination (pure physiology)"
+    - "No memory influence (stateless computation)"
+
+  performance:
+    - "step() completes in < 10ms (excluding progressive injection sleep)"
+    - "get_snapshot() completes in < 1ms"
+    - "get_full_state() completes in < 5ms"
+
+# ============================================================
+# ERROR HANDLING
+# ============================================================
+error_cases:
+  invalid_input:
+    condition: "eva_stimuli contains invalid values"
+    behavior: "Clamp to [0.0, 1.0] and log warning"
+    output: "Valid output with clamped inputs"
+
+  missing_zeitgebers:
+    condition: "Required zeitgeber keys missing"
+    behavior: "Raise KeyError"
+    output: "Exception (no output)"
+
+  negative_dt:
+    condition: "dt <= 0.0"
+    behavior: "Raise ValueError"
+    output: "Exception (no output)"
+
+  state_corruption:
+    condition: "Internal state becomes invalid (e.g., negative inventory)"
+    behavior: "Log error, clamp to valid range, continue"
+    output: "Valid output with corrected state"
+
+# ============================================================
+# USAGE BY DOWNSTREAM MODULES
+# ============================================================
+downstream_usage:
+  EVA_Matrix:
+    reads:
+      - "receptor_signals (all regions)"
+      - "blood_levels (for direct hormone influence)"
+    purpose: "Compute 9D psychological state"
+    method: "EVAMatrixSystem.process_signals(receptor_signals)"
+
+  Artifact_Qualia:
+    reads:
+      - "ans_state (sympathetic, parasympathetic, balance)"
+      - "blood_levels (for intensity modulation)"
+    purpose: "Determine phenomenological tone (quiet/charged/settling)"
+    method: "ArtifactQualiaSystem.integrate(eva_state, rim_semantic)"
+
+  CIN_Phase_2:
+    reads:
+      - "get_snapshot() → ans_state + blood_levels"
+    purpose: "Build deep context with embodied sensation description"
+    method: "CIN.inject_phase_2(..., physio_state=snapshot)"
+
+  RMS:
+    reads:
+      - "ans_state (for color encoding)"
+      - "blood_levels (for resonance textures)"
+    purpose: "Encode memory with physiological signature"
+    method: "RMSSystem.encode_memory(eva_state, qualia, physio)"
+
+  AgenticRAG_Emotion_Stream:
+    reads:
+      - "ans_state (sympathetic, parasympathetic)"
+      - "blood_levels (core 5 hormones)"
+    purpose: "Retrieve physio-congruent memories (cosine similarity)"
+    method: "AgenticRAG.emotion_stream.query(current_physio)"
+
+  MSP:
+    reads:
+      - "get_full_state() → complete state"
+    purpose: "Persist physiological state to consciousness/10_state/"
+    method: "MSP.save_state_snapshot(physio.get_full_state())"
+
+# ============================================================
+# CHANGE LOG
+# ============================================================
+change_log:
+  v8.1.0-R1:
+    date: "2026-01-03"
+    changes:
+      - "Initial output contract creation"
+      - "Aligned with PhysioController_Spec.yaml"
+      - "Documented all 3 output methods (step, get_snapshot, get_full_state)"
+
+# ============================================================
+# CONTRACT METADATA
+# ============================================================
+metadata:
+  contract_type: "OUTPUT"
+  eva_version: "8.1.0-R1"
+  module_location: "physio_core/physio_controller.py"
+  primary_method: "step()"
+  secondary_methods: ["get_snapshot()", "get_full_state()"]
+
+  contract_status: "COMPLETE"
+  last_validated: "2026-01-03"
+  breaking_changes_from_previous: "None (new contract)"
+
+  related_contracts:
+    - "PhysioController_Interface.yaml"
+    - "PhysioController_Input_Contract.yaml"
+    - "PhysioController_Spec.yaml"
+    - "EVA_Matrix_Input_Contract.yaml (consumer)"
+    - "Artifact_Qualia_Input_Contract.yaml (consumer)"
+    - "CIN_Output_Contract.yaml (consumer)"

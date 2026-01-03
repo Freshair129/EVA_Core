@@ -2,8 +2,10 @@
 # Endocrine Regulation Layer
 # HPA Axis + Circadian Controller
 # version: 8.1.0-R1
+# Status: GKS Standardized
 # ============================================================
 
+schema: EVA-Endocrine-Regulation-v1
 version: 8.1.0-R1
 system: "EndocrineRegulation"
 description: >

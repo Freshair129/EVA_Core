@@ -1,11 +1,10 @@
-# Bio-Digital Core v7.1: Integrated Emotive Signal Chemical (ESC) Specification
-# Classification:
-#   ESC = Emotive Signal Chemical
-#   H   = Hormone (Blood-borne, slower acting)
-#   N   = Neurotransmitter (Synaptic/Fast-acting, modulation)
-#
-# Naming Convention: ESC_{Type}{Seq}_{Abbr}_{Name}
+# ============================================================
+# Hormone Specification (Machine Learning)
+# version: 8.1.0-R1
+# Status: GKS Standardized
+# ============================================================
 
+schema: EVA-Hormone-Spec-v1
 version: 8.1.0-R1
 last_sync: "2026-01-03"
 system_id: "Endocrine & Neurochemical System"

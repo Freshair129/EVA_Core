@@ -5,19 +5,21 @@
 schema: EVA-CIN-Interface-v1
 version: 8.1.0-R1
 name: CIN (Context Injection Node)
-role: Orchestration & Context Builder
+role: Orchestration, Context Builder & Stimulus Normalizer
 
 description: >
-  Dual-phase context orchestrator. 
-  Phase 1 (Intuition): Builds 'Perception' prompt (Lightweight, Quick Recall).
+  Dual-phase context orchestrator and cognitive firewall. 
+  Phase 1 (Intuition): Builds 'Perception' prompt and normalizes extracted triggers.
   Phase 2 (Reasoning): Builds 'Reasoning' prompt (Deep Context via AgenticRAG & EVA_Matrix).
 
 position:
   upstream:
+    - LLM Bridge (Triggers)
     - PhysioController (Physiological Controller)
     - MSP (Memory & Soul Passport)
     - PMT (Prompt Rule Layer)
   downstream:
+    - PhysioController (Stimulus Injection)
     - Orchestrator (Main Conductor)
 
 methods:
@@ -25,6 +27,11 @@ methods:
     input: "User Input (String)"
     output: "Phase 1 Perception Context (Object)"
     description: "Assembles intuition-based context including quick recall (แว๊บแรก)."
+
+  - name: normalize_stimulus
+    input: "Raw Stimulus from LLM (Object)"
+    output: "Validated Stimulus Vector (Object)"
+    description: "Enforces safety scaling and filters unknown keys before biological injection."
   
   - name: build_phase_2_context
     input: "Stimulus Vector (Object) + Tags (List)"

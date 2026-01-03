@@ -1,32 +1,19 @@
-# Artifact Qualia (Phenomenological Experience Integrator)
+# 🌈 Artifact Qualia (Phenomenology Core)
+**Component ID:** `SYS-QUALIA-8.1` | **Version:** `8.1.0-R1` | **Status:** GKS Standardized
 
-## Component ID: SYS-QUALIA-8.1
+## 📋 Overview
+Artifact Qualia is the phenomenological "Sensation" layer of EVA. It transforms abstract psychological metrics (from EVA Matrix) and semantic impact (from RIM) into a subjective experience snapshot (Qualia), representing "what it is like" for the system in this moment.
 
-**Version:** 8.1.0
-**Status:** Production-Ready (with future enhancement roadmap)
-**Migration:** Based on EVA 7.0 spec, updated for 8.1.0 implementation
+**Version 8.1.0-R1 Updates**:
+- **System Wrapper (`artifact_qualia_engine.py`)**: Acts as the system authority with state persistence.
+- **MSP State Bus Integration**: Automatically pulls psychological state from MSP and pushes qualia snapshots to the bus.
+- **Persistence**: State is saved to `consciousness/10_state/artifact_qualia_state.json`.
 
----
-
-## Overview
-
-The **Artifact_Qualia** module transforms abstract psychological metrics into phenomenological qualities that represent **"what it's like"** for the llm in this moment.
-
-It integrates:
-- **Psychological state** (from EVA Matrix) - 9D emotional axes
-- **Semantic impact** (from RIM) - Event impact signals
-
-Into a **phenomenological experience snapshot** that the LLM can interpret into language and behavior.
-
-### Purpose
-
-Provide the **felt quality** of the llm's internal state - a bridge between physiological/cognitive signals and subjective experience representation.
-
-**Key Principle:** "Qualia คือประสบการณ์ ไม่ใช่คำอธิบาย" (Qualia is experience, not explanation)
-
----
-
-## 📁 Directory Structure
+## 🗂️ Directory Structure
+- `configs/`: Standardized phenomenological mapping and principles.
+- `contract/`: Upstream (Psyche/RIM) and Downstream (Orchestrator/MSP) definitions.
+- `logic/`: Functional implementation (`Artifact_Qualia.py` and `artifact_qualia_engine.py`).
+- `validation/`: JSON schemas for qualia snapshots and semantic input.
 
 ```
 Artifact_Qualia/

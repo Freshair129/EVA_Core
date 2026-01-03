@@ -1,0 +1,386 @@
+# PhysioController Input Contract
+# Version: 8.1.0-R1
+# Date: 2026-01-03
+# Status: Aligned with EVA 8.1.0 Implementation
+
+schema: EVA-PhysioController-Input-Contract-v8.1
+version: 8.1.0-R1
+updated: 2026-01-03
+
+# ============================================================
+# CONTRACT SCOPE
+# ============================================================
+description: >
+  Input contract for PhysioController in EVA 8.1.0.
+  Defines the structure and validation rules for stimulus vectors
+  and environmental inputs required for physiological simulation.
+
+# ============================================================
+# MAIN API SIGNATURE
+# ============================================================
+api_signature: |
+  def step(
+      self,
+      eva_stimuli: Union[Dict[str, float], List[Dict[str, Any]]],
+      zeitgebers: Dict[str, float],
+      dt: float,
+      now: datetime | None = None
+  ) -> Dict[str, Any]:
+
+# ============================================================
+# 1. EVA_STIMULI INPUT
+# ============================================================
+eva_stimuli:
+  type: "Dict[str, float] | List[Dict[str, Any]]"
+  required: true
+  description: "Stimulus vector OR list of progressive chunks from CIN"
+
+  single_stimulus_format:
+    type: "Dict[str, float]"
+    description: "Single stimulus vector for immediate processing"
+
+    required_keys:
+      threat:
+        type: "float"
+        range: [0.0, 1.0]
+        description: "Threat level (survival concern)"
+        affects: "HPA Axis → Cortisol & Adrenaline"
+
+      trust:
+        type: "float"
+        range: [0.0, 1.0]
+        description: "Trust/safety level"
+        affects: "Oxytocin production, PNS activation"
+
+      novelty:
+        type: "float"
+        range: [0.0, 1.0]
+        description: "Novelty/surprise level"
+        affects: "Dopamine production"
+
+    optional_keys:
+      reward:
+        type: "float"
+        range: [0.0, 1.0]
+        description: "Reward anticipation"
+        affects: "Dopamine, ventral striatum"
+        default: 0.0
+
+      social:
+        type: "float"
+        range: [0.0, 1.0]
+        description: "Social engagement level"
+        affects: "Oxytocin, connection"
+        default: 0.0
+
+      calm:
+        type: "float"
+        range: [0.0, 1.0]
+        description: "Calming signal"
+        affects: "Serotonin, parasympathetic"
+        default: 0.0
+
+    validation:
+      - "All values must be in range [0.0, 1.0]"
+      - "Must contain at least 'threat', 'trust', 'novelty'"
+      - "Unknown keys are ignored (graceful degradation)"
+
+    example:
+      threat: 0.7
+      trust: 0.3
+      novelty: 0.5
+      reward: 0.0
+      social: 0.2
+      calm: 0.1
+
+  progressive_chunks_format:
+    type: "List[Dict[str, Any]]"
+    description: "List of stimulus chunks for progressive injection"
+
+    chunk_structure:
+      stimulus:
+        type: "Dict[str, float]"
+        description: "Same structure as single_stimulus_format"
+        required: true
+
+      metadata:
+        type: "Dict[str, Any]"
+        description: "Optional chunk metadata"
+        optional: true
+        fields:
+          - chunk_id: "Chunk identifier"
+          - timestamp: "When this chunk was generated"
+          - source: "Origin of stimulus (e.g., 'llm_perception')"
+
+    processing:
+      - "Chunks processed sequentially with 500ms spacing (Digestion Time)"
+      - "Each chunk triggers full pipeline independently"
+      - "Results from last chunk returned"
+
+    use_case: "Progressive stimulus injection for complex scenarios"
+
+    example:
+      - stimulus: {threat: 0.3, trust: 0.7, novelty: 0.2}
+        metadata: {chunk_id: 1, source: "greeting"}
+      - stimulus: {threat: 0.8, trust: 0.2, novelty: 0.9}
+        metadata: {chunk_id: 2, source: "sudden_event"}
+
+# ============================================================
+# 2. ZEITGEBERS INPUT
+# ============================================================
+zeitgebers:
+  type: "Dict[str, float]"
+  required: true
+  description: "External environmental inputs for circadian modulation"
+
+  required_keys:
+    hour_of_day:
+      type: "float"
+      range: [0.0, 24.0]
+      description: "Hour of day in 24-hour format (14.5 = 2:30 PM)"
+      affects: "Circadian rhythm, cortisol baseline, melatonin"
+      example: 14.5
+
+    light_lux:
+      type: "float"
+      range: [0.0, 100000.0]
+      unit: "lux"
+      description: "Ambient light intensity"
+      affects: "Melatonin suppression, cortisol modulation"
+      typical_values:
+        darkness: 0.0
+        moonlight: 0.1
+        indoor: 300.0
+        office: 500.0
+        daylight: 10000.0
+        direct_sun: 100000.0
+      example: 500.0
+
+  optional_keys:
+    activity_level:
+      type: "float"
+      range: [0.0, 1.0]
+      description: "Physical activity level"
+      affects: "Adrenaline, cortisol baseline"
+      default: 0.0
+
+    temperature:
+      type: "float"
+      range: [-40.0, 60.0]
+      unit: "Celsius"
+      description: "Ambient temperature"
+      affects: "Metabolic rate, stress response"
+      optional: true
+
+  validation:
+    - "hour_of_day must be in [0.0, 24.0]"
+    - "light_lux must be non-negative"
+
+  example:
+    hour_of_day: 14.5
+    light_lux: 500.0
+    activity_level: 0.3
+
+# ============================================================
+# 3. DT (DELTA TIME) INPUT
+# ============================================================
+dt:
+  type: "float"
+  required: true
+  range: [0.001, 1.0]
+  unit: "seconds"
+  description: "Time step for simulation (how much time has passed)"
+
+  typical_values:
+    streaming_30hz: 0.033
+    streaming_20hz: 0.05
+    single_step: 0.1
+    slow_update: 1.0
+
+  validation:
+    - "dt must be positive (> 0.0)"
+    - "dt should be < 1.0 second for accuracy"
+    - "Recommended: 0.033s (30Hz) for real-time streaming"
+
+  effects:
+    - "Endocrine: Secretion mass = rate × dt"
+    - "Blood: Clearance = exp(-k × dt)"
+    - "Receptor: Integration time window"
+
+  example: 0.033
+
+# ============================================================
+# 4. NOW (TIMESTAMP) INPUT
+# ============================================================
+now:
+  type: "datetime | None"
+  required: false
+  optional: true
+  description: "Current timestamp for circadian calculations"
+
+  usage:
+    - "If None: CircadianController uses system time"
+    - "If provided: Use for deterministic testing or replay"
+
+  format: "Python datetime object"
+
+  example: "datetime(2026, 1, 3, 14, 30, 0)"
+
+# ============================================================
+# UPSTREAM SOURCES
+# ============================================================
+upstream_sources:
+  eva_stimuli:
+    source: "CIN (Context Injection Node)"
+    method: "normalize_stimulus()"
+    transformation: "LLM raw output → normalized [0.0, 1.0] stimulus vector"
+    validation: "Safety scaling, unknown key filtering"
+
+  zeitgebers:
+    source: "Main Orchestrator"
+    method: "get_zeitgebers()"
+    data:
+      - "System clock → hour_of_day"
+      - "Light sensor (or default) → light_lux"
+      - "Activity tracker (optional) → activity_level"
+
+  dt:
+    source: "Main Orchestrator"
+    calculation: "time.time() - last_step_time"
+    typical: "0.033s for 30Hz streaming"
+
+  now:
+    source: "Main Orchestrator (optional)"
+    purpose: "Override system time for testing/replay"
+
+# ============================================================
+# VALIDATION RULES (PRE-PROCESSING)
+# ============================================================
+validation:
+  eva_stimuli:
+    required_structure:
+      - "Must be Dict or List"
+      - "If Dict: must contain numeric values"
+      - "If List: each element must be Dict with 'stimulus' key"
+
+    value_constraints:
+      - "All stimulus values must be float"
+      - "All stimulus values must be in range [0.0, 1.0]"
+      - "Negative values clamped to 0.0"
+      - "Values > 1.0 clamped to 1.0"
+
+    error_handling:
+      - "Missing keys: Use default 0.0"
+      - "Unknown keys: Ignored (graceful degradation)"
+      - "Invalid type: Raise ValueError"
+
+  zeitgebers:
+    required_structure:
+      - "Must be Dict"
+      - "Must contain 'hour_of_day' and 'light_lux'"
+
+    value_constraints:
+      - "hour_of_day in [0.0, 24.0]"
+      - "light_lux >= 0.0"
+
+    error_handling:
+      - "Missing required keys: Raise KeyError"
+      - "Out of range: Raise ValueError"
+
+  dt:
+    constraints:
+      - "Must be float"
+      - "Must be > 0.0"
+      - "Should be < 1.0 (recommended)"
+
+    error_handling:
+      - "dt <= 0.0: Raise ValueError"
+      - "dt > 1.0: Warning (accuracy degradation)"
+
+  now:
+    constraints:
+      - "Must be datetime object or None"
+
+    error_handling:
+      - "Invalid type: Raise TypeError"
+
+# ============================================================
+# SAFETY & NORMALIZATION
+# ============================================================
+safety:
+  clamping:
+    description: "All stimulus values clamped to [0.0, 1.0]"
+    rationale: "Prevent extreme inputs from causing physiological overflow"
+    implementation: "clamp(x, 0.0, 1.0) before HPA Regulator"
+
+  unknown_key_handling:
+    description: "Unknown stimulus keys are silently ignored"
+    rationale: "Graceful degradation (LLM might send unexpected keys)"
+    implementation: "Only extract known keys from stimulus dict"
+
+  hpa_modulation:
+    description: "HPA Regulator applies homeostatic feedback"
+    effects:
+      - "High cortisol suppresses CRH (negative feedback)"
+      - "Safety signals dampen threat response"
+      - "Prevents runaway stress accumulation"
+
+# ============================================================
+# TYPICAL USE CASES
+# ============================================================
+use_cases:
+  normal_interaction:
+    description: "User sends friendly message"
+    eva_stimuli:
+      threat: 0.1
+      trust: 0.8
+      novelty: 0.2
+      social: 0.7
+    zeitgebers:
+      hour_of_day: 10.0
+      light_lux: 1000.0
+    dt: 0.033
+    expected_outcome: "Low cortisol, high oxytocin, PNS dominance"
+
+  threat_scenario:
+    description: "User expresses distress or conflict"
+    eva_stimuli:
+      threat: 0.9
+      trust: 0.2
+      novelty: 0.8
+    zeitgebers:
+      hour_of_day: 22.0  # Late night (higher baseline stress)
+      light_lux: 50.0     # Dim light
+    dt: 0.033
+    expected_outcome: "High cortisol & adrenaline, SNS dominance, freeze/flight reflex"
+
+  progressive_injection:
+    description: "Complex multi-part stimulus (conversation flow)"
+    eva_stimuli:
+      - stimulus: {threat: 0.2, trust: 0.7, novelty: 0.1}  # Greeting
+      - stimulus: {threat: 0.5, trust: 0.5, novelty: 0.6}  # Question
+      - stimulus: {threat: 0.8, trust: 0.3, novelty: 0.9}  # Revelation
+    zeitgebers:
+      hour_of_day: 14.5
+      light_lux: 500.0
+    dt: 0.5
+    expected_outcome: "Progressive stress buildup, final state reflects last chunk"
+
+# ============================================================
+# CONTRACT METADATA
+# ============================================================
+metadata:
+  contract_type: "INPUT"
+  eva_version: "8.1.0-R1"
+  module_location: "physio_core/physio_controller.py"
+  api_signature: "def step(self, eva_stimuli, zeitgebers, dt, now)"
+
+  contract_status: "COMPLETE"
+  last_validated: "2026-01-03"
+  breaking_changes_from_previous: "None (new contract)"
+
+  related_contracts:
+    - "PhysioController_Interface.yaml"
+    - "PhysioController_Output_Contract.yaml"
+    - "PhysioController_Spec.yaml"
+    - "CIN_Output_Contract.yaml (stimulus source)"

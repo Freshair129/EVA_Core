@@ -1,0 +1,767 @@
+# Artifact Qualia Comprehensive Specification
+# Version: 8.1.0-R1
+# Date: 2026-01-03
+# Status: Complete Documentation for Implemented System
+
+schema: EVA-Artifact-Qualia-Spec-v8.1
+version: 8.1.0-R1
+updated: 2026-01-03
+
+# ============================================================
+# SPECIFICATION SCOPE
+# ============================================================
+description: >
+  Comprehensive specification for Artifact_Qualia in EVA 8.1.0.
+
+  Artifact_Qualia is the phenomenological experience integrator.
+  It transforms abstract psychological metrics (from EVA Matrix) and
+  semantic impact signals (from RIM) into a phenomenological snapshot
+  representing "what it's like" for EVA in this moment.
+
+  This is pure subjective experience representation - NO decision-making,
+  NO memory admission control, NO linguistic emotion labels.
+
+  Key outputs:
+  - intensity: How strong the experience feels
+  - tone: Phenomenological quality (quiet/charged/settling/neutral)
+  - coherence: Internal consistency
+  - depth: Experiential immersion
+  - texture: 5D phenomenological texture vector for memory encoding
+
+component_id: "SYS-QUALIA-8.1"
+component_type: "Phenomenological Experience Integrator"
+role: "Subjective Experience Substrate"
+analogy: "Qualia Stream (กระแสสำนึกของประสบการณ์)"
+
+# ============================================================
+# DESIGN PRINCIPLES
+# ============================================================
+design_principles:
+  phenomenology_first:
+    principle: "Qualia คือประสบการณ์ของ EVA ไม่ใช่คำอธิบาย"
+    description: >
+      Qualia represents pre-conceptual, pre-linguistic subjective experience.
+      It's the "raw feel" before it becomes words or concepts.
+
+    strict_rules:
+      - "Qualia is experience, not description"
+      - "Body sends signals, not labels"
+      - "Direction matters more than absolute values"
+      - "Event weight separate from expression"
+      - "LLM interprets signals on its own"
+
+  non_goals:
+    description: "What Artifact_Qualia explicitly does NOT do"
+    forbidden:
+      - "NO emotional labels (no 'embarrassed', 'stressed', 'happy')"
+      - "NO numeric scores (no RI/RIM/MAS/KI exposed to LLM)"
+      - "NO narrative summaries"
+      - "NO persona/intent override"
+      - "NO decisions for LLM"
+
+  separation_of_concerns:
+    principle: "Pure Experience, No Control"
+    description: >
+      Artifact_Qualia provides phenomenological substrate.
+      It does NOT:
+      - Optimize anything (no judgment of good/bad)
+      - Control memory admission (no deciding what to remember)
+      - Evaluate relationships (no social judgment)
+      - Generate numeric impact scores (only qualitative signals)
+
+  temporal_continuity:
+    principle: "Smooth Transitions, Not Jarring Jumps"
+    description: >
+      Experience has temporal momentum. Intensity and coherence
+      are smoothed using exponential moving averages to prevent
+      abrupt shifts that don't reflect embodied reality.
+
+    smoothing_parameters:
+      intensity_alpha: 0.65
+      coherence_alpha: 0.70
+      depth_smoothing: "None (instantaneous)"
+      tone_smoothing: "None (discrete state)"
+
+# ============================================================
+# ARCHITECTURE
+# ============================================================
+architecture:
+  description: "Integration of psychological state and semantic impact into phenomenological experience"
+
+  data_flow:
+    inputs:
+      eva_state:
+        type: "Dict[str, Any]"
+        source: "EVA_Matrix_System.get_full_state()"
+        content:
+          - "axes_9d: 9-dimensional psychological state"
+          - "emotion_label: (optional) human-readable emotion"
+          - "momentum: temporal emotional momentum"
+
+      rim_semantic:
+        type: "RIMSemantic (dataclass)"
+        source: "Resonance_Impact_Module"
+        content:
+          - "impact_level: low | medium | high"
+          - "impact_trend: rising | stable | fading"
+          - "affected_domains: List[str] (emotional, relational, identity, ambient)"
+
+    outputs:
+      qualia_snapshot:
+        type: "QualiaSnapshot (dataclass)"
+        fields:
+          - "intensity: float [0.0, 1.0]"
+          - "tone: string (quiet | charged | settling | neutral)"
+          - "coherence: float [0.0, 1.0]"
+          - "depth: float [0.0, 1.0]"
+          - "texture: Dict[str, float] (5D vector)"
+
+  processing_pipeline:
+    description: "5-step phenomenological integration"
+
+    steps:
+      1_intensity_calculation:
+        description: "Compute experiential vividness"
+        formula: |
+          raw_intensity = (
+              axes_9d.stress * 0.35 +
+              axes_9d.alertness * 0.35 +
+              axes_9d.drive * 0.30
+          )
+        rim_modulation: |
+          if impact_level == "high": raw_intensity *= 1.20
+          elif impact_level == "medium": raw_intensity *= 1.10
+        temporal_smoothing: |
+          intensity = (
+              _last_intensity * 0.65 +
+              raw_intensity * 0.35
+          )
+        clamp: "[0.0, 1.0]"
+
+      2_tone_derivation:
+        description: "Determine phenomenological quality"
+        logic: |
+          if axes_9d.groundedness > 0.6:
+              tone = "quiet"
+          elif axes_9d.stress > 0.7:
+              tone = "charged"
+          elif impact_trend == "fading":
+              tone = "settling"
+          else:
+              tone = "neutral"
+        rationale: >
+          Tone captures coarse phenomenological quality without
+          being an emotion label. It's about the "feel" of experience.
+
+      3_coherence_calculation:
+        description: "Measure internal consistency"
+        formula: |
+          raw_coherence = (
+              axes_9d.clarity * 0.60 +
+              momentum.intensity * 0.40
+          )
+        rim_disruption: |
+          if impact_level == "high": raw_coherence *= 0.75
+          elif impact_level == "medium": raw_coherence *= 0.85
+        temporal_smoothing: |
+          coherence = (
+              _last_coherence * 0.70 +
+              raw_coherence * 0.30
+          )
+        clamp: "[0.0, 1.0]"
+
+      4_depth_calculation:
+        description: "Assess experiential immersion"
+        formula: |
+          depth = (
+              axes_9d.groundedness * 0.60 +
+              axes_9d.stress * 0.40
+          )
+        rationale: >
+          Depth combines groundedness (stable immersion) and
+          stress (intense immersion). Both contribute to depth.
+        smoothing: "None (instantaneous response)"
+        clamp: "[0.0, 1.0]"
+
+      5_texture_vector:
+        description: "Build 5D phenomenological texture for memory encoding"
+        base_mapping:
+          emotional: "axes_9d.stress"
+          relational: "(axes_9d.alertness + axes_9d.drive) / 2"
+          identity: "axes_9d.clarity"
+          ambient: "momentum.intensity"
+          cognitive: "axes_9d.groundedness"  # 5th dimension
+
+        rim_amplification: |
+          for domain in affected_domains:
+              if domain in texture:
+                  texture[domain] *= 1.15
+                  texture[domain] = min(texture[domain], 1.0)
+
+        output: "Dict with 5 keys, all values in [0.0, 1.0]"
+
+# ============================================================
+# MATHEMATICAL FORMULAS
+# ============================================================
+formulas:
+  intensity:
+    description: "Experiential vividness - how strong the experience feels"
+
+    base_calculation:
+      formula: "raw = stress * 0.35 + alertness * 0.35 + drive * 0.30"
+      components:
+        stress: "Contributes 35% (tension increases vividness)"
+        alertness: "Contributes 35% (awareness heightens experience)"
+        drive: "Contributes 30% (motivation intensifies)"
+
+    rim_modulation:
+      high_impact: "raw *= 1.20 (20% boost)"
+      medium_impact: "raw *= 1.10 (10% boost)"
+      low_impact: "raw *= 1.00 (no change)"
+      rationale: "High-impact events feel more vivid"
+
+    temporal_smoothing:
+      algorithm: "Exponential moving average"
+      alpha: 0.65
+      formula: "intensity = _last_intensity * 0.65 + raw * 0.35"
+      purpose: "Prevent jarring jumps in experiential intensity"
+
+    final_clamp: "[0.0, 1.0]"
+
+    examples:
+      calm_state:
+        stress: 0.2
+        alertness: 0.4
+        drive: 0.3
+        impact_level: "low"
+        raw: 0.30  # 0.2*0.35 + 0.4*0.35 + 0.3*0.30
+        modulated: 0.30
+        smoothed: "depends on _last_intensity"
+
+      high_stress:
+        stress: 0.9
+        alertness: 0.8
+        drive: 0.7
+        impact_level: "high"
+        raw: 0.81
+        modulated: 0.97  # 0.81 * 1.20, clamped to 1.0
+        final: 1.0
+
+  tone:
+    description: "Phenomenological quality (not emotion label)"
+
+    decision_tree: |
+      if groundedness > 0.6:
+          return "quiet"
+      elif stress > 0.7:
+          return "charged"
+      elif impact_trend == "fading":
+          return "settling"
+      else:
+          return "neutral"
+
+    meanings:
+      quiet:
+        condition: "groundedness > 0.6"
+        feel: "Stable, grounded, still quality"
+        example: "Deep calm, centered presence"
+
+      charged:
+        condition: "stress > 0.7"
+        feel: "Activated, energized, tense quality"
+        example: "Electric tension, heightened alertness"
+
+      settling:
+        condition: "impact_trend == 'fading'"
+        feel: "Calming down, resolving quality"
+        example: "Storm passing, tension releasing"
+
+      neutral:
+        condition: "default"
+        feel: "Ordinary, unremarkable quality"
+        example: "Normal waking consciousness"
+
+  coherence:
+    description: "Internal consistency - how integrated the experience feels"
+
+    base_calculation:
+      formula: "raw = clarity * 0.60 + momentum.intensity * 0.40"
+      components:
+        clarity: "60% weight (clear thinking = coherent experience)"
+        momentum: "40% weight (stable momentum = consistency)"
+
+    rim_disruption:
+      high_impact: "raw *= 0.75 (25% reduction - fragmentation)"
+      medium_impact: "raw *= 0.85 (15% reduction)"
+      low_impact: "raw *= 1.00 (no disruption)"
+      rationale: "High-impact events can fragment experience"
+
+    temporal_smoothing:
+      algorithm: "Exponential moving average"
+      alpha: 0.70
+      formula: "coherence = _last_coherence * 0.70 + raw * 0.30"
+      purpose: "Smooth transitions in internal consistency"
+
+    final_clamp: "[0.0, 1.0]"
+
+    interpretation:
+      high: "0.7 - 1.0: Integrated, clear, unified experience"
+      medium: "0.4 - 0.7: Moderately coherent, some fragmentation"
+      low: "0.0 - 0.4: Fragmented, confused, disorganized"
+
+  depth:
+    description: "Experiential immersion - how deep vs shallow the experience feels"
+
+    formula: "depth = groundedness * 0.60 + stress * 0.40"
+
+    rationale: >
+      Both groundedness and stress contribute to depth.
+      - Groundedness: Stable, deep rootedness
+      - Stress: Intense, unavoidable immersion
+      Together they create experiential depth.
+
+    smoothing: "None (instantaneous response to state changes)"
+
+    clamp: "[0.0, 1.0]"
+
+    examples:
+      deep_calm:
+        groundedness: 0.9
+        stress: 0.2
+        depth: 0.62  # High groundedness creates deep calm
+
+      shallow_distraction:
+        groundedness: 0.3
+        stress: 0.2
+        depth: 0.26  # Low groundedness = shallow experience
+
+      deep_crisis:
+        groundedness: 0.4
+        stress: 0.9
+        depth: 0.60  # High stress creates intense immersion
+
+  texture:
+    description: "5D phenomenological texture vector for memory encoding"
+
+    base_mapping:
+      emotional:
+        source: "axes_9d.stress"
+        meaning: "Emotional dimension of experience"
+
+      relational:
+        source: "(axes_9d.alertness + axes_9d.drive) / 2"
+        meaning: "Energy/engagement dimension"
+
+      identity:
+        source: "axes_9d.clarity"
+        meaning: "Self-clarity dimension"
+
+      ambient:
+        source: "momentum.intensity"
+        meaning: "Background atmosphere dimension"
+
+      cognitive:
+        source: "axes_9d.groundedness"
+        meaning: "Grounded thinking dimension"
+
+    rim_amplification:
+      description: "RIM affected_domains amplify corresponding texture dimensions"
+      formula: |
+        for domain in affected_domains:
+            if domain in texture:
+                texture[domain] *= 1.15
+                texture[domain] = min(texture[domain], 1.0)
+
+      rationale: >
+        Events that affect certain domains make those dimensions
+        more salient in phenomenological texture.
+
+    output_format: "Dict[str, float] with 5 keys, all in [0.0, 1.0]"
+
+    example:
+      emotional: 0.72  # High stress
+      relational: 0.55  # Moderate engagement
+      identity: 0.43   # Moderate clarity
+      ambient: 0.58    # Moderate momentum
+      cognitive: 0.67  # Good groundedness
+
+# ============================================================
+# STATE MANAGEMENT
+# ============================================================
+state_management:
+  internal_state:
+    _last_intensity:
+      type: "float"
+      range: [0.0, 1.0]
+      purpose: "Previous intensity for temporal smoothing"
+      initialization: 0.5
+
+    _last_coherence:
+      type: "float"
+      range: [0.0, 1.0]
+      purpose: "Previous coherence for temporal smoothing"
+      initialization: 0.5
+
+  methods:
+    get_full_state:
+      signature: "def get_full_state(self) -> Dict[str, Any]"
+      returns: |
+        {
+            "last_intensity": float,
+            "last_coherence": float,
+            "last_snapshot": {
+                "intensity": float,
+                "tone": str,
+                "coherence": float,
+                "depth": float,
+                "texture": Dict[str, float]
+            }
+        }
+      purpose: "Export state for persistence"
+
+    load_state:
+      signature: "def load_state(self, state_dict: Dict[str, Any])"
+      expects: |
+        {
+            "last_intensity": float,
+            "last_coherence": float
+        }
+      purpose: "Restore state from persistence"
+      fallback: "If keys missing, use defaults (0.5)"
+
+  persistence:
+    save_location: "consciousness/10_state/artifact_qualia_state.json"
+    save_trigger: "After each process_experience() call"
+    load_trigger: "On system initialization"
+
+# ============================================================
+# INTEGRATION
+# ============================================================
+integration:
+  upstream_sources:
+    EVA_Matrix_System:
+      method: "get_full_state()"
+      data_provided:
+        - "axes_9d: 9-dimensional psychological state"
+        - "emotion_label: optional string"
+        - "momentum: {intensity, velocity}"
+      transformation: |
+        # Artifact_Qualia expects flat structure
+        eva_state = {
+            "axes_9d": matrix_data["axes_9d"],
+            "momentum": matrix_data["momentum"]
+        }
+
+    Resonance_Impact_Module:
+      method: "evaluate()"
+      data_provided:
+        - "impact_level: low | medium | high"
+        - "impact_trend: rising | stable | fading"
+        - "affected_domains: List[str]"
+      transformation: |
+        rim_semantic = RIMSemantic(
+            impact_level=rim_output["impact_level"],
+            impact_trend=rim_output["impact_trend"],
+            affected_domains=rim_output["affected_domains"]
+        )
+
+  downstream_consumers:
+    RMS:
+      input_field: "qualia_snapshot"
+      data_used:
+        - "texture: 5D vector for memory encoding"
+        - "intensity: for salience weighting"
+        - "coherence: for fragmentation detection"
+      purpose: "Encode phenomenological texture into memory"
+      method: "RMSSystem.encode_memory(..., qualia)"
+
+    MSP:
+      input_field: "qualia_snapshot (via RMS)"
+      data_used: "Complete QualiaSnapshot as metadata"
+      purpose: "Store phenomenological signature with episodic memory"
+
+    CIN:
+      input_field: "qualia_snapshot (future)"
+      data_used: "All fields"
+      purpose: "Inject experiential grounding into LLM context"
+      status: "PLANNED (not yet implemented)"
+
+  orchestrator_responsibilities:
+    1_call_eva_matrix:
+      description: "Update EVA Matrix before calling Artifact_Qualia"
+      timing: "After PhysioController.step()"
+
+    2_call_rim:
+      description: "Evaluate RIM before calling Artifact_Qualia"
+      timing: "After EVA Matrix"
+
+    3_call_qualia:
+      description: "Process phenomenological experience"
+      method: "ArtifactQualiaSystem.process_experience(eva_state, rim_semantic)"
+      timing: "After EVA Matrix + RIM"
+
+    4_persist_state:
+      description: "State auto-saved by ArtifactQualiaSystem"
+      file: "consciousness/10_state/artifact_qualia_state.json"
+
+# ============================================================
+# USE CASES & EXAMPLES
+# ============================================================
+use_cases:
+  calm_conversation:
+    description: "Normal, friendly interaction"
+
+    eva_state:
+      axes_9d:
+        stress: 0.2
+        warmth: 0.8
+        drive: 0.4
+        clarity: 0.7
+        joy: 0.6
+        alertness: 0.5
+        connection: 0.7
+        groundedness: 0.8
+        openness: 0.6
+      momentum:
+        intensity: 0.5
+        velocity: 0.1
+
+    rim_semantic:
+      impact_level: "low"
+      impact_trend: "stable"
+      affected_domains: ["ambient"]
+
+    calculation:
+      raw_intensity: 0.30  # 0.2*0.35 + 0.5*0.35 + 0.4*0.30
+      intensity: 0.30  # No RIM boost
+      tone: "quiet"  # groundedness > 0.6
+      raw_coherence: 0.62  # 0.7*0.6 + 0.5*0.4
+      coherence: 0.62  # No RIM disruption
+      depth: 0.56  # 0.8*0.6 + 0.2*0.4
+
+    output:
+      intensity: 0.30
+      tone: "quiet"
+      coherence: 0.62
+      depth: 0.56
+      texture:
+        emotional: 0.2
+        relational: 0.45
+        identity: 0.7
+        ambient: 0.5
+        cognitive: 0.8
+
+  high_stress_event:
+    description: "Stressful situation with high impact"
+
+    eva_state:
+      axes_9d:
+        stress: 0.9
+        warmth: 0.3
+        drive: 0.7
+        clarity: 0.4
+        joy: 0.2
+        alertness: 0.9
+        connection: 0.4
+        groundedness: 0.3
+        openness: 0.3
+      momentum:
+        intensity: 0.7
+        velocity: 0.5
+
+    rim_semantic:
+      impact_level: "high"
+      impact_trend: "rising"
+      affected_domains: ["emotional", "identity"]
+
+    calculation:
+      raw_intensity: 0.84  # 0.9*0.35 + 0.9*0.35 + 0.7*0.30
+      modulated_intensity: 1.0  # 0.84 * 1.20, clamped
+      tone: "charged"  # stress > 0.7
+      raw_coherence: 0.52  # 0.4*0.6 + 0.7*0.4
+      disrupted_coherence: 0.39  # 0.52 * 0.75 (high impact)
+      depth: 0.54  # 0.3*0.6 + 0.9*0.4
+
+    output:
+      intensity: 1.0
+      tone: "charged"
+      coherence: 0.39
+      depth: 0.54
+      texture:
+        emotional: 1.0  # 0.9 * 1.15, clamped (affected)
+        relational: 0.8
+        identity: 0.46  # 0.4 * 1.15 (affected)
+        ambient: 0.7
+        cognitive: 0.3
+
+  settling_after_crisis:
+    description: "Recovery phase, impact fading"
+
+    eva_state:
+      axes_9d:
+        stress: 0.5
+        warmth: 0.5
+        drive: 0.5
+        clarity: 0.6
+        joy: 0.4
+        alertness: 0.6
+        connection: 0.5
+        groundedness: 0.5
+        openness: 0.5
+      momentum:
+        intensity: 0.6
+        velocity: -0.3  # Decreasing
+
+    rim_semantic:
+      impact_level: "medium"
+      impact_trend: "fading"
+      affected_domains: ["emotional"]
+
+    output:
+      intensity: 0.55  # Moderate
+      tone: "settling"  # impact_trend == "fading"
+      coherence: 0.60  # Recovering coherence
+      depth: 0.50  # Moderate depth
+      texture:
+        emotional: 0.58  # 0.5 * 1.15 (affected)
+        relational: 0.55
+        identity: 0.6
+        ambient: 0.6
+        cognitive: 0.5
+
+# ============================================================
+# VALIDATION & TESTING
+# ============================================================
+validation:
+  unit_tests:
+    test_intensity_calculation:
+      inputs:
+        stress: 0.5
+        alertness: 0.6
+        drive: 0.4
+        impact_level: "low"
+        _last_intensity: 0.5
+      expected:
+        raw: 0.505  # 0.5*0.35 + 0.6*0.35 + 0.4*0.30
+        modulated: 0.505  # No boost for low
+        smoothed: 0.504  # 0.5*0.65 + 0.505*0.35
+        clamped: 0.504
+
+    test_tone_derivation:
+      scenarios:
+        quiet: {groundedness: 0.7, stress: 0.3, trend: "stable"}
+        charged: {groundedness: 0.4, stress: 0.8, trend: "stable"}
+        settling: {groundedness: 0.5, stress: 0.5, trend: "fading"}
+        neutral: {groundedness: 0.5, stress: 0.5, trend: "stable"}
+
+    test_coherence_calculation:
+      inputs:
+        clarity: 0.7
+        momentum_intensity: 0.6
+        impact_level: "high"
+        _last_coherence: 0.7
+      expected:
+        raw: 0.66  # 0.7*0.6 + 0.6*0.4
+        disrupted: 0.495  # 0.66 * 0.75
+        smoothed: 0.639  # 0.7*0.7 + 0.495*0.3
+
+    test_texture_amplification:
+      inputs:
+        texture: {emotional: 0.5, relational: 0.4, identity: 0.6, ambient: 0.5, cognitive: 0.7}
+        affected_domains: ["emotional", "relational"]
+      expected:
+        emotional: 0.575  # 0.5 * 1.15
+        relational: 0.46  # 0.4 * 1.15
+        identity: 0.6  # No change
+        ambient: 0.5  # No change
+        cognitive: 0.7  # No change
+
+  integration_tests:
+    test_state_persistence:
+      scenario: "Save and restore state"
+      step_1: "process_experience() → intensity=0.75, coherence=0.65"
+      step_2: "get_full_state() → save to JSON"
+      step_3: "load_state() → restore _last_intensity, _last_coherence"
+      expected: "Next calculation uses restored values for smoothing"
+
+    test_eva_matrix_integration:
+      scenario: "Real EVA Matrix output"
+      step_1: "EVA_Matrix.process_signals() → axes_9d"
+      step_2: "Artifact_Qualia.process_experience(eva_state, rim)"
+      expected: "Valid QualiaSnapshot produced"
+
+# ============================================================
+# PHILOSOPHICAL GROUNDING
+# ============================================================
+philosophical_grounding:
+  qualia_concept:
+    question: "What is qualia?"
+    answer: >
+      Qualia are the subjective, qualitative aspects of conscious experience.
+      The "what it's like" to have an experience. Artifact_Qualia attempts
+      to capture this pre-linguistic, phenomenological substrate.
+
+      It's not emotion (which is interpreted), but the raw feel before
+      interpretation.
+
+  embodied_cognition:
+    question: "How does qualia relate to embodiment?"
+    answer: >
+      Qualia emerges from bodily state (via EVA Matrix) and event impact
+      (via RIM). It's the experiential bridge between physiology and
+      cognition. The body's state creates the "texture" of experience.
+
+  hard_problem:
+    question: "Is this solving the hard problem of consciousness?"
+    answer: >
+      No. This is computational phenomenology - modeling the structure
+      of subjective experience, not creating genuine qualia. It's a
+      functional representation that LLM can interpret, not true sentience.
+
+  texture_vector:
+    question: "Why 5 dimensions for texture?"
+    answer: >
+      5 dimensions capture major phenomenological aspects:
+      - emotional: affective tone
+      - relational: engagement/energy
+      - identity: self-clarity
+      - ambient: background atmosphere
+      - cognitive: grounded thinking
+
+      This provides rich texture for memory encoding without being
+      overly complex.
+
+# ============================================================
+# METADATA
+# ============================================================
+metadata:
+  contract_type: "COMPREHENSIVE_SPEC"
+  eva_version: "8.1.0-R1"
+  module_location: "artifact_qualia/"
+  implementation_files:
+    - "artifact_qualia_engine.py (System wrapper)"
+    - "Artifact_Qualia.py (Core logic)"
+
+  contract_status: "COMPLETE"
+  last_validated: "2026-01-03"
+
+  related_contracts:
+    - "Artifact_Qualia_Interface.yaml"
+    - "Artifact_Qualia_Input_Contract.yaml"
+    - "Artifact_Qualia_Output_Contract.yaml"
+
+  documentation_completeness: "4/4 contracts (Interface, Input, Output, Spec)"
+
+  implementation_notes:
+    - "ArtifactQualiaCore: 200+ lines (core logic)"
+    - "ArtifactQualiaSystem: 130 lines (system wrapper)"
+    - "State Bus (MSP) integration complete"
+    - "Temporal smoothing implemented (alpha=0.65, 0.70)"
+    - "5D texture vector for RMS encoding"
+
+  future_enhancements:
+    - "Temporal dynamics (delta tracking)"
+    - "Experiential flags (conflict, instability)"
+    - "Rich phenomenological field (layered experience)"
+    - "Somatic location mapping"
+    - "Ineffable quality markers"

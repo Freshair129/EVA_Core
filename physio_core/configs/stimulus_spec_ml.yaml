@@ -1,9 +1,10 @@
 # ============================================================
-# Stimulus Specification ML
-# Reverse Mapping from Stimuli to Hormone Impacts
-# Generated from hormone_spec_ml.yaml (v7.1)
+# Stimulus Specification (Machine Learning)
+# version: 8.1.0-R1
+# Status: GKS Standardized
 # ============================================================
 
+schema: EVA-Stimulus-Spec-v1
 version: 8.1.0-R1
 generated_date: "2026-01-03"
 description: "Master dictionary of all valid biological triggers and their physiological effects (Hormones/Neurotransmitters)."

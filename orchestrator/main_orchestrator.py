@@ -40,8 +40,9 @@ from operation_system.llm_bridge.llm_bridge import LLMBridge, SYNC_BIOCOGNITIVE_
 # Biological & Psychological Systems
 from physio_core.physio_controller import PhysioController
 from eva_matrix.eva_matrix_engine import EVAMatrixSystem
-from artifact_qualia.Artifact_Qualia import ArtifactQualiaCore, RIMSemantic
-from resonance_memory_system.rms_v6 import RMSEngineV6
+from artifact_qualia.artifact_qualia_engine import ArtifactQualiaSystem
+from resonance_memory_system.rms_system import RMSSystem
+from resonance_index.ri_engine import RIEngine
 
 # Optional: PMT (Prompt Rule Layer)
 try:
@@ -95,16 +96,20 @@ class EVAOrchestrator:
             print("  - Initializing EVA Matrix (Psyche Core)...")
             self.matrix = EVAMatrixSystem(msp=self.msp)
             
-            print("  - Initializing Artifact Qualia (Phenomenology)...")
-            self.qualia = ArtifactQualiaCore()
+            print("  - Initializing Artifact Qualia (Phenomenology Core)...")
+            self.qualia = ArtifactQualiaSystem(msp=self.msp)
+            
+            print("  - Initializing RMS (Memory Encoding Core)...")
+            self.rms = RMSSystem(msp=self.msp)
 
-            print("  - Initializing Resonance Memory System (RMS)...")
-            self.rms = RMSEngineV6()
+            print("  - Initializing RI Engine (Resonance Intelligence)...")
+            self.ri_engine = RIEngine()
         else:
             self.physio = None
             self.matrix = None
             self.qualia = None
             self.rms = None
+            self.ri_engine = None
 
         # --------------------------------------------------
         # 3. Initialize Cognitive Layer
@@ -122,7 +127,7 @@ class EVAOrchestrator:
         if PMT_AVAILABLE:
             print("  - Initializing PMT (Prompt Rule Layer)...")
             try:
-                self.pmt = PromptRuleLayer()
+                self.pmt = PromptRuleLayer(msp=self.msp)
             except:
                 self.pmt = None
                 print("    Warning: PMT initialization failed")
@@ -160,28 +165,32 @@ class EVAOrchestrator:
             temperature=0.7
         )
 
-        # Handle tool call (The Gap)
+        # Handle tool call (The Gap) with Cognitive Firewall (Phase 4)
         if not llm_response.tool_calls:
             print("  ⚠️ Warning: LLM skipped Phase 1 extraction. Falling back to default.")
-            stimulus_vector = {"stress": 0.3, "warmth": 0.5, "arousal": 0.3, "valence": 0.5}
-            tags = ["neutral"]
+            stimulus_chunks = self.cin.normalize_stimulus({"valence": 0.5, "arousal": 0.3, "intensity": 0.3})
         else:
             tool_call = llm_response.tool_calls[0]
-            # Handle possible dict or object return from SDK
-            stimulus_raw = tool_call.args["stimulus_vector"]
-            stimulus_vector = {k: float(v) for k, v in stimulus_raw.items()}
-            tags = list(tool_call.args["tags"])
-            print(f"  ✓ LLM Extracted: {tags} (Stress={stimulus_vector.get('stress', 0):.2f})")
+            # Route through CIN Cognitive Firewall (Phase 4)
+            print("  🛡️ Routing stimulus through CIN Cognitive Firewall...")
+            stimulus_chunks = self.cin.normalize_stimulus(tool_call.args)
+            
+            # Log first chunk for clarity
+            first_chunk = stimulus_chunks[0]
+            tags = first_chunk.get("tags", [])
+            print(f"  ✓ CIN Normalized {len(stimulus_chunks)} chunks. Tags: {tags}")
 
         # --------------------------------------------------
         # STEP 2: The Gap - Biological & Psychological Sync
         # --------------------------------------------------
         print("\n⚡ STEP 2: The Gap - Bio-Cognitive Sync")
-        
+
         qualia_snapshot = None
         ans_state = {"sympathetic": 0.4, "parasympathetic": 0.6}
         blood_levels = {"cortisol": 0.3, "oxytocin": 0.5}
         qualitative_experience = "Feeling calm and stable."
+        axes_9d = {}  # Initialize for RI calculation
+        dynamic_ri = 0.75  # Default fallback
 
         if self.enable_physio:
             # 2a. Update Body (PhysioController)
@@ -196,12 +205,12 @@ class EVAOrchestrator:
             }
             
             physio_result = self.physio.step(
-                eva_stimuli=stimulus_vector,
+                eva_stimuli=stimulus_chunks, # Pass normalized chunk list (Phase 5)
                 zeitgebers=zeitgebers,
                 dt=60.0 # Process as a 1-minute state transition
             )
-            ans_state = physio_result.get("ans_state", {})
-            blood_levels = physio_result.get("blood_levels", {})
+            ans_state = physio_result.get("autonomic", {})
+            blood_levels = physio_result.get("blood", {})
 
             # 2b. Update Psyche (EVA Matrix)
             print("  - Updating EVA Matrix...")
@@ -210,13 +219,27 @@ class EVAOrchestrator:
 
             # 2c. Generate Qualia (Artifact Qualia)
             print("  - Generating Artifact Qualia...")
-            rim_semantic = RIMSemantic(
-                impact_level="high" if stimulus_vector.get("stress", 0) > 0.7 else "medium",
-                impact_trend="rising" if self.turn_count > 1 else "stable",
-                affected_domains=["identity", "emotional"]
+            # Simulate RIM (Resonance Impact) for now
+            rim_semantic = {
+                "impact_level": "high" if stimulus_chunks[0].get("stress", 0) > 0.7 else "medium",
+                "impact_trend": "rising" if self.turn_count > 1 else "stable",
+                "affected_domains": ["identity", "emotional"]
+            }
+            qualia_snap = self.qualia.process_experience(rim_semantic=rim_semantic)
+            qualitative_experience = self._format_qualia_for_llm(qualia_snap)
+
+            # 2d. Compute Dynamic RI
+            print("  - Computing Dynamic RI...")
+            dynamic_ri = self._compute_dynamic_ri(
+                stimulus=stimulus_chunks[0],
+                axes_9d=axes_9d,
+                memory_context=[]  # Will be filled after retrieval
             )
-            qualia_snapshot = self.qualia.integrate(axes_9d, rim_semantic)
-            qualitative_experience = self._format_qualia_for_llm(qualia_snapshot)
+            print(f"    ✓ RI_total: {dynamic_ri:.3f}")
+
+            # 2e. Memory Encoding (RMS)
+            print("  - Processing Memory Encoding (RMS)...")
+            self.rms.process_encoding(ri_total=dynamic_ri)
 
         # 2d. Memory Retrieval (AgenticRAG)
         print("  - Executing AgenticRAG...")
@@ -245,28 +268,56 @@ class EVAOrchestrator:
                     memory_list.append(m)
 
         # --------------------------------------------------
+        # STEP 2.5: Meta-Evaluation (Phase 5 Task 5)
+        # --------------------------------------------------
+        print("\n⚖️ STEP 2.5: Meta-Evaluation & Weighting")
+        
+        # Calculate Unified Impact (0.4 Affective / 0.6 Physio)
+        # Affective: from extracted stimulus intensity
+        # Physio: from autonomic arousal (sympathetic)
+        affective_impact = stimulus_chunks[0].get("intensity", 0.5)
+        physio_impact = ans_state.get("sympathetic", 0.5)
+        
+        unified_impact = (0.4 * affective_impact) + (0.6 * physio_impact)
+        print(f"  - Unified Impact Score: {unified_impact:.2f} (0.4 Aff / 0.6 Phys)")
+        
+        # Meta-Evaluation of Intent
+        meta_intent = "Proceeding with current persona alignment."
+        if unified_impact > 0.8:
+            meta_intent = "URGENT RE-ALIGNMENT: High physiological stress detected. Prioritizing safety and stabilization."
+        elif unified_impact < 0.2:
+            meta_intent = "Low engagement detected. Seeking to deepen connection or explore new topics."
+
+        print(f"  - Meta-Evaluation: {meta_intent}")
+
+        # --------------------------------------------------
         # STEP 3: Phase 2 - Reasoning (40/60 Weighting)
         # --------------------------------------------------
         print("\n💭 STEP 3: Phase 2 - Reasoning")
         
         # Build Phase 2 Context
         phase2_context = self.cin.inject_phase_2(
-            stimulus_vector=stimulus_vector,
-            tags=tags,
+            stimulus_vector=stimulus_chunks[0], # Use first chunk for deep context bootstrap
+            tags=stimulus_chunks[0].get("tags", []),
             updated_physio={"autonomic": ans_state, "blood": blood_levels},
             memory_matches=memory_list
         )
-        # Inject Qualia into sensation
+        # Inject Qualia and Meta-Evaluation into sensation
         phase2_context["embodied_sensation"] = qualitative_experience
+        phase2_context["meta_evaluation"] = {
+            "unified_impact": unified_impact,
+            "recommended_intent": meta_intent
+        }
 
         phase2_result = self.cin.build_phase_2_prompt(phase2_context)
         phase2_prompt = phase2_result["function_result_text"]
         
-        # Explicitly enforce 40/60 weighting
+        # Explicitly enforce 40/60 weighting (Instructional + Contextual)
         weighting_directive = (
             "\n### REASONING DIRECTIVE: [HIERARCHY OF TRUTH]\n"
-            "- 60% WEIGHT: Your current physiological state and qualitative experience (Physicality dominant).\n"
+            f"- 60% WEIGHT: Your current physiological state (Unified Impact: {unified_impact:.2f}) and qualitative experience.\n"
             "- 40% WEIGHT: Your persona principles and conversational history.\n"
+            f"META-INTENT: {meta_intent}\n"
             "Respond as an embodied being whose words are chosen by the rhythm of your internal state.\n"
         )
         final_prompt = weighting_directive + phase2_prompt
@@ -305,17 +356,17 @@ class EVAOrchestrator:
             
             reflex_state = {"threat_level": 0.1} # Placeholder for actual reflex engine if available
             
-            # Create full visual/emotional snapshot
+            # Create full visual/emotional snapshot (use previously computed dynamic_ri)
             state_snapshot = self.rms.process(
                 eva_matrix=axes_9d,
                 rim_output=rim_output,
                 reflex_state=reflex_state,
-                ri_total=0.75 # TODO: Connect to dynamic RI calculator if exists, else 0.75 default
+                ri_total=dynamic_ri  # Using dynamic RI from step 2d
             )
         else:
             state_snapshot = {
                 "Endocrine": blood_levels,
-                "Resonance_index": 0.75,
+                "Resonance_index": dynamic_ri,  # Use fallback 0.75 from initialization
                 "EVA_matrix": {"emotion_label": self.matrix.emotion_label if self.enable_physio else "Neutral"},
                 "qualia": vars(qualia_snapshot) if qualia_snapshot else {}
             }
@@ -326,7 +377,8 @@ class EVAOrchestrator:
                 "speaker": "Human",
                 "content": user_input,
                 "summary": user_input[:100],
-                "semantic_frames": tags
+                "semantic_frames": stimulus_chunks[0].get("tags", []),
+                "salience_anchor": stimulus_chunks[0].get("salience_anchor")
             },
             "turn_2": {
                 "speaker": "EVA",
@@ -345,6 +397,44 @@ class EVAOrchestrator:
             "physio_state": {"ans": ans_state, "blood": blood_levels},
             "emotion_label": self.matrix.emotion_label if self.enable_physio else "Neutral"
         }
+
+    def _compute_dynamic_ri(self, stimulus: Dict[str, Any], axes_9d: Dict[str, float], memory_context: List[Dict]) -> float:
+        """
+        Compute dynamic Resonance Intelligence (RI) using current state.
+        Maps EVA 8.1.0 data → RI Engine inputs
+        """
+        if not self.ri_engine:
+            return 0.75  # Fallback if RI engine disabled
+
+        # Map stimulus → user_emotion
+        user_emotion = {
+            "arousal": stimulus.get("arousal", 0.5),
+            "valence": stimulus.get("valence", 0.5),
+            "tension": stimulus.get("tension", axes_9d.get("stress", 0.5))
+        }
+
+        # Map axes_9d → llm_emotion_estimate
+        llm_emotion = {
+            "arousal": axes_9d.get("alertness", 0.5),
+            "valence": axes_9d.get("joy", 0.5),
+            "tension": axes_9d.get("stress", 0.5)
+        }
+
+        # Prepare RI inputs
+        ri_inputs = {
+            "user_emotion": user_emotion,
+            "llm_emotion_estimate": llm_emotion,
+            "intent": stimulus.get("intent", "CONVERSE"),
+            "clarity": axes_9d.get("clarity", 0.5),
+            "tension": axes_9d.get("stress", 0.5),
+            "llm_summary_vector": [],  # TODO: Add embedding if available
+            "episodic_context_vector": [],  # TODO: Add from memory_context
+            "flow_score": 0.7,  # Placeholder (could use turn_count heuristic)
+            "personalization_score": 0.8  # Placeholder (could use memory match count)
+        }
+
+        result = self.ri_engine.compute_RI(ri_inputs)
+        return result["RI_total"]
 
     def _format_qualia_for_llm(self, qualia: Any) -> str:
         """Format qualia snapshot for LLM consumption"""

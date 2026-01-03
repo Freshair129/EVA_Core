@@ -1,9 +1,10 @@
 # ============================================================
-# Receptor Configuration & Mapping (Consolidated)
+# Receptor Configuration & Mapping
 # version: 8.1.0-R1
-# Description: Defines receptor binding properties (Kd, Hill, Bmax) and their distribution across brain regions.
+# Status: GKS Standardized
 # ============================================================
 
+schema: EVA-Receptor-Configs-v1
 version: 8.1.0-R1
 description: "Consolidated Receptor Definition and Regional Mapping"
 

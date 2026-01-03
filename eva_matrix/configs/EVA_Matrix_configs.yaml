@@ -1,7 +1,7 @@
-# EVA Matrix System Configuration
-# version: 8.1.0-R1
-# Date: 2026-01-02
-# Description: Defines the mapping, weights, and thresholds for the 9-Dimensional Psychological Matrix.
+schema: EVA-Matrix-Configs-v1
+version: 8.1.0-R1
+updated: 2026-01-03
+status: GKS Standardized
 
 # ============================================================
 # 1. DIMENSION WEIGHTS (Hormone -> Axis Mapping)

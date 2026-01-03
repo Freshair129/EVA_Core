@@ -19,9 +19,10 @@ class PromptRuleLayer:
         - Ensure adherence to "Physiology First. Cognition Later."
     """
 
-    def __init__(self, yaml_path: Optional[str] = None):
-        self.version = "8.1.0"
-        self.yaml_path = yaml_path or str(Path(__file__).parent / "prompt_rule_layer.yaml")
+    def __init__(self, yaml_path: Optional[str] = None, msp=None):
+        self.version = "8.1.0-R1"
+        self.msp = msp
+        self.yaml_path = yaml_path or str(Path(__file__).parent / "configs" / "PMT_configs.yaml")
         self.config = self._load_config()
 
     def _load_config(self) -> Dict[str, Any]:
@@ -54,14 +55,22 @@ class PromptRuleLayer:
         
         return rules
 
-    def get_phase_2_rules(self, physio_state: Dict[str, Any], rim_impact: str = "low") -> List[str]:
+    def get_phase_2_rules(self, physio_state: Optional[Dict[str, Any]] = None, rim_impact: str = "low") -> List[str]:
         """
         Get rules for Phase 2: Reasoning (Embodied)
         
         Args:
-            physio_state: Current body state snapshot (ans, blood)
+            physio_state: Current body state snapshot. If None, pulls from MSP.
             rim_impact: Impact level from RIM Engine ("low", "medium", "high")
         """
+        # Pull from MSP if not provided
+        if physio_state is None and self.msp:
+            physio_state = self.msp.get_active_state("physio_state") or {}
+            # Also check for matrix state for strain calculation
+            matrix_state = self.msp.get_active_state("matrix_state") or {}
+            physio_strain = matrix_state.get("momentum", {}).get("intensity", 0.0)
+        else:
+            physio_strain = 0.0
         rules = []
         
         # 1. Weighting Strategy
@@ -77,12 +86,25 @@ class PromptRuleLayer:
         else:
             rules.append("- ร่างกายอยู่ในสภาวะปกติ รักษาโทนตาม Persona ภายใต้กฎ 40/60")
 
-        # 3. Phase 2 Directives
-        phase_2 = self.config.get("phase_directives", {}).get("phase_2_reasoning", {})
-        rules.append("\n# PHASE 2 DIRECTIVES")
-        rules.extend(phase_2.get("rules", []))
+        # 3. GKS Master Blocks (Cognitive Immunity)
+        if physio_strain > 0.7:
+            rules.append("\n# GKS MASTER BLOCKS (STRAIN > 0.7)")
+            gks_governance = self.config.get("gks_master_governance", [])
+            for block in gks_governance:
+                rules.append(block.get("directive", "").strip())
         
-        # 4. Critical Governance
+        # 4. Phase 2 Directives
+        phase_2 = self.config.get("phase_directives", {}).get("phase_2_reasoning", {})
+        if not phase_2:
+            # Fallback if not in config
+            rules.append("\n# PHASE 2 DIRECTIVES")
+            rules.append("- Integrate physiological state (60%) with persona style (40%)")
+            rules.append("- Respond authentically to embodied sensation")
+        else:
+            rules.append("\n# PHASE 2 DIRECTIVES")
+            rules.extend(phase_2.get("rules", []))
+        
+        # 5. Critical Governance
         rules.append("\n# GOVERNANCE & INTEGRITY")
         for rule in self.config.get("governance_rules", []):
             if rule['id'] in ['MEMORY_IMMUTABILITY', 'CONTEXT_SUMMARY_ANCHOR', 'RESPONSE_STYLE']:

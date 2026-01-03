@@ -47,6 +47,7 @@ core_systems:
       sensory: "memory_n_soul_passport/schema/Sensory_Memory_Schema_v2.json"
       perception_out: "memory_n_soul_passport/schema/MSP_to_CIN_Perception_Schema.json"
       reasoning_out: "memory_n_soul_passport/schema/MSP_to_CIN_Reasoning_Schema.json"
+      emotional_trajectory: "memory_n_soul_passport/schema/Emotional_Trajectory_Schema.json"
     collections:
       - episodes_v8
       - semantic_graph
@@ -74,21 +75,25 @@ core_systems:
     main_files:
       - path: physio_core/physio_controller.py
         purpose: main_orchestrator
-      - path: physio_core/Endocrine System/
+      - path: physio_core/logic/endocrine/
         purpose: hormone_production
-      - path: physio_core/Circulation & Blood Physiology/
+      - path: physio_core/logic/blood/
         purpose: blood_transport
-      - path: physio_core/receptor/
+      - path: physio_core/logic/receptor/
         purpose: signal_transduction
-      - path: physio_core/reflex/
+      - path: physio_core/logic/reflex/
         purpose: fast_reflexes
-      - path: physio_core/autonomic/
+      - path: physio_core/logic/autonomic/
         purpose: ans_integration
       - path: consciousness/10_state/body_state_history.jsonl
         purpose: physio_logs
     schemas:
-      bio_state: "memory_n_soul_passport/schema/Bio_State_Schema.json"
-      output_contract: "physio_core/configs/PhysioController_Output_Contract.yaml"
+      input_contract: "physio_core/contract/upstream_contract/Input_Stimulus_Contract.yaml"
+      output_contract: "physio_core/contract/downstream_contract/Output_to_Orchestrator_Contract.yaml"
+      physio_to_cin: "physio_core/validation/output/Physio_to_CIN_Data_Schema.json"
+      receptor_state: "physio_core/validation/output/Receptor_State_Schema.json"
+      normalized_input: "physio_core/validation/input/Normalized_Stimulus_Chunk_Schema.json"
+      physio_snapshot: "physio_core/validation/output/Physio_State_Snapshot_Schema.json"
     subsystems:
       - HPARegulator
       - CircadianController
@@ -145,7 +150,7 @@ core_systems:
     owns_slots:
       - qualia_state
     main_files:
-      - path: artifact_qualia/Artifact_Qualia.py
+      - path: artifact_qualia/artifact_qualia_engine.py
         purpose: phenomenology_integration
       - path: consciousness/10_state/artifact_qualia_state.json
         purpose: state_persistence
@@ -174,7 +179,7 @@ core_systems:
       - core_color
       - resonance_textures
     main_files:
-      - path: resonance_memory_system/rms_v6.py
+      - path: resonance_memory_system/rms_system.py
         purpose: encoding_logic
       - path: consciousness/10_state/rms_state.json
         purpose: state_persistence
@@ -209,6 +214,7 @@ core_systems:
       perception_input: "orchestrator/cin/validation/input/MSP_to_CIN_Perception_Schema.json"
       reasoning_input: "orchestrator/cin/validation/input/MSP_to_CIN_Reasoning_Schema.json"
       cin_output: "orchestrator/cin/schema/CIN_Output_Schema.json"
+      stimulus_extraction: "orchestrator/cin/validation/input/LLM_Stimulus_Extraction_Schema.json"
       interface: "orchestrator/cin/configs/CIN_Interface.yaml"
     performance_targets:
       phase_1_latency: "<100ms (rough retrieval)"
@@ -263,8 +269,14 @@ core_systems:
       - behavior_policy
       - persona_data
     main_files:
-      - path: User_profile/Persona_01.md
-        purpose: identity_definition
+      - path: orchestrator/pmt/pmt_engine.py
+        purpose: behavioral_governance
+      - path: orchestrator/pmt/pmt_Identity_loader.py
+        purpose: identity_management
+      - path: orchestrator/pmt/configs/Identity/persona.yaml
+        purpose: identity_definitions
+      - path: orchestrator/pmt/configs/Identity/soul.md
+        purpose: identity_definitions
     response_weighting:
       persona: 0.4
       physio_state: 0.6
@@ -280,10 +292,6 @@ slots:
     owner: MSP
     description: "Episodic, Semantic, and Sensory data layers"
 
-  state_barcode:
-    owner: MSP
-    description: "Encoded state snapshots for per-turn persistence"
-
   resonance_log:
     owner: MSP
     description: "Resonance index tracking"
@@ -295,32 +303,39 @@ slots:
   # Physiological State
   physio_state:
     owner: PhysioController
-    description: "Complete physiological state snapshot"
+    sync_via: MSP
+    description: "Complete physiological state snapshot, synchronized to MSP State Bus."
 
   plasma_bus:
     owner: PhysioController
-    description: "Current hormone concentrations in plasma"
+    sync_via: MSP
+    description: "Current hormone concentrations, mirrored in MSP for psyche retrieval."
 
   neural_signals:
     owner: PhysioController
-    description: "Transduced signals from receptors"
+    sync_via: MSP
+    description: "Transduced signals from receptors, registered in MSP."
 
   ans_state:
     owner: PhysioController
-    description: "Autonomic Nervous System state (Sympathetic/Parasympathetic)"
+    sync_via: MSP
+    description: "Autonomic state (Sympathetic/Parasympathetic), cached in MSP."
 
   # Psychological State
   matrix_state:
     owner: EVA_Matrix
-    description: "9D Psychological vector"
+    sync_via: MSP
+    description: "9D Psychological vector, pulling from MSP biological state."
 
   reflex_directives:
     owner: EVA_Matrix
-    description: "Safety Reflex directives (urgency, cognitive_drive, etc.)"
+    sync_via: MSP
+    description: "Safety Reflex directives, synchronized through MSP."
 
   qualia_state:
     owner: Artifact_Qualia
-    description: "Phenomenological experience snapshot"
+    sync_via: MSP
+    description: "Phenomenological experience snapshot, derived from MSP state."
 
   # Memory Encoding
   encoding_buffer:
