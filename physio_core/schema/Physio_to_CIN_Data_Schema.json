@@ -11,7 +11,8 @@
             "type": "object",
             "required": [
                 "hr_index",
-                "autonomic_state"
+                "autonomic_state",
+                "hormone_summary"
             ],
             "properties": {
                 "hr_index": {
@@ -23,7 +24,8 @@
                 "hormone_summary": {
                     "type": "string"
                 }
-            }
+            },
+            "additionalProperties": false
         },
         "ans_delta": {
             "type": "object",
@@ -40,7 +42,9 @@
                 "adrenaline_delta": {
                     "type": "number"
                 }
-            }
+            },
+            "additionalProperties": false
         }
-    }
+    },
+    "additionalProperties": true
 }

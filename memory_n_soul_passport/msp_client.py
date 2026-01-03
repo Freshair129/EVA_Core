@@ -85,9 +85,12 @@ class MSPClient:
         self.semantic_dir = self.root_path / "02_Semantic_memory"
         self.semantic_concepts_file = self.semantic_dir / "semantic_concepts.json"
 
-        # State paths
+        # State and Context paths
         self.state_dir_10 = self.root_path / "10_state"
         self.turn_cache_file = self.state_dir_10 / "turn_cache.json"
+        
+        self.context_storage_dir = self.root_path / "10_context_storage"
+        self.context_ledger = self.context_storage_dir / "context_ledger.jsonl"
 
         self.state_dir_09 = self.root_path / "09_state"
         self.compression_counters_file = self.state_dir_09 / "compression_counters.json"
@@ -110,6 +113,7 @@ class MSPClient:
         self.episodes_dir.mkdir(parents=True, exist_ok=True)  # Legacy
         self.semantic_dir.mkdir(parents=True, exist_ok=True)
         self.state_dir_10.mkdir(parents=True, exist_ok=True)
+        self.context_storage_dir.mkdir(parents=True, exist_ok=True)
         self.state_dir_09.mkdir(parents=True, exist_ok=True)
         self.session_memory_dir.mkdir(parents=True, exist_ok=True)
 
@@ -1024,20 +1028,45 @@ class MSPClient:
     def update_turn_cache(
         self,
         context_id: str,
-        summary: str
+        context_data: Any
     ):
         """
-        Update turn cache for Phase 1 bootstrap
+        Update turn cache for Phase 1 bootstrap (Supports rich dict or string)
 
         Args:
             context_id: Context ID
-            summary: Turn summary
+            context_data: Turn summary (string) or rich metadata (dict)
         """
-        self.turn_cache[context_id] = {
-            "summary": summary,
-            "timestamp": datetime.now().isoformat()
-        }
+        if isinstance(context_data, str):
+            data = {
+                "summary": context_data,
+                "timestamp": datetime.now().isoformat()
+            }
+        elif isinstance(context_data, dict):
+            data = {
+                **context_data,
+                "timestamp": datetime.now().isoformat()
+            }
+        else:
+            data = {
+                "summary": str(context_data),
+                "timestamp": datetime.now().isoformat()
+            }
+
+        # 1. Update In-memory & JSON Turn Cache (Fast access)
+        self.turn_cache[context_id] = data
         self._save_turn_cache()
+
+        # 2. Append to Context Ledger (Long-term tracking)
+        try:
+            ledger_entry = {
+                "context_id": context_id,
+                **data
+            }
+            with open(self.context_ledger, 'a', encoding='utf-8') as f:
+                f.write(json.dumps(ledger_entry, ensure_ascii=False) + '\n')
+        except Exception as e:
+            print(f"[MSP] Error writing to context ledger: {e}")
 
     def get_recent_history(
         self,

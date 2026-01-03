@@ -34,6 +34,6 @@ phase_2_budget:
 
 # Path Discovery Settings
 discovery_paths:
-  persona: "orchestrator/pmt/configs/persona.yaml"
-  soul: "orchestrator/pmt/docs/soul.md"
+  persona: "orchestrator/pmt/configs/Identity/persona.yaml"
+  soul: "orchestrator/pmt/configs/Identity/soul.md"
   pmt_rules: "orchestrator/pmt/configs/"

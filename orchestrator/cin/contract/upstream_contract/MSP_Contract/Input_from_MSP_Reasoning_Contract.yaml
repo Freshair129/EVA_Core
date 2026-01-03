@@ -1,0 +1,59 @@
+# Input from MSP (Memory & Soul Passport) - Phase 2: Reasoning Contract
+# Component: MSP -> CIN (Phase 2)
+# version: 8.1.0-R1
+# Status: Rich Context Integration (Post-Inference/Deep RAG)
+
+schema: EVA-Input-from-MSP-Reasoning-v1.0
+version: 8.1.0-R1
+schema_ref: "orchestrator/cin/validation/input/MSP_to_CIN_Reasoning_Schema.json"
+
+required_inputs:
+  reasoning_context:
+    type: "object"
+    description: "Rich metadata from previous turn (Selected from existing + Pending)."
+    required: true
+    properties:
+      last_turn_summary: { type: "string" } # Existing: turn_2.summary
+      interpersonal_atmosphere: { type: "string" } # PENDING
+      previous_intent: { type: "string" } # PENDING
+
+  psychological_context:
+    type: "object"
+    description: "Current 9D Matrix state and Resonance Metrics (Database-backed)."
+    required: true
+    properties:
+      eva_matrix_state:
+        type: "object"
+        properties:
+          axes_9d:
+            stress_load: { type: "float" }
+            social_warmth: { type: "float" }
+            drive_level: { type: "float" }
+            cognitive_clarity: { type: "float" }
+            joy_level: { type: "float" }
+          metadata:
+            emotion_label: { type: "string" }
+      resonance_metrics:
+        type: "object"
+        properties:
+          Resonance_index: { type: "float" }
+          memory_encoding_level: { type: "string" }
+          memory_color: { type: "string" }
+
+  rag_context:
+    type: "object"
+    description: "AgenticRAG results (7 dimensions)."
+    required: true
+    properties:
+      hept_stream_matches:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            stream: { type: "string" }
+            content: { type: "string" }
+            score: { type: "float" }
+
+data_integrity:
+  - "Metadata must align with Episodic_Memory_Schema_v2 definitions."
+  - "RAG results must be congruent with current resonance_metrics."

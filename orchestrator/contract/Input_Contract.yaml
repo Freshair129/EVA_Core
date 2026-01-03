@@ -5,6 +5,24 @@
 
 schema: Dual-Phase-Orchestrator-Input-Contract-v1
 
+required_inputs:
+  - name: cin_phase_1_perception
+    source: "CIN"
+    description: "Rapid intuition-based context bootstrap (Physio/History/User/Atmosphere)."
+  
+  - name: cin_phase_2_reasoning
+    source: "CIN"
+    description: "Deep reasoning context (7D RAG + 9D Matrix State)."
+
+  - name: context_lifecycle_buffer
+    source: "CIN"
+    description: "Compiled 3-stage metadata for 10_context_storage archival."
+
+data_flow:
+  - "Orchestrator must trigger Phase 1 immediately upon user input."
+  - "Phase 2 must be triggered after biological/matrix stabilization."
+  - "Final archival call to MSP must use the full context_lifecycle_buffer."
+
 # ============================================================
 # 1. USER INTERACTION
 # ============================================================

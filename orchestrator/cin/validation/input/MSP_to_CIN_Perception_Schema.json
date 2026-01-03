@@ -1,0 +1,100 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "MSP_to_CIN_Perception_Schema",
+    "description": "Phase 1: Bootstrapping context from raw database lookups. Strict Least Privilege Enforcement.",
+    "type": "object",
+    "required": [
+        "perception_context"
+    ],
+    "properties": {
+        "perception_context": {
+            "type": "object",
+            "required": [
+                "recent_raw_turns",
+                "current_context_id",
+                "last_turn_physio_state",
+                "current_physio_state",
+                "user_profile"
+            ],
+            "properties": {
+                "recent_raw_turns": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "speaker",
+                            "raw_text"
+                        ],
+                        "properties": {
+                            "speaker": {
+                                "type": "string",
+                                "enum": [
+                                    "user",
+                                    "eva",
+                                    "system"
+                                ]
+                            },
+                            "raw_text": {
+                                "type": "string"
+                            },
+                            "episode_id": {
+                                "type": "string"
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "current_context_id": {
+                    "type": "string"
+                },
+                "last_turn_physio_state": {
+                    "type": "object",
+                    "properties": {
+                        "hr_index": {
+                            "type": "number"
+                        },
+                        "autonomic_state": {
+                            "type": "string"
+                        },
+                        "hormone_summary": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "current_physio_state": {
+                    "type": "object",
+                    "properties": {
+                        "hr_index": {
+                            "type": "number"
+                        },
+                        "autonomic_state": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "user_profile": {
+                    "type": "object",
+                    "properties": {
+                        "nickname": {
+                            "type": "string"
+                        },
+                        "preferred_language": {
+                            "type": "string"
+                        },
+                        "interaction_style": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "session_status": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}

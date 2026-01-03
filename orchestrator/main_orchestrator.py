@@ -17,6 +17,7 @@ Architecture:
 import sys
 import os
 import json
+import re
 from typing import Dict, List, Any, Optional
 from pathlib import Path
 from datetime import datetime
@@ -274,6 +275,16 @@ class EVAOrchestrator:
         final_llm_response = self.llm.continue_with_result(final_prompt)
         final_text = final_llm_response.text
         print(f"  ✓ Response Generated ({len(final_text)} chars)")
+        
+        # 3b. Extract Next Turn Context
+        context_dict = self._extract_context_json(final_text)
+        if context_dict:
+            print(f"  ✓ Extracted context summary: {context_dict.get('summary', 'No summary')[:50]}...")
+            # Update live turn cache immediately for next turn bootstrap
+            self.msp.update_turn_cache(context_id, context_dict)
+        else:
+            # Fallback to basic summary if extraction fails
+            self.msp.update_turn_cache(context_id, final_text[:100])
 
         # --------------------------------------------------
         # STEP 4: Persistance
@@ -320,8 +331,9 @@ class EVAOrchestrator:
             "turn_2": {
                 "speaker": "EVA",
                 "content": final_text,
-                "summary": final_text[:100]
+                "summary": context_dict.get("summary", final_text[:100]) if context_dict else final_text[:100]
             },
+            "situation_context": context_dict if context_dict else None,
             "state_snapshot": state_snapshot
         })
 
@@ -341,6 +353,22 @@ class EVAOrchestrator:
 - Presence: {'Vibrant' if qualia.coherence > 0.7 else 'Faded' if qualia.coherence < 0.3 else 'Stable'}
 - Internal Texture: {', '.join([f'{k}={v:.2f}' for k, v in qualia.texture.items()])}
 """
+
+    def _extract_context_json(self, text: str) -> Dict[str, Any]:
+        """Extract CONTEXT_SUMMARY_TEMPLATE JSON from LLM response"""
+        try:
+            # Look for JSON between { and }
+            # LLM might wrap it in a code block or just put it at the end
+            # We look for the required "summary" key to be sure
+            match = re.search(r'\{.*?"summary".*?\}', text, re.DOTALL)
+            if match:
+                json_str = match.group(0)
+                # Clean up markdown code blocks if present
+                json_str = json_str.replace('```json', '').replace('```', '').strip()
+                return json.loads(json_str)
+        except Exception:
+            pass
+        return {}
 
     def _generate_context_id(self) -> str:
         now = datetime.now()

@@ -8,14 +8,22 @@ version: 8.1.0-R1
 schema_ref: "orchestrator/cin/schema/CIN_Output_Schema.json"
 
 required_outputs:
-  phase_1_prompt:
-    type: "string"
-    description: "Perception Prompt (Identity + Soul + Physio Baseline + Intuition/Turn Cache)."
-    required: true
+  - name: phase_1_perception_bootstrap
+    type: "object"
+    description: "Rapid context including raw history, current physio, and user profile metadata."
   
-  phase_2_prompt:
-    type: "string"
-    description: "Reasoning Prompt (Embodied Sensation + Matrix State + Deep AgenticRAG)."
+  - name: phase_2_reasoning_deep_context
+    type: "object"
+    description: "Deep context including AgenticRAG (7D) and 9D Matrix psychological state."
+
+  - name: turn_context_lifecycle
+    type: "object"
+    description: "Complete 3-stage context buffer for persistence (Phase 1 + Phase 2 + Final LLM Output)."
+
+data_delivery:
+  - "Phase 1 must be delivered to orchestrator for 'Intuition' prompt construction."
+  - "Phase 2 must be delivered for 'Reasoning' prompt construction."
+  - "Final compiled context must be sent to MSP for 10_context_storage persistence."
     required: true
 
   context_meta:

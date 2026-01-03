@@ -389,7 +389,7 @@ class ContextInjectionNode:
             "physio_baseline": self._get_physio_baseline(),
 
             # Memory components (Intuition Layer)
-            "turn_cache": self._get_turn_cache(limit=5),
+            "situation_context": self._get_situation_context(limit=5),
             "session_memory": self._get_session_memory(),
             "intuition_flashes": self._get_intuition_flashes(user_input),
 
@@ -433,10 +433,11 @@ Develop ID: {context['soul']['Deverlop_id']}
 - Status: {context['physio_baseline'].get('status', 'connected')}
 
 ## 📂 RECENT_CONVERSATIONAL_CONTEXT
-- 5-Turn Summary: {context['turn_cache'].get('summary', 'No recent context')}
+- 5-Turn Memory: {context['situation_context'].get('last_5_episodic_memory_summary', 'No recent context')}
 - Session Memory: {context['session_memory'].get('summary', 'No long-term context')}
-- Atmosphere: {context['turn_cache'].get('atmosphere', 'neutral')}
-- Previous Intent: {context['turn_cache'].get('intent', 'None')}
+- Atmosphere: {context['situation_context'].get('interpersonal_atmosphere', 'neutral')}
+- Previous Intent: {context['situation_context'].get('previous_intent', 'None')}
+- Previous Context: {context['situation_context'].get('previous_context', 'None')}
 
 ## 🧩 INTUITION_FLASHES (แว๊บแรก)
 {context.get('intuition_flashes', 'No mental flashes triggered')}
@@ -773,22 +774,23 @@ Required JSON Structure:
     # HELPER METHODS - MEMORY RETRIEVAL
     # ================================================================
 
-    def _get_turn_cache(self, limit: int = 5) -> Dict[str, Any]:
+    def _get_situation_context(self, limit: int = 5) -> Dict[str, Any]:
         """
-        Get recent turn cache (5-turn summary) from MSP
+        Get recent situation context (5-turn summary + metadata) from MSP
         Graceful degradation: Returns empty if unavailable
 
         Args:
             limit: Number of recent turns to retrieve
 
         Returns:
-            dict: Turn cache with summary, atmosphere, intent
+            dict: Situation context for Phase 1
         """
         if self.msp_client is None:
             return {
-                "summary": "No recent context (MSP unavailable)",
-                "atmosphere": "neutral",
-                "intent": "None"
+                "last_5_episodic_memory_summary": "No recent context (MSP unavailable)",
+                "interpersonal_atmosphere": "neutral",
+                "previous_intent": "None",
+                "previous_context": "None"
             }
 
         try:
@@ -799,13 +801,19 @@ Required JSON Structure:
             latest_turn = recent_turns[0] if recent_turns else {}
 
             return {
-                "summary": " → ".join(summaries[:3]),  # Max 3 summaries
-                "atmosphere": latest_turn.get("atmosphere", "neutral"),
-                "intent": latest_turn.get("intent", "None")
+                "last_5_episodic_memory_summary": " → ".join(summaries[:3]),  # Max 3 summaries
+                "interpersonal_atmosphere": latest_turn.get("atmosphere", "neutral"),
+                "previous_intent": latest_turn.get("intent", "None"),
+                "previous_context": latest_turn.get("summary", "None")
             }
         except Exception as e:
-            print(f"[CIN] ⚠️ Turn cache retrieval error: {e}")
-            return {"summary": "Error loading turn cache", "atmosphere": "unknown", "intent": "None"}
+            print(f"[CIN] ⚠️ Situation context retrieval error: {e}")
+            return {
+                "last_5_episodic_memory_summary": "Error loading context",
+                "interpersonal_atmosphere": "unknown",
+                "previous_intent": "None",
+                "previous_context": "None"
+            }
 
     def _get_session_memory(self) -> Dict[str, Any]:
         """

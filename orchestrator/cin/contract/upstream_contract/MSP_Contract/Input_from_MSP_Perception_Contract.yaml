@@ -1,0 +1,32 @@
+# Input from MSP (Memory & Soul Passport) - Phase 1: Perception Contract
+# Component: MSP -> CIN (Phase 1)
+# version: 8.1.0-R1
+# Status: Pure Database Lookup (Low Latency)
+
+schema: EVA-Input-from-MSP-Perception-v1.0
+version: 8.1.0-R1
+schema_ref: "orchestrator/cin/validation/input/MSP_to_CIN_Perception_Schema.json"
+
+required_inputs:
+  perception_context:
+    type: "object"
+    description: "Raw historical turns and immediate physiological/user data (แว๊บแรก / Intuition)."
+    required: true
+    properties:
+      recent_raw_turns:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            speaker: { type: "string" }
+            raw_text: { type: "string" }
+            episode_id: { type: "string" }
+      current_context_id: { type: "string" }
+      last_turn_physio_state: { type: "object" }
+      current_physio_state: { type: "object" }
+      user_profile: { type: "object" }
+
+data_integrity:
+  - "Metadata must be fetched directly from episodic_log.jsonl or SQL/Vector DB."
+  - "NO LLM content extraction required for this phase."
+  - "Target hardware latency: < 50ms."
