@@ -36,9 +36,9 @@ core_systems:
         purpose: semantic_graph
       - path: Consciousness/03_Sensory_memory/
         purpose: sensory_sidecars
-      - path: Memory_&_Soul_Passaport/MSP/
+      - path: memory_n_soul_passaport/MSP/
         purpose: msp_modules
-      - path: Memory_&_Soul_Passaport/schema/
+      - path: memory_n_soul_passaport/schema/
         purpose: memory_schemas
     collections:
       - episodes_v8
@@ -129,7 +129,7 @@ core_systems:
     owns_slots:
       - qualia_state
     main_files:
-      - path: Artifact_Qualia/Artifact_Qualia.py
+      - path: artifact_qualia/Artifact_Qualia.py
         purpose: phenomenology_integration
       - path: Consciousness/10_state/artifact_qualia_state.json
         purpose: state_persistence
@@ -157,7 +157,7 @@ core_systems:
       - core_color
       - resonance_textures
     main_files:
-      - path: Resonance_Memory_System/rms_v6.py
+      - path: resonance_memory_system/rms_v6.py
         purpose: encoding_logic
       - path: Consciousness/10_state/rms_state.json
         purpose: state_persistence

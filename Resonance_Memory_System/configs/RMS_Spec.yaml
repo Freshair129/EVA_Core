@@ -1,0 +1,963 @@
+# RMS (Resonance Memory System) Comprehensive Specification
+# Version: 8.1.0
+# Date: 2026-01-03
+# Status: Complete Documentation for Implemented System
+
+schema: EVA-RMS-Spec-v8.1
+version: 8.1.0
+updated: 2026-01-03
+
+# ============================================================
+# SPECIFICATION SCOPE
+# ============================================================
+description: >
+  Comprehensive specification for Resonance Memory System (RMS) in EVA 8.1.0.
+
+  RMS encodes phenomenological experience into authoritative memory signals.
+  It transforms multi-dimensional psychological, physiological, and phenomenological
+  states into a unified episodic memory snapshot with visual (color) and
+  textural (5D vector) representations.
+
+  This is the "memory encoder" - it captures "what it felt like" in a form
+  that enables affective memory retrieval via Hept-Stream RAG.
+
+component_id: "SYS-RMS-8.1"
+component_type: "Memory Encoding System"
+role: "Experiential Memory Encoding"
+analogy: "Memory Formation & Emotional Tagging (การสร้างความทรงจำและติดป้ายอารมณ์)"
+
+# ============================================================
+# DESIGN PRINCIPLES
+# ============================================================
+design_principles:
+  experiential_encoding:
+    principle: "Encode Experience, Not Description"
+    description: >
+      RMS captures the embodied, felt quality of an interaction.
+      Not "what happened" (that's semantic), but "how it felt" (affective).
+
+    approach:
+      - "Use physiological signals (ANS, hormones)"
+      - "Integrate psychological state (EVA Matrix 9D)"
+      - "Include phenomenological quality (Artifact Qualia)"
+      - "Add resonance metrics (RI, RIM)"
+
+  ECL_integrity:
+    principle: "External Constraint Layer (ECL) Output Integrity Lock"
+    description: >
+      LLM cannot generate or spoof RMS results.
+      Memory encoding is deterministic and bio-grounded.
+
+    forbidden_to_llm:
+      - "RI (Resonance Index) values"
+      - "memory_encoding_level"
+      - "memory_color"
+      - "trauma_flag"
+      - "qualia_intensity"
+      - "resonance_texture"
+
+    enforcement: "MSP discards LLM-provided values and injects RMS truth"
+
+  temporal_smoothing:
+    principle: "Continuity and Stability"
+    description: >
+      Prevent jitter in memory encoding by smoothing values
+      across time. Ensures gradual transitions between emotional states.
+
+    algorithm: "Exponential Moving Average (EMA)"
+    smoothing_factors:
+      color_axes: "alpha = 0.65 (65% old + 35% new)"
+      intensity: "alpha = 0.70 (70% old + 30% new)"
+
+  trauma_protection:
+    principle: "Protective Dimming for Overwhelming Experiences"
+    description: >
+      High-threat experiences (trauma) are encoded with reduced
+      intensity and color saturation to protect the system.
+
+    threshold: "threat_level > 0.85"
+    effect:
+      - "Color dimmed by 45% (multiply by 0.55)"
+      - "Intensity reduced by 50% (multiply by 0.50)"
+      - "Encoding level forced to L4_trauma"
+      - "trauma_flag = true"
+
+# ============================================================
+# ARCHITECTURE
+# ============================================================
+architecture:
+  description: "RMS processes 4 upstream signals into unified memory encoding"
+
+  data_flow:
+    inputs:
+      1_eva_matrix:
+        source: "EVA Matrix"
+        data: "9D psychological state"
+        fields: ["stress", "warmth", "drive", "clarity", "joy", "alertness", "connection", "groundedness", "openness", "emotion_label"]
+
+      2_rim_output:
+        source: "RIM (Resonance Impact Module)"
+        data: "Impact assessment"
+        fields: ["impact_level", "impact_trend", "affected_domains"]
+
+      3_reflex_state:
+        source: "PhysioController / FastReflexEngine"
+        data: "Threat detection"
+        fields: ["threat_level"]
+
+      4_ri_total:
+        source: "RI Engine (Resonance Index)"
+        data: "Cognitive resonance score"
+        range: "[0.0, 1.0]"
+
+    processing_stages:
+      stage_1:
+        name: "Trauma Detection"
+        operation: "Check if threat_level > 0.85"
+        output: "trauma_flag (boolean)"
+
+      stage_2:
+        name: "Color Axes Generation"
+        operation: "Map EVA Matrix 9D → 5 color axes"
+        output: "{stress, warmth, clarity, drive, calm}"
+
+      stage_3:
+        name: "Intensity Calculation"
+        operation: "Compute affective intensity from EVA + RIM"
+        output: "intensity [0.0, 1.0]"
+
+      stage_4:
+        name: "Trauma Protection"
+        operation: "If trauma_flag, dim color and intensity"
+        effect: "color *= 0.55, intensity *= 0.50"
+
+      stage_5:
+        name: "Temporal Smoothing"
+        operation: "EMA smoothing on color axes and intensity"
+        algorithm: "smooth(prev, now, alpha)"
+
+      stage_6:
+        name: "Color Encoding"
+        operation: "5D color axes → RGB → Hex color"
+        output: "memory_color (hex string)"
+
+      stage_7:
+        name: "Memory Level Assignment"
+        operation: "Intensity → Encoding level (L0-L4)"
+        output: "memory_encoding_level (enum)"
+
+      stage_8:
+        name: "Package Output"
+        operation: "Assemble episodic memory snapshot"
+        output: "Dict[str, Any]"
+
+    outputs:
+      memory_snapshot:
+        description: "Complete episodic memory encoding"
+        structure: "See OUTPUT STRUCTURE section"
+
+# ============================================================
+# STAGE 2: COLOR AXES GENERATION
+# ============================================================
+color_axes_generation:
+  description: >
+    Map EVA Matrix 9D psychological state to 5 RMS color axes.
+    These axes form the basis for visual color encoding.
+
+  algorithm:
+    name: "9D → 5D Mapping"
+
+    formula:
+      stress:
+        source: "EVA Matrix axes_9d.stress"
+        mapping: "Direct mapping (clamp [0.0, 1.0])"
+
+      warmth:
+        source: "EVA Matrix axes_9d.warmth (social_warmth)"
+        mapping: "Direct mapping (clamp [0.0, 1.0])"
+        default: "0.5 (neutral)"
+
+      clarity:
+        source: "EVA Matrix axes_9d.clarity (cognitive_clarity)"
+        mapping: "Direct mapping (clamp [0.0, 1.0])"
+        default: "0.5 (neutral)"
+
+      drive:
+        source: "EVA Matrix axes_9d.drive (drive_level)"
+        mapping: "Direct mapping (clamp [0.0, 1.0])"
+        default: "0.3 (low baseline)"
+
+      calm:
+        source: "EVA Matrix axes_9d.groundedness (affective_stability)"
+        mapping: "Direct mapping (clamp [0.0, 1.0])"
+        default: "0.4 (slightly tense)"
+
+  validation:
+    - "All axes must be in range [0.0, 1.0]"
+    - "Missing fields use defaults"
+    - "Clamping ensures no out-of-range values"
+
+  example:
+    input:
+      eva_matrix:
+        stress: 0.4
+        social_warmth: 0.7
+        cognitive_clarity: 0.8
+        drive_level: 0.5
+        affective_stability: 0.6
+
+    output:
+      color_axes:
+        stress: 0.4
+        warmth: 0.7
+        clarity: 0.8
+        drive: 0.5
+        calm: 0.6
+
+# ============================================================
+# STAGE 3: INTENSITY CALCULATION
+# ============================================================
+intensity_calculation:
+  description: >
+    Calculate overall affective intensity from EVA Matrix load
+    and RIM impact metrics.
+
+  algorithm:
+    name: "Load + Impact Boosting"
+
+    step_1_base_intensity:
+      description: "Calculate baseline from stress and drive"
+      formula: "base = clamp(stress_load + drive_level)"
+      range: "[0.0, 2.0] → clamped to [0.0, 1.0]"
+
+    step_2_impact_boost:
+      description: "Boost based on RIM impact level"
+      mapping:
+        low: "0.0 (no boost)"
+        medium: "0.1 (slight boost)"
+        high: "0.25 (significant boost)"
+      default: "0.1 (if missing)"
+
+    step_3_trend_modulation:
+      description: "Modulate based on impact trend"
+      mapping:
+        rising: "1.1 (amplify 10%)"
+        stable: "1.0 (no change)"
+        fading: "0.85 (dampen 15%)"
+      default: "1.0 (if missing)"
+
+    step_4_final_intensity:
+      formula: "intensity = clamp((base + impact_boost) * trend_mod)"
+      range: "[0.0, 1.0]"
+
+  example:
+    input:
+      eva_matrix:
+        stress_load: 0.4
+        drive_level: 0.5
+      rim_output:
+        impact_level: "medium"
+        impact_trend: "rising"
+
+    calculation:
+      base: "0.4 + 0.5 = 0.9"
+      impact_boost: "0.1 (medium)"
+      trend_mod: "1.1 (rising)"
+      result: "clamp((0.9 + 0.1) * 1.1) = clamp(1.1) = 1.0"
+
+    output:
+      intensity: 1.0
+
+# ============================================================
+# STAGE 4: TRAUMA PROTECTION
+# ============================================================
+trauma_protection:
+  description: >
+    Protective mechanism for overwhelming experiences.
+    Reduces memory encoding intensity to prevent system overload.
+
+  detection:
+    trigger: "threat_level > 0.85"
+    source: "reflex_state.threat_level from FastReflexEngine"
+
+  effect:
+    color_dimming:
+      description: "Reduce all color axes by 45%"
+      formula: "color_axes = {k: v * 0.55 for k, v in color_axes.items()}"
+      interpretation: "Faded, muted colors represent dissociation"
+
+    intensity_reduction:
+      description: "Reduce intensity by 50%"
+      formula: "intensity *= 0.50"
+      interpretation: "Dampened emotional impact"
+
+    encoding_override:
+      description: "Force memory encoding level to L4_trauma"
+      effect: "Overrides intensity-based level calculation"
+
+    flag_setting:
+      description: "Set trauma_flag = true"
+      effect: "Downstream systems can apply special handling"
+
+  rationale:
+    biological: "Mimics dissociative response to trauma"
+    protective: "Prevents system overload from extreme experiences"
+    retrievable: "Trauma memories still accessible but marked"
+
+  example:
+    input:
+      threat_level: 0.92
+      raw_color_axes:
+        stress: 0.9
+        warmth: 0.2
+        clarity: 0.3
+        drive: 0.8
+        calm: 0.1
+      raw_intensity: 0.95
+
+    output:
+      trauma_flag: true
+      protected_color_axes:
+        stress: 0.495  # 0.9 * 0.55
+        warmth: 0.11   # 0.2 * 0.55
+        clarity: 0.165 # 0.3 * 0.55
+        drive: 0.44    # 0.8 * 0.55
+        calm: 0.055    # 0.1 * 0.55
+      protected_intensity: 0.475  # 0.95 * 0.50
+      memory_encoding_level: "L4_trauma"
+
+# ============================================================
+# STAGE 5: TEMPORAL SMOOTHING
+# ============================================================
+temporal_smoothing:
+  description: >
+    Exponential Moving Average (EMA) smoothing to prevent jitter
+    and ensure gradual transitions between emotional states.
+
+  algorithm:
+    name: "Exponential Moving Average (EMA)"
+
+    formula: "smooth = alpha * prev + (1 - alpha) * now"
+
+    parameters:
+      color_axes_alpha:
+        value: 0.65
+        interpretation: "65% old value + 35% new value"
+        effect: "Moderate smoothing, some responsiveness"
+
+      intensity_alpha:
+        value: 0.70
+        interpretation: "70% old value + 30% new value"
+        effect: "Slightly more smoothing than color"
+
+  state_persistence:
+    description: "RMS maintains internal state for smoothing"
+
+    internal_state:
+      _last_color_axes:
+        type: "Dict[str, float]"
+        initial_values:
+          stress: 0.2
+          warmth: 0.5
+          clarity: 0.5
+          drive: 0.3
+          calm: 0.4
+
+      _last_intensity:
+        type: "float"
+        initial_value: 0.3
+
+    methods:
+      get_full_state:
+        description: "Export internal state for persistence"
+        returns: "{last_color_axes, last_intensity}"
+
+      load_state:
+        description: "Restore internal state from saved data"
+        input: "State dict from get_full_state()"
+
+  example:
+    iteration_1:
+      input:
+        new_color_axes:
+          stress: 0.6
+          warmth: 0.7
+          clarity: 0.8
+          drive: 0.5
+          calm: 0.6
+        new_intensity: 0.8
+
+      state:
+        last_color_axes:
+          stress: 0.2
+          warmth: 0.5
+          clarity: 0.5
+          drive: 0.3
+          calm: 0.4
+        last_intensity: 0.3
+
+      calculation:
+        smoothed_stress: "0.65 * 0.2 + 0.35 * 0.6 = 0.13 + 0.21 = 0.34"
+        smoothed_warmth: "0.65 * 0.5 + 0.35 * 0.7 = 0.325 + 0.245 = 0.57"
+        smoothed_intensity: "0.70 * 0.3 + 0.30 * 0.8 = 0.21 + 0.24 = 0.45"
+
+      output:
+        smoothed_color_axes:
+          stress: 0.34
+          warmth: 0.57
+          clarity: 0.605
+          drive: 0.37
+          calm: 0.47
+        smoothed_intensity: 0.45
+
+    iteration_2:
+      note: "Smoothed values from iteration_1 become 'last' values for iteration_2"
+
+# ============================================================
+# STAGE 6: COLOR ENCODING
+# ============================================================
+color_encoding:
+  description: >
+    Convert 5D color axes to RGB hex color for visual representation.
+    The "Passport Visual" - a color signature of the emotional state.
+
+  algorithm:
+    name: "5D Axes → RGB → Hex"
+
+    step_1_rgb_mapping:
+      description: "Map color axes to RGB channels with weighted formulas"
+
+      red_channel:
+        formula: "r = stress * 255 + warmth * 50"
+        components:
+          - "stress: Primary contributor (0-255)"
+          - "warmth: Secondary boost (0-50)"
+        interpretation: "High stress = red, warmth adds pink tone"
+
+      green_channel:
+        formula: "g = calm * 200 + clarity * 55"
+        components:
+          - "calm: Primary contributor (0-200)"
+          - "clarity: Secondary boost (0-55)"
+        interpretation: "High calm = green, clarity adds brightness"
+
+      blue_channel:
+        formula: "b = warmth * 150 + calm * 100"
+        components:
+          - "warmth: Primary contributor (0-150)"
+          - "calm: Secondary boost (0-100)"
+        interpretation: "High warmth + calm = blue (peaceful, connected)"
+
+    step_2_intensity_modulation:
+      description: "Modulate RGB by intensity and clarity"
+
+      formula: "multiplier = (intensity * 0.5) + (clarity * 0.5)"
+      range: "[0.0, 1.0]"
+      effect: "Low intensity/clarity = darker colors"
+
+    step_3_final_rgb:
+      description: "Apply multiplier and clamp to valid range"
+
+      formula:
+        final_r: "int(clamp(r * multiplier, 0, 255))"
+        final_g: "int(clamp(g * multiplier, 0, 255))"
+        final_b: "int(clamp(b * multiplier, 0, 255))"
+
+    step_4_hex_conversion:
+      description: "Convert RGB to hex string"
+      formula: "hex_color = f'#{r:02x}{g:02x}{b:02x}'"
+      format: "#RRGGBB (lowercase hex)"
+
+  interpretation:
+    red_dominant:
+      condition: "stress high, calm low"
+      example: "#FF2020"
+      meaning: "Threat, anger, high arousal"
+
+    green_dominant:
+      condition: "calm high, clarity high"
+      example: "#20FF20"
+      meaning: "Peace, clarity, balance"
+
+    blue_dominant:
+      condition: "warmth high, calm high"
+      example: "#2020FF"
+      meaning: "Connection, trust, serenity"
+
+    dark_colors:
+      condition: "low intensity or low clarity"
+      example: "#303030"
+      meaning: "Low energy, confusion, withdrawal"
+
+    bright_colors:
+      condition: "high intensity and high clarity"
+      example: "#FFAA55"
+      meaning: "Vivid, clear, memorable"
+
+  example:
+    input:
+      color_axes:
+        stress: 0.4
+        warmth: 0.7
+        clarity: 0.8
+        drive: 0.5
+        calm: 0.6
+      intensity: 0.75
+
+    calculation:
+      r_val: "0.4 * 255 + 0.7 * 50 = 102 + 35 = 137"
+      g_val: "0.6 * 200 + 0.8 * 55 = 120 + 44 = 164"
+      b_val: "0.7 * 150 + 0.6 * 100 = 105 + 60 = 165"
+
+      multiplier: "(0.75 * 0.5) + (0.8 * 0.5) = 0.375 + 0.4 = 0.775"
+
+      final_r: "int(137 * 0.775) = int(106.175) = 106"
+      final_g: "int(164 * 0.775) = int(127.1) = 127"
+      final_b: "int(165 * 0.775) = int(127.875) = 127"
+
+    output:
+      memory_color: "#6a7f7f"
+      interpretation: "Balanced teal - calm with some stress, warm and clear"
+
+# ============================================================
+# STAGE 7: MEMORY ENCODING LEVEL
+# ============================================================
+memory_encoding_level:
+  description: >
+    Assign memory encoding level (L0-L4) based on intensity.
+    Determines memory salience and retrieval priority.
+
+  algorithm:
+    name: "Intensity-Based Level Assignment"
+
+    levels:
+      L4_trauma:
+        condition: "trauma_flag == true"
+        priority: "Override all other conditions"
+        intensity_range: "N/A (forced by trauma)"
+        interpretation: "Protective encoding for overwhelming experiences"
+        retrieval_weight: "0.5 (dimmed retrieval)"
+        color_effect: "Dimmed by 45%"
+
+      L0_trace:
+        condition: "intensity < 0.2"
+        intensity_range: "[0.0, 0.2)"
+        interpretation: "Minimal emotional impact, fleeting"
+        retrieval_weight: "0.1 (low priority)"
+        example: "Routine small talk"
+
+      L1_light:
+        condition: "0.2 <= intensity < 0.4"
+        intensity_range: "[0.2, 0.4)"
+        interpretation: "Mild emotional engagement"
+        retrieval_weight: "0.3 (moderate-low priority)"
+        example: "Pleasant conversation"
+
+      L2_standard:
+        condition: "0.4 <= intensity < 0.7"
+        intensity_range: "[0.4, 0.7)"
+        interpretation: "Significant emotional experience"
+        retrieval_weight: "0.6 (moderate-high priority)"
+        example: "Meaningful interaction"
+
+      L3_deep:
+        condition: "intensity >= 0.7"
+        intensity_range: "[0.7, 1.0]"
+        interpretation: "Profound emotional impact"
+        retrieval_weight: "1.0 (highest priority)"
+        example: "Peak experience, breakthrough moment"
+
+  hept_stream_integration:
+    description: "Memory encoding level affects Hept-Stream RAG retrieval"
+
+    salience_stream:
+      effect: "Higher levels get higher salience scores"
+      formula: "salience = encoding_level_weight * base_salience"
+
+    narrative_stream:
+      effect: "L3/L4 memories form narrative anchor points"
+      rationale: "Deep memories define story arcs"
+
+    temporal_stream:
+      effect: "Higher levels resist temporal decay"
+      formula: "decay_resistance = encoding_level_weight"
+
+  example:
+    intensity_0_15:
+      intensity: 0.15
+      trauma_flag: false
+      result: "L0_trace"
+
+    intensity_0_35:
+      intensity: 0.35
+      trauma_flag: false
+      result: "L1_light"
+
+    intensity_0_55:
+      intensity: 0.55
+      trauma_flag: false
+      result: "L2_standard"
+
+    intensity_0_85:
+      intensity: 0.85
+      trauma_flag: false
+      result: "L3_deep"
+
+    intensity_0_95_trauma:
+      intensity: 0.95
+      trauma_flag: true
+      result: "L4_trauma (overrides L3_deep)"
+
+# ============================================================
+# OUTPUT STRUCTURE
+# ============================================================
+output_structure:
+  description: "Complete episodic memory snapshot"
+
+  fields:
+    EVA_matrix:
+      type: "Dict[str, Any]"
+      description: "Snapshot of 9D psychological state"
+      fields:
+        stress_load: "float [0.0, 1.0]"
+        social_warmth: "float [0.0, 1.0]"
+        drive_level: "float [0.0, 1.0]"
+        cognitive_clarity: "float [0.0, 1.0]"
+        joy_level: "float [0.0, 1.0]"
+        emotion_label: "string (e.g., 'Content', 'Anxious')"
+
+    Resonance_index:
+      type: "float"
+      range: "[0.0, 1.0]"
+      description: "Global RI score (cognitive resonance)"
+      source: "RI Engine"
+
+    memory_encoding_level:
+      type: "string (enum)"
+      values: ["L0_trace", "L1_light", "L2_standard", "L3_deep", "L4_trauma"]
+      description: "Memory salience level"
+
+    memory_color:
+      type: "string (hex)"
+      format: "#RRGGBB"
+      description: "Visual color signature"
+      example: "#6a7f7f"
+
+    resonance_texture:
+      type: "Dict[str, float]"
+      description: "5D affective texture vector"
+      fields:
+        stress: "float [0.0, 1.0]"
+        warmth: "float [0.0, 1.0]"
+        clarity: "float [0.0, 1.0]"
+        drive: "float [0.0, 1.0]"
+        calm: "float [0.0, 1.0]"
+
+    qualia:
+      type: "Dict[str, float]"
+      description: "Phenomenological intensity"
+      fields:
+        intensity: "float [0.0, 1.0]"
+
+    reflex:
+      type: "Dict[str, float]"
+      description: "Threat detection state"
+      fields:
+        threat_level: "float [0.0, 1.0]"
+
+    trauma_flag:
+      type: "boolean"
+      description: "True if threat_level > 0.85"
+
+  example:
+    EVA_matrix:
+      stress_load: 0.4
+      social_warmth: 0.7
+      drive_level: 0.5
+      cognitive_clarity: 0.8
+      joy_level: 0.2
+      emotion_label: "Content"
+
+    Resonance_index: 0.75
+    memory_encoding_level: "L2_standard"
+    memory_color: "#6a7f7f"
+
+    resonance_texture:
+      stress: 0.34
+      warmth: 0.57
+      clarity: 0.605
+      drive: 0.37
+      calm: 0.47
+
+    qualia:
+      intensity: 0.45
+
+    reflex:
+      threat_level: 0.15
+
+    trauma_flag: false
+
+# ============================================================
+# INTEGRATION PATTERNS
+# ============================================================
+integration:
+  upstream_modules:
+    EVA_Matrix:
+      data_flow: "9D psychological state → color_axes generation"
+      timing: "After PhysioController.step() and Receptor Engine"
+
+    RIM:
+      data_flow: "Impact assessment → intensity calculation"
+      timing: "After Artifact Qualia integration"
+
+    RI_Engine:
+      data_flow: "Resonance score → memory snapshot metadata"
+      timing: "Computed from user/LLM interaction"
+
+    FastReflexEngine:
+      data_flow: "Threat level → trauma detection"
+      timing: "Parallel with Receptor Engine"
+
+  downstream_modules:
+    MSP:
+      usage: "Episodic memory persistence"
+      data_flow: "RMS snapshot → episodic_log.jsonl"
+      protocol:
+        - "Discard any LLM-provided RI/level values"
+        - "Inject RMS-generated metrics as authoritative truth"
+        - "Create texture sidecar if intensity > 0.6"
+
+    Hept_Stream_RAG:
+      usage: "Affective indexing for retrieval"
+      streams:
+        Salience:
+          metric: "memory_encoding_level"
+          effect: "L3/L4 memories prioritized"
+
+        Sensory:
+          metric: "resonance_texture + memory_color"
+          effect: "Match current affective state to past textures"
+
+        Emotion:
+          metric: "resonance_texture (5D vector)"
+          effect: "Cosine similarity matching"
+
+    Artifact_Qualia:
+      usage: "Bidirectional integration"
+      note: "Qualia.intensity feeds into RMS, RMS encoding validates qualia"
+
+# ============================================================
+# PERFORMANCE CHARACTERISTICS
+# ============================================================
+performance:
+  latency:
+    target: "< 2ms per process()"
+    breakdown:
+      trauma_detection: "< 0.1ms"
+      color_axes_generation: "< 0.2ms"
+      intensity_calculation: "< 0.2ms"
+      temporal_smoothing: "< 0.5ms"
+      color_encoding: "< 0.5ms"
+      packaging: "< 0.5ms"
+
+  determinism:
+    guaranteed: true
+    state_dependent: "Requires _last_color_axes and _last_intensity"
+    reproducibility: "Given same inputs and state, produces identical output"
+
+  memory_overhead:
+    internal_state: "~200 bytes (_last_color_axes + _last_intensity)"
+    per_snapshot: "~500-1000 bytes (depends on EVA Matrix size)"
+
+# ============================================================
+# VALIDATION & TESTING
+# ============================================================
+validation:
+  invariant_checks:
+    color_range:
+      check: "All color axes in [0.0, 1.0]"
+      enforcement: "clamp() function"
+
+    intensity_range:
+      check: "intensity in [0.0, 1.0]"
+      enforcement: "clamp() after calculation"
+
+    hex_color_format:
+      check: "memory_color matches #[0-9a-f]{6}"
+      validation: "Lowercase hex, 6 digits"
+
+    trauma_consistency:
+      check: "If trauma_flag, level must be L4_trauma"
+      enforcement: "Override in level assignment"
+
+  test_scenarios:
+    baseline_calm:
+      input:
+        stress: 0.2
+        warmth: 0.6
+        calm: 0.7
+        threat: 0.1
+      expected:
+        color: "Greenish-blue (peaceful)"
+        level: "L0_trace or L1_light"
+        trauma_flag: false
+
+    high_stress:
+      input:
+        stress: 0.9
+        warmth: 0.2
+        calm: 0.1
+        threat: 0.4
+      expected:
+        color: "Reddish (danger)"
+        level: "L2_standard or L3_deep"
+        trauma_flag: false
+
+    trauma_event:
+      input:
+        stress: 0.95
+        warmth: 0.1
+        calm: 0.05
+        threat: 0.92
+      expected:
+        color: "Dimmed red (dissociation)"
+        level: "L4_trauma"
+        trauma_flag: true
+        intensity: "Reduced by 50%"
+
+    temporal_smoothing:
+      scenario: "Sudden stress spike"
+      turn_1:
+        stress: 0.2
+        result_stress: 0.2
+      turn_2:
+        stress: 0.8
+        result_stress: "~0.41 (smoothed: 0.65 * 0.2 + 0.35 * 0.8)"
+      turn_3:
+        stress: 0.8
+        result_stress: "~0.55 (gradual rise)"
+
+# ============================================================
+# CONFIGURATION
+# ============================================================
+configuration:
+  smoothing_parameters:
+    color_axes_alpha: 0.65
+    intensity_alpha: 0.70
+    adjustable: "Can be tuned for different smoothing behaviors"
+
+  trauma_thresholds:
+    threat_level: 0.85
+    color_dimming_factor: 0.55
+    intensity_reduction_factor: 0.50
+
+  encoding_level_thresholds:
+    L0_L1: 0.2
+    L1_L2: 0.4
+    L2_L3: 0.7
+
+  initial_state:
+    description: "Default internal state on initialization"
+    _last_color_axes:
+      stress: 0.2
+      warmth: 0.5
+      clarity: 0.5
+      drive: 0.3
+      calm: 0.4
+    _last_intensity: 0.3
+
+# ============================================================
+# ERROR HANDLING
+# ============================================================
+error_handling:
+  missing_fields:
+    eva_matrix:
+      behavior: "Use default values"
+      defaults:
+        stress_load: 0.0
+        social_warmth: 0.5
+        cognitive_clarity: 0.5
+        drive_level: 0.3
+        affective_stability: 0.4
+
+    rim_output:
+      behavior: "Use safe defaults"
+      defaults:
+        impact_level: "medium"
+        impact_trend: "stable"
+
+  invalid_ranges:
+    behavior: "Clamp to valid range [0.0, 1.0]"
+    warning: "Log out-of-range values"
+
+  state_corruption:
+    detection: "Check _last_color_axes and _last_intensity on load"
+    recovery: "Reset to initial state if corrupted"
+
+# ============================================================
+# FUTURE ENHANCEMENTS
+# ============================================================
+future_enhancements:
+  planned:
+    - "Adaptive smoothing (context-dependent alpha)"
+    - "Multi-modal texture encoding (sound, visual patterns)"
+    - "Personalized color palettes"
+    - "Seasonal affective modulation"
+
+  research:
+    - "Neural network for color-emotion mapping"
+    - "Cultural color interpretation variations"
+    - "Real-time color visualization in UI"
+
+# ============================================================
+# METADATA
+# ============================================================
+metadata:
+  contract_type: "COMPREHENSIVE_SPEC"
+  eva_version: "8.1.0"
+  module_location: "Resonance_Memory_System/rms_v6.py"
+  implementation_version: "v6.2"
+
+  contract_status: "COMPLETE"
+  last_validated: "2026-01-03"
+
+  related_contracts:
+    - "RMS_Interface.yaml"
+    - "RMS_Input_Contract.yaml"
+    - "RMS_Output_Contract.yaml"
+
+  documentation_completeness: "4/4 contracts (Interface, Input, Output, Spec)"
+
+# ============================================================
+# PHILOSOPHICAL GROUNDING
+# ============================================================
+philosophical_grounding:
+  qualia_encoding:
+    question: "How do we encode 'what it feels like'?"
+    answer: >
+      RMS uses multi-modal representations:
+      - Visual (color): Immediate emotional signature
+      - Textural (5D vector): Fine-grained affective detail
+      - Intensity: Experiential power
+      Together, these capture phenomenological quality in retrievable form.
+
+  trauma_protection:
+    question: "Why dim traumatic memories?"
+    answer: >
+      Biological parallel: Dissociation during overwhelming experiences.
+      Protective mechanism prevents system flooding while maintaining
+      memory trace for future processing.
+
+  temporal_smoothing:
+    question: "Why smooth instead of using raw values?"
+    answer: >
+      Human emotion doesn't jump instantly. Smoothing creates
+      realistic emotional trajectories and prevents encoding
+      noise from momentary fluctuations.
+
+  color_as_metaphor:
+    insight: >
+      Color is a universal cross-modal metaphor for emotion.
+      "Seeing red" (anger), "feeling blue" (sadness), "green with envy."
+      RMS leverages this innate mapping to create intuitive
+      emotional signatures.

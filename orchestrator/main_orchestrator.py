@@ -1,25 +1,21 @@
 """
 EVA 8.1.5: Main Orchestrator
-Integrates all components for Dual-Phase One-Inference with Dynamic Chunking
+Integrates all components for Dual-Phase One-Inference (Official v8.1.0/v8.2.5 Logic)
 
 Architecture:
     User Input
         ↓
-    Dynamic Chunking (split into semantic chunks)
+    Phase 1: Perception (CIN + LLM extract stimulus)
         ↓
-    For each chunk:
-        Phase 1: Perception (CIN + LLM extract stimulus)
-        The Gap: PhysioController + HeptRAG
-        Phase 2: Reasoning (CIN + LLM generate response)
+    The Gap: PhysioController + EVA Matrix + Artifact Qualia + HeptRAG
         ↓
-    Retroactive Synthesis (Terminal Anchor)
-        ↓
-    Meta-Evaluation (The Watcher)
+    Phase 2: Reasoning (CIN + LLM generate RESPONSE with 40/60 weighting)
         ↓
     Write to MSP
 """
 
 import sys
+import os
 import json
 from typing import Dict, List, Any, Optional
 from pathlib import Path
@@ -28,24 +24,23 @@ from datetime import datetime
 # Fix Windows console UTF-8 encoding
 import codecs
 if sys.platform == 'win32':
-    try:
-        if hasattr(sys.stdout, 'buffer'):
-            sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
-            sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
-    except:
-        pass  # Already configured or not needed
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
 
-# Add core system paths (including non-Python-safe directory names)
-msp_path = Path(__file__).parent.parent / "Memory_&_Soul_Passaport"
-sys.path.insert(0, str(msp_path / "MSP_Client"))
-sys.path.insert(0, str(msp_path / "MSP"))
+# Add parent directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Import components
-from orchestrator.dual_phase_engine import DynamicChunkingOrchestrator
 from orchestrator.cin.cin import ContextInjectionNode
 from services.hept_stream_rag.hept_stream_rag import HeptStreamRAG
-from msp_client import MSPClient
+from services.msp_client.msp_client import MSPClient
 from services.llm_bridge.llm_bridge import LLMBridge, SYNC_BIOCOGNITIVE_STATE_TOOL
+
+# Biological & Psychological Systems
+from physio_core.physio_controller import PhysioController
+from eva_matrix.eva_matrix_engine import EVAMatrixSystem
+from artifact_qualia.Artifact_Qualia import ArtifactQualiaCore, RIMSemantic
+from resonance_memory_system.rms_v6 import RMSEngineV6
 
 # Optional: PMT (Prompt Rule Layer)
 try:
@@ -58,54 +53,64 @@ except ImportError:
 
 class EVAOrchestrator:
     """
-    EVA 8.1.5: Main Orchestrator
-
-    Integrates:
-    - Dynamic Chunking (Terminal Anchor + Micro-Reactions)
-    - CIN (Context Injection Node)
-    - HeptStreamRAG (7-stream memory retrieval)
-    - MSP Client (Memory persistence)
-    - LLM Bridge (Gemini API / Mock)
-    - PMT (Prompt Rule Layer - optional)
-    - PhysioController (optional - future integration)
-
-    Usage:
-        orchestrator = EVAOrchestrator()
-        response = orchestrator.process_user_input("ขอบคุณนะที่วันนี้มาส่ง...")
-        print(response["final_response"])
+    EVA 8.1.5: Main Orchestrator (Official Architecture)
     """
 
     def __init__(
         self,
-        mock_mode: bool = True,
-        enable_chunking: bool = True,
-        enable_physio: bool = False
+        mock_mode: bool = False,
+        enable_physio: bool = True
     ):
-        """
-        Initialize EVA Orchestrator
+        print("🚀 Initializing EVA 8.1.5 Orchestrator (Official Architecture)...")
 
-        Args:
-            mock_mode: Use mock LLM/MSP (True) or real APIs (False)
-            enable_chunking: Enable dynamic chunking (True) or process as single chunk (False)
-            enable_physio: Enable PhysioController integration (Future feature)
-        """
-        print("🚀 Initializing EVA 8.1.5 Orchestrator...")
-
-        # Configuration
         self.mock_mode = mock_mode
-        self.enable_chunking = enable_chunking
         self.enable_physio = enable_physio
 
-        # Initialize components
+        # --------------------------------------------------
+        # 1. Initialize Memory & RAG
+        # --------------------------------------------------
         print("  - Initializing MSP Client...")
         self.msp = MSPClient()
 
         print("  - Initializing HeptStreamRAG...")
         self.hept_rag = HeptStreamRAG(msp_client=self.msp)
 
+        # --------------------------------------------------
+        # 2. Initialize Biological & Psychological Mind (The Gap Modules)
+        # --------------------------------------------------
+        if enable_physio:
+            print("  - Initializing PhysioController (Real Pipeline)...")
+            base_physio_cfg = "E:/The Human Algorithm/T2/EVA 8.1.0/physio_core/configs"
+            self.physio = PhysioController(
+                endocrine_cfg_path=f"{base_physio_cfg}/hormone_spec_ml.yaml",
+                endocrine_reg_cfg_path=f"{base_physio_cfg}/endocrine_regulation.yaml",
+                blood_cfg_path=f"{base_physio_cfg}/blood_physiology.yaml",
+                receptor_cfg_path=f"{base_physio_cfg}/receptor_configs.yaml",
+                reflex_cfg_path=f"{base_physio_cfg}/receptor_configs.yaml",
+                autonomic_cfg_path=f"{base_physio_cfg}/autonomic_response.yaml",
+                msp=self.msp
+            )
+            
+            print("  - Initializing EVA Matrix (Psyche Core)...")
+            self.matrix = EVAMatrixSystem(msp=self.msp)
+            
+            print("  - Initializing Artifact Qualia (Phenomenology)...")
+            self.qualia = ArtifactQualiaCore()
+
+            print("  - Initializing Resonance Memory System (RMS)...")
+            self.rms = RMSEngineV6()
+        else:
+            self.physio = None
+            self.matrix = None
+            self.qualia = None
+            self.rms = None
+
+        # --------------------------------------------------
+        # 3. Initialize Cognitive Layer
+        # --------------------------------------------------
         print("  - Initializing CIN (Context Injection Node)...")
         self.cin = ContextInjectionNode(
-            physio_controller=None,  # TODO: Add PhysioController
+            physio_controller=self.physio,
             msp_client=self.msp,
             hept_stream_rag=self.hept_rag
         )
@@ -113,16 +118,6 @@ class EVAOrchestrator:
         print("  - Initializing LLM Bridge...")
         self.llm = LLMBridge()
 
-        if enable_chunking:
-            print("  - Initializing Dynamic Chunking Orchestrator...")
-            self.chunker = DynamicChunkingOrchestrator(
-                cin=self.cin,
-                physio_controller=None  # TODO: Add PhysioController
-            )
-        else:
-            self.chunker = None
-
-        # Optional: PMT
         if PMT_AVAILABLE:
             print("  - Initializing PMT (Prompt Rule Layer)...")
             try:
@@ -139,431 +134,234 @@ class EVAOrchestrator:
 
         print(f"✅ EVA Orchestrator ready! (Session: {self.session_id})\n")
 
-    def process_user_input(
-        self,
-        user_input: str,
-        context: Optional[Dict] = None
-    ) -> Dict[str, Any]:
+    def process_user_input(self, user_input: str) -> Dict[str, Any]:
         """
-        Main entry point: Process user input through full pipeline
-
-        Args:
-            user_input: Raw user input text
-            context: Optional context dictionary
-
-        Returns:
-            {
-                "final_response": "...",
-                "context_id": "ctx_v8_...",
-                "chunks": [...],
-                "micro_trace": [...],
-                "final_state": {...},
-                "memory_written": True/False
-            }
+        Main entry point: Dual-Phase One-Inference Flow
         """
         self.turn_count += 1
-        context = context or {}
-
         print(f"\n{'='*60}")
-        print(f"🎯 Processing Turn {self.turn_count}")
+        print(f"🎯 Turn {self.turn_count}")
         print(f"{'='*60}")
-        print(f"User Input: {user_input[:100]}{'...' if len(user_input) > 100 else ''}\n")
 
-        # Generate context ID
         context_id = self._generate_context_id()
-        context["context_id"] = context_id
+        
+        # --------------------------------------------------
+        # STEP 1: Phase 1 - Perception
+        # --------------------------------------------------
+        print("🧠 STEP 1: Phase 1 - Perception")
+        phase1_context = self.cin.inject_phase_1(user_input)
+        phase1_prompt = self.cin.build_phase_1_prompt(phase1_context)
 
-        # Step 1: Dynamic Chunking (if enabled)
-        if self.enable_chunking and self.chunker:
-            print("📑 STEP 1: Dynamic Chunking")
-            chunking_result = self.chunker.process_interaction(user_input, context)
-            chunks = [trace["chunk"] for trace in chunking_result["trace"]]
-            micro_trace = chunking_result["trace"]
-            final_state = chunking_result["final_state"]
-            print(f"  ✓ Split into {len(chunks)} chunks\n")
-        else:
-            # Single chunk mode
-            chunks = [user_input]
-            micro_trace = []
-            final_state = {}
-
-        # Step 2: Phase 1 - Perception (for combined input or last chunk)
-        print("🧠 STEP 2: Phase 1 - Perception")
-
-        # Use full input for Phase 1 analysis
-        phase1_prompt = self.cin.build_phase_1_prompt(
-            self.cin.inject_phase_1(user_input)
-        )
-
-        print(f"  - Calling LLM with function tools...")
+        print("  - Calling LLM with function tool (sync_biocognitive_state)...")
         llm_response = self.llm.generate(
             phase1_prompt,
             tools=[SYNC_BIOCOGNITIVE_STATE_TOOL],
             temperature=0.7
         )
 
-        # Check if LLM called sync_biocognitive_state
+        # Handle tool call (The Gap)
         if not llm_response.tool_calls:
-            print("  ⚠️ Warning: LLM did not call sync_biocognitive_state")
-            # Fallback: create mock tool call
-            stimulus_vector = {"stress": 0.3, "warmth": 0.5, "arousal": 0.4, "valence": 0.6}
+            print("  ⚠️ Warning: LLM skipped Phase 1 extraction. Falling back to default.")
+            stimulus_vector = {"stress": 0.3, "warmth": 0.5, "arousal": 0.3, "valence": 0.5}
             tags = ["neutral"]
         else:
             tool_call = llm_response.tool_calls[0]
-
-            # Convert protobuf objects to plain Python types (for JSON serialization)
-            stimulus_vector = dict(tool_call.args["stimulus_vector"])
+            # Handle possible dict or object return from SDK
+            stimulus_raw = tool_call.args["stimulus_vector"]
+            stimulus_vector = {k: float(v) for k, v in stimulus_raw.items()}
             tags = list(tool_call.args["tags"])
+            print(f"  ✓ LLM Extracted: {tags} (Stress={stimulus_vector.get('stress', 0):.2f})")
 
-            print(f"  ✓ LLM extracted: {tags} (stress={stimulus_vector.get('stress', 0):.2f})")
+        # --------------------------------------------------
+        # STEP 2: The Gap - Biological & Psychological Sync
+        # --------------------------------------------------
+        print("\n⚡ STEP 2: The Gap - Bio-Cognitive Sync")
+        
+        qualia_snapshot = None
+        ans_state = {"sympathetic": 0.4, "parasympathetic": 0.6}
+        blood_levels = {"cortisol": 0.3, "oxytocin": 0.5}
+        qualitative_experience = "Feeling calm and stable."
 
-        # Step 3: The Gap - Physiological & Memory Processing
-        print("\n⚡ STEP 3: The Gap - Bio-Resonance")
-
-        # 3a. PhysioController (Mock for now)
         if self.enable_physio:
-            print("  - PhysioController.step() [NOT IMPLEMENTED YET]")
-            updated_physio = {"autonomic": {"sympathetic": 0.5, "parasympathetic": 0.5}}
-        else:
-            # Mock physio update based on stimulus
-            sympathetic = min(1.0, stimulus_vector.get("stress", 0.3) * 0.6 + stimulus_vector.get("arousal", 0.4) * 0.4)
-            parasympathetic = 1.0 - sympathetic
-            updated_physio = {
-                "autonomic": {
-                    "sympathetic": sympathetic,
-                    "parasympathetic": parasympathetic
-                },
-                "blood": {
-                    "cortisol": stimulus_vector.get("stress", 0.3),
-                    "oxytocin": stimulus_vector.get("warmth", 0.5)
-                }
+            # 2a. Update Body (PhysioController)
+            print("  - Updating Physio Core...")
+            # Simple zeitgeber logic (aligned with EndocrineRegulation config.yaml)
+            hour = datetime.now().hour
+            is_day = 6 <= hour <= 18
+            zeitgebers = {
+                "daylight": 1.0 if is_day else 0.0,
+                "blue_light": 0.5 if is_day else 0.0,
+                "active": 0.5 if is_day else 0.1
             }
-            print(f"  ✓ Mock physio update (Symp={sympathetic:.2f}, Para={parasympathetic:.2f})")
+            
+            physio_result = self.physio.step(
+                eva_stimuli=stimulus_vector,
+                zeitgebers=zeitgebers,
+                dt=60.0 # Process as a 1-minute state transition
+            )
+            ans_state = physio_result.get("ans_state", {})
+            blood_levels = physio_result.get("blood_levels", {})
 
-        # 3b. HeptStreamRAG retrieval
-        print("  - HeptStreamRAG.retrieve()...")
+            # 2b. Update Psyche (EVA Matrix)
+            print("  - Updating EVA Matrix...")
+            matrix_result = self.matrix.process_signals(blood_levels) # Mapping logic inside engine
+            axes_9d = matrix_result.get("axes_9d", {})
+
+            # 2c. Generate Qualia (Artifact Qualia)
+            print("  - Generating Artifact Qualia...")
+            rim_semantic = RIMSemantic(
+                impact_level="high" if stimulus_vector.get("stress", 0) > 0.7 else "medium",
+                impact_trend="rising" if self.turn_count > 1 else "stable",
+                affected_domains=["identity", "emotional"]
+            )
+            qualia_snapshot = self.qualia.integrate(axes_9d, rim_semantic)
+            qualitative_experience = self._format_qualia_for_llm(qualia_snapshot)
+
+        # 2d. Memory Retrieval (HeptStreamRAG)
+        print("  - Executing HeptStreamRAG...")
         query_ctx = {
             "tags": tags,
-            "ans_state": updated_physio["autonomic"],
-            "blood_levels": updated_physio.get("blood", {}),
+            "ans_state": ans_state,
+            "blood_levels": blood_levels,
             "context_id": context_id
         }
         memory_matches = self.hept_rag.retrieve(query_ctx)
-
-        # Handle both dict (new format) and list (legacy format)
-        if isinstance(memory_matches, dict):
-            total_memories = sum(len(matches) for matches in memory_matches.values())
-        elif isinstance(memory_matches, list):
-            total_memories = len(memory_matches)
-            # Convert list to dict format for consistency
-            memory_matches = {"combined": memory_matches}
-        else:
-            total_memories = 0
-            memory_matches = {}
-
-        print(f"  ✓ Retrieved {total_memories} memories across 7 streams")
-
-        # Step 4: Phase 2 - Reasoning
-        print("\n💭 STEP 4: Phase 2 - Reasoning")
-
-        # Convert memory_matches to list format for CIN (handles empty dict)
+        
+        # Flatten and serialize memory for Phase 2 injection
         memory_list = []
         if isinstance(memory_matches, dict):
-            for stream, matches in memory_matches.items():
-                memory_list.extend(matches)
-        elif isinstance(memory_matches, list):
-            memory_list = memory_matches
+            for m_list in memory_matches.values():
+                for m in m_list:
+                    if hasattr(m, '__dict__'):
+                        memory_list.append(vars(m))
+                    elif isinstance(m, dict):
+                        memory_list.append(m)
+        else:
+            for m in memory_matches:
+                if hasattr(m, '__dict__'):
+                    memory_list.append(vars(m))
+                elif isinstance(m, dict):
+                    memory_list.append(m)
 
+        # --------------------------------------------------
+        # STEP 3: Phase 2 - Reasoning (40/60 Weighting)
+        # --------------------------------------------------
+        print("\n💭 STEP 3: Phase 2 - Reasoning")
+        
+        # Build Phase 2 Context
         phase2_context = self.cin.inject_phase_2(
             stimulus_vector=stimulus_vector,
             tags=tags,
-            updated_physio=updated_physio,
+            updated_physio={"autonomic": ans_state, "blood": blood_levels},
             memory_matches=memory_list
         )
+        # Inject Qualia into sensation
+        phase2_context["embodied_sensation"] = qualitative_experience
 
-        phase2_prompt = self.cin.build_phase_2_prompt(phase2_context)
-
-        print("  - Continuing LLM with Phase 2 context...")
-        final_llm_response = self.llm.continue_with_result(phase2_prompt)
-        final_response_text = final_llm_response.text
-        print(f"  ✓ Generated response ({len(final_response_text)} chars)")
-
-        # Step 5: Meta-Evaluation (The Watcher)
-        print("\n🔍 STEP 5: Meta-Evaluation")
-        evaluation = self._meta_evaluation(
-            user_input=user_input,
-            response=final_response_text,
-            stimulus_vector=stimulus_vector,
-            physio_state=updated_physio
+        phase2_result = self.cin.build_phase_2_prompt(phase2_context)
+        phase2_prompt = phase2_result["function_result_text"]
+        
+        # Explicitly enforce 40/60 weighting
+        weighting_directive = (
+            "\n### REASONING DIRECTIVE: [HIERARCHY OF TRUTH]\n"
+            "- 60% WEIGHT: Your current physiological state and qualitative experience (Physicality dominant).\n"
+            "- 40% WEIGHT: Your persona principles and conversational history.\n"
+            "Respond as an embodied being whose words are chosen by the rhythm of your internal state.\n"
         )
-        print(f"  ✓ Cognitive load: {evaluation['cognitive_load']:.2f}")
-        print(f"  ✓ Consistency check: {evaluation['consistency_check']}")
+        final_prompt = weighting_directive + phase2_prompt
 
-        # Step 6: Write to MSP
-        print("\n💾 STEP 6: Write to Memory")
-        episode_written = self._write_to_memory(
-            context_id=context_id,
-            user_input=user_input,
-            response=final_response_text,
-            stimulus_vector=stimulus_vector,
-            physio_state=updated_physio,
-            tags=tags
-        )
-        print(f"  ✓ Episode written: {episode_written}")
+        print("  - Continuing LLM for Final Response...")
+        final_llm_response = self.llm.continue_with_result(final_prompt)
+        final_text = final_llm_response.text
+        print(f"  ✓ Response Generated ({len(final_text)} chars)")
 
-        # Return result
-        print(f"\n{'='*60}")
-        print(f"✅ Turn {self.turn_count} Complete!")
-        print(f"{'='*60}\n")
-
-        return {
-            "final_response": final_response_text,
-            "context_id": context_id,
-            "chunks": chunks,
-            "micro_trace": micro_trace,
-            "final_state": final_state,
-            "stimulus_vector": stimulus_vector,
-            "tags": tags,
-            "updated_physio": updated_physio,
-            "memory_matches": memory_matches,
-            "meta_evaluation": evaluation,
-            "episode_id": episode_written,
-            "token_usage": self.llm.get_token_usage()
-        }
-
-    def _meta_evaluation(
-        self,
-        user_input: str,
-        response: str,
-        stimulus_vector: Dict,
-        physio_state: Dict
-    ) -> Dict[str, Any]:
-        """
-        Meta-Evaluation: The Watcher validates response consistency
-
-        Checks:
-        1. Cognitive Load (stress level vs response complexity)
-        2. Persona-Physio balance (40% Persona + 60% Physio-State)
-        3. Safety Layer violations
-        """
-        # Calculate cognitive load
-        stress = stimulus_vector.get("stress", 0.3)
-        response_length = len(response)
-        cognitive_load = min(1.0, stress * 0.5 + (response_length / 500) * 0.3)
-
-        # Consistency check
-        sympathetic = physio_state.get("autonomic", {}).get("sympathetic", 0.5)
-
-        # Simple rule: if high stress but calm response → inconsistent
-        if stress > 0.7 and sympathetic > 0.7:
-            if len(response) < 100:  # Very short response
-                consistency_check = "WARN: High stress but minimal response"
+        # --------------------------------------------------
+        # STEP 4: Persistance
+        # --------------------------------------------------
+        print("\n💾 STEP 4: Write to Memory (MSP)")
+        # Prepare State Snapshot
+        if self.enable_physio and self.rms:
+            # RMS Processing (P2 -> RMS -> MSP)
+            # rim_semantic was created in step 2c, we reuse it or create a lightweight one
+            if 'rim_semantic' not in locals():
+                # Fallback if step 2 was skipped (unlikely if enable_physio is True)
+                rim_output = {"impact_level": "low", "impact_trend": "stable"}
             else:
-                consistency_check = "OK: High arousal with detailed response"
-        elif stress < 0.3 and len(response) > 300:
-            consistency_check = "OK: Low stress with elaborate response"
-        else:
-            consistency_check = "OK: Balanced response"
-
-        return {
-            "cognitive_load": cognitive_load,
-            "consistency_check": consistency_check,
-            "stress_level": stress,
-            "response_length": response_length,
-            "sympathetic_activation": sympathetic
-        }
-
-    def _write_to_memory(
-        self,
-        context_id: str,
-        user_input: str,
-        response: str,
-        stimulus_vector: Dict,
-        physio_state: Dict,
-        tags: List[str]
-    ) -> str:
-        """
-        Write episode to MSP following Schema V2 format
-
-        Returns:
-            Episode ID
-        """
-        # Extract stress from stimulus_vector
-        stress = stimulus_vector.get("stress", 0.3)
-        arousal = stimulus_vector.get("arousal", 0.4)
-        warmth = stimulus_vector.get("warmth", 0.5)
-        valence = stimulus_vector.get("valence", 0.6)
-
-        # Calculate Resonance Impact (RIM) for salience_anchor
-        # RIM formula: stress * 0.4 + arousal * 0.3 + warmth * 0.2 + |valence - 0.5| * 0.1
-        rim = stress * 0.4 + arousal * 0.3 + warmth * 0.2 + abs(valence - 0.5) * 0.1
-
-        # Find salience_anchor (most impactful phrase - simplified: first 5 words)
-        words = user_input.split()
-        salience_phrase = " ".join(words[:min(5, len(words))])
-
-        # Generate event_label (emotion + action pattern)
-        emotion_signal = tags[0] if tags else "neutral"
-        event_label = f"{emotion_signal}_expressed"
-
-        # Generate episode_tag (importance classification)
-        ri = 0.70  # TODO: Calculate from RIM
-        if ri >= 0.8:
-            episode_tag = "milestone"
-        elif stress > 0.7:
-            episode_tag = "important"
-        else:
-            episode_tag = "routine"
-
-        # Build Schema V2 compliant episode
-        episode_data = {
-            "episode_type": "interaction",
-            "session_id": self.session_id,
-            "event_label": event_label,
-            "episode_tag": episode_tag,
-            "situation_context": {
-                "context_id": context_id,
-                "interaction_mode": "casual",
-                "stakes_level": "low",
-                "time_pressure": "low"
-            },
-            "turn_1": {
-                "speaker": "user",
-                "raw_text": user_input,
-                "summary": user_input[:100] if len(user_input) > 100 else user_input,
-                "affective_inference": {
-                    "emotion_signal": tags[0] if tags else "neutral",
-                    "intensity": stress,
-                    "confidence": 0.8
-                },
-                "semantic_frames": tags,
-                "salience_anchor": {
-                    "phrase": salience_phrase,
-                    "Resonance_impact": rim
+                rim_output = {
+                    "impact_level": rim_semantic.impact_level,
+                    "impact_trend": rim_semantic.impact_trend
                 }
+            
+            reflex_state = {"threat_level": 0.1} # Placeholder for actual reflex engine if available
+            
+            # Create full visual/emotional snapshot
+            state_snapshot = self.rms.process(
+                eva_matrix=axes_9d,
+                rim_output=rim_output,
+                reflex_state=reflex_state,
+                ri_total=0.75 # TODO: Connect to dynamic RI calculator if exists, else 0.75 default
+            )
+        else:
+            state_snapshot = {
+                "Endocrine": blood_levels,
+                "Resonance_index": 0.75,
+                "EVA_matrix": {"emotion_label": self.matrix.emotion_label if self.enable_physio else "Neutral"},
+                "qualia": vars(qualia_snapshot) if qualia_snapshot else {}
+            }
+
+        self.msp.write_episode({
+            "context_id": context_id,
+            "turn_1": {
+                "speaker": "Human",
+                "content": user_input,
+                "summary": user_input[:100],
+                "semantic_frames": tags
             },
             "turn_2": {
-                "speaker": "eva",
-                "text_excerpt": response,
-                "summary": response[:100] if len(response) > 100 else response,
-                "epistemic_mode": "assert"
+                "speaker": "EVA",
+                "content": final_text,
+                "summary": final_text[:100]
             },
-            "state_snapshot": {
-                "EVA_matrix": {
-                    "stress_load": stress,
-                    "social_warmth": warmth,
-                    "drive_level": arousal,
-                    "cognitive_clarity": 1.0 - stress,
-                    "joy_level": valence,
-                    "emotion_label": tags[0] if tags else "neutral"
-                },
-                "Endocrine": {
-                    "ESC_H01_ADRENALINE": physio_state.get("blood", {}).get("cortisol", 0.3),
-                    "ESC_H02_CORTISOL": physio_state.get("blood", {}).get("cortisol", 0.3),
-                    "ESC_H09_OXYTOCIN": physio_state.get("blood", {}).get("oxytocin", 0.5),
-                    # Add other hormones with default values
-                    "ESC_H03_NORADRENALINE": 0.0,
-                    "ESC_H04_ALDOSTERONE": 0.0,
-                    "ESC_H05_DOPAMINE": 0.0,
-                    "ESC_H06_SEROTONIN": 0.0,
-                    "ESC_H07_ENDORPHIN": 0.0,
-                    "ESC_H08_GABA": 0.0,
-                    "ESC_H10_VASOPRESSIN": 0.0,
-                    "ESC_H11_TESTOSTERONE": 0.0,
-                    "ESC_H12_ESTROGEN": 0.0,
-                    "ESC_H13_PROGESTERONE": 0.0,
-                    "ESC_H14_INSULIN": 0.0,
-                    "ESC_H15_GLUCAGON": 0.0,
-                    "ESC_H16_LEPTIN": 0.0,
-                    "ESC_H17_GHRELIN": 0.0,
-                    "ESC_H18_THYROXINE": 0.0,
-                    "ESC_H19_MELATONIN": 0.0,
-                    "ESC_H20_GROWTH_HORMONE": 0.0,
-                    "ESC_H21_PROLACTIN": 0.0,
-                    "ESC_H22_ADENOSINE": 0.0,
-                    "ESC_H23_HISTAMINE": 0.0
-                },
-                "Resonance_index": 0.70,  # TODO: Calculate from RIM
-                "memory_encoding_level": "L2_standard",
-                "memory_color": "#808080",  # TODO: Calculate from RMS
-                "qualia": {
-                    "intensity": stress
-                },
-                "reflex": {
-                    "threat_level": stress
-                }
-            }
+            "state_snapshot": state_snapshot
+        })
+
+        print(f"\n✅ Turn {self.turn_count} Complete!\n")
+
+        return {
+            "final_response": final_text,
+            "context_id": context_id,
+            "physio_state": {"ans": ans_state, "blood": blood_levels},
+            "emotion_label": self.matrix.emotion_label if self.enable_physio else "Neutral"
         }
 
-        episode_id = self.msp.write_episode(episode_data)
-
-        # Update turn cache for next turn's Phase 1
-        summary = f"User: {user_input[:50]}... → Response: {response[:50]}..."
-        self.msp.update_turn_cache(context_id, summary)
-
-        return episode_id
+    def _format_qualia_for_llm(self, qualia: Any) -> str:
+        """Format qualia snapshot for LLM consumption"""
+        return f"""**Current Lived Experience:**
+- Intensity: {qualia.intensity:.2f} (Tone: {qualia.tone})
+- Presence: {'Vibrant' if qualia.coherence > 0.7 else 'Faded' if qualia.coherence < 0.3 else 'Stable'}
+- Internal Texture: {', '.join([f'{k}={v:.2f}' for k, v in qualia.texture.items()])}
+"""
 
     def _generate_context_id(self) -> str:
-        """Generate context ID: ctx_v8_{yymmdd}_{hhmmss}_{hash_short}"""
         now = datetime.now()
-        timestamp_str = f"{now.strftime('%y%m%d')}_{now.strftime('%H%M%S')}"
-        hash_short = hex(hash(f"{self.session_id}_{self.turn_count}_{now.timestamp()}"))[2:10]
-        return f"ctx_v8_{timestamp_str}_{hash_short}"
+        return f"ctx_v8_{now.strftime('%y%m%d_%H%M%S')}_{os.urandom(4).hex()}"
 
     def _generate_session_id(self) -> str:
-        """Generate session ID"""
-        import uuid
-        return str(uuid.uuid4())[:8]
-
-    def get_stats(self) -> Dict[str, Any]:
-        """Get orchestrator statistics"""
-        return {
-            "session_id": self.session_id,
-            "turn_count": self.turn_count,
-            "token_usage": self.llm.get_token_usage(),
-            "memory_stats": self.msp.get_stats()
-        }
+        return os.urandom(4).hex()
 
 
 if __name__ == "__main__":
-    """Test Main Orchestrator"""
     print("="*60)
-    print("EVA 8.1.5 - Main Orchestrator Test")
+    print("EVA 8.1.0 - Official Architecture Test")
     print("="*60)
 
-    # Initialize orchestrator
-    orchestrator = EVAOrchestrator(
-        mock_mode=False,
-        enable_chunking=True,
-        enable_physio=False
-    )
-
-    # Test inputs
-    test_inputs = [
-        "ขอบคุณนะที่วันนี้มาส่งที่สนามบิน น่ารักมากๆเลย",
-        "ถ้าเธอทำตัวน่ารักแบบนี้กับเราคนเดียวก็คงดี"
-    ]
-
-    for i, user_input in enumerate(test_inputs, 1):
-        print(f"\n\n{'#'*60}")
-        print(f"# Test {i}/{len(test_inputs)}")
-        print(f"{'#'*60}")
-
-        result = orchestrator.process_user_input(user_input)
-
-        print("\n" + "="*60)
-        print("📤 FINAL RESPONSE:")
-        print("="*60)
-        print(result["final_response"])
-        print()
-
-    # Print final stats
+    orchestrator = EVAOrchestrator(mock_mode=False, enable_physio=True)
+    
+    test_input = "ขอบคุณนะที่วันนี้มาส่งที่สนามบิน น่ารักมากๆเลย"
+    result = orchestrator.process_user_input(test_input)
+    
     print("\n" + "="*60)
-    print("📊 SESSION STATISTICS")
+    print("OUTPUT RESPONSE:")
     print("="*60)
-    stats = orchestrator.get_stats()
-    print(f"Session ID: {stats['session_id']}")
-    print(f"Total turns: {stats['turn_count']}")
-    print(f"Total tokens: {stats['token_usage']['total_tokens']}")
-    print(f"Episodes in memory: {stats['memory_stats']['total_episodes']}")
-    print()
+    print(result["final_response"])
+    print("\nEMOTION:", result["emotion_label"])

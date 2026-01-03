@@ -1,0 +1,101 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Dashboard Metrics Schema",
+    "description": "Schema for real-time dashboard streaming metrics (hormones, heart rate, emotion, memory color).",
+    "type": "object",
+    "required": [
+        "metric_name",
+        "category",
+        "buffer"
+    ],
+    "properties": {
+        "metric_name": {
+            "type": "string",
+            "description": "Unique metric identifier",
+            "examples": [
+                "ESC_H01_ADRENALINE",
+                "heart_rate",
+                "emotion_label",
+                "memory_color"
+            ]
+        },
+        "category": {
+            "type": "string",
+            "enum": [
+                "physiological_stream",
+                "cognitive_state",
+                "cardiovascular"
+            ]
+        },
+        "update_frequency": {
+            "type": "string",
+            "description": "Update rate (e.g., '30 Hz', 'per-turn')"
+        },
+        "buffer": {
+            "type": "object",
+            "required": [
+                "size",
+                "entries"
+            ],
+            "properties": {
+                "size": {
+                    "type": "integer",
+                    "description": "Max buffer capacity"
+                },
+                "circular": {
+                    "type": "boolean",
+                    "description": "Use circular/ring buffer for streaming",
+                    "default": true
+                },
+                "entries": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "timestamp",
+                            "value"
+                        ],
+                        "properties": {
+                            "timestamp": {
+                                "type": "number",
+                                "description": "Unix timestamp (seconds.milliseconds)"
+                            },
+                            "value": {
+                                "oneOf": [
+                                    {
+                                        "type": "number"
+                                    },
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "visualization": {
+            "type": "object",
+            "properties": {
+                "chart_type": {
+                    "type": "string",
+                    "enum": [
+                        "line",
+                        "area",
+                        "timeline",
+                        "gauge"
+                    ]
+                },
+                "color": {
+                    "type": "string",
+                    "description": "Hex color for chart"
+                },
+                "unit": {
+                    "type": "string",
+                    "description": "Display unit (e.g., 'pg/mL', 'bpm')"
+                }
+            }
+        }
+    }
+}

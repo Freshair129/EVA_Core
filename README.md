@@ -1,5 +1,11 @@
 # EVA 8.1.0 - Embodied Virtual Agent
 
+> [!IMPORTANT]
+> **CRITICAL STANDARD COMPLIANCE**
+> All module development MUST strictly adhere to the guidelines in:
+> `Operation_System/docs/MODULE_STRUCTURE_STANDARD.md`
+> This document is the **CORE LAW** for directory structure, contract definitions, and integration patterns. Deviations are strictly forbidden without explicit authorization.
+
 **Version:** 8.1.0
 **Architecture:** Dual-Phase One-Inference Orchestrator
 **Status:** 🚧 In Development (~60% Complete)

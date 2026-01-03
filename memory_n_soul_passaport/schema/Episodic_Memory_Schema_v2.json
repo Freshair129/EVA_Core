@@ -1,0 +1,354 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "EVA-Episodic-Memory-v2-Sync",
+    "description": "Synced version of the Episodic Memory Schema following the latest YAML spec (Map-based episodes, 9D Matrix, 5D Texture).",
+    "type": "object",
+    "required": [
+        "persona_id",
+        "persona_name",
+        "user_id",
+        "memory_version",
+        "instance_id",
+        "session_id",
+        "timestamp",
+        "episodes_structure"
+    ],
+    "properties": {
+        "persona_id": {
+            "type": "string"
+        },
+        "persona_name": {
+            "type": "string"
+        },
+        "user_id": {
+            "type": "string"
+        },
+        "memory_version": {
+            "type": "string"
+        },
+        "instance_id": {
+            "type": "string"
+        },
+        "session_id": {
+            "type": "string"
+        },
+        "timestamp": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "episodes_structure": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/episode"
+            }
+        }
+    },
+    "definitions": {
+        "episode": {
+            "type": "object",
+            "required": [
+                "episode_id",
+                "episode_type",
+                "situation_context",
+                "turn_1",
+                "turn_2",
+                "state_snapshot"
+            ],
+            "properties": {
+                "episode_id": {
+                    "type": "string"
+                },
+                "episode_type": {
+                    "type": "string",
+                    "enum": [
+                        "interaction",
+                        "synthesis",
+                        "meta_cognition",
+                        "system_event"
+                    ]
+                },
+                "episode_tag": {
+                    "type": "string"
+                },
+                "event_label": {
+                    "type": "string"
+                },
+                "situation_context": {
+                    "type": "object",
+                    "required": [
+                        "context_id",
+                        "interaction_mode",
+                        "stakes_level",
+                        "time_pressure"
+                    ],
+                    "properties": {
+                        "context_id": {
+                            "type": "string"
+                        },
+                        "interaction_mode": {
+                            "type": "string",
+                            "enum": [
+                                "small_talk",
+                                "casual",
+                                "deep_discussion",
+                                "conflict",
+                                "instruction",
+                                "meta"
+                            ]
+                        },
+                        "stakes_level": {
+                            "type": "string",
+                            "enum": [
+                                "low",
+                                "medium",
+                                "high"
+                            ]
+                        },
+                        "time_pressure": {
+                            "type": "string",
+                            "enum": [
+                                "low",
+                                "medium",
+                                "high"
+                            ]
+                        }
+                    }
+                },
+                "turn_1": {
+                    "$ref": "#/definitions/turn_user"
+                },
+                "turn_2": {
+                    "$ref": "#/definitions/turn_eva"
+                },
+                "state_snapshot": {
+                    "type": "object",
+                    "required": [
+                        "EVA_matrix",
+                        "Resonance_index",
+                        "memory_encoding_level",
+                        "memory_color",
+                        "qualia",
+                        "reflex"
+                    ],
+                    "properties": {
+                        "EVA_matrix": {
+                            "type": "object",
+                            "required": [
+                                "stress_load",
+                                "social_warmth",
+                                "drive_level",
+                                "cognitive_clarity",
+                                "joy_level",
+                                "emotion_label"
+                            ],
+                            "properties": {
+                                "stress_load": {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 1
+                                },
+                                "social_warmth": {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 1
+                                },
+                                "drive_level": {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 1
+                                },
+                                "cognitive_clarity": {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 1
+                                },
+                                "joy_level": {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 1
+                                },
+                                "emotion_label": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "Resonance_index": {
+                            "type": "number"
+                        },
+                        "memory_encoding_level": {
+                            "type": "string",
+                            "enum": [
+                                "L0_trace",
+                                "L1_light",
+                                "L2_standard",
+                                "L3_deep",
+                                "L4_trauma"
+                            ]
+                        },
+                        "memory_color": {
+                            "type": "string"
+                        },
+                        "qualia": {
+                            "type": "object",
+                            "properties": {
+                                "intensity": {
+                                    "type": "number"
+                                }
+                            }
+                        },
+                        "reflex": {
+                            "type": "object",
+                            "properties": {
+                                "threat_level": {
+                                    "type": "number"
+                                }
+                            }
+                        },
+                        "threat_level": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "crosslinks": {
+                    "type": "object",
+                    "properties": {
+                        "semantic_refs": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "sensory_refs": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "gks_refs": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "AQI_refs": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "turn_user": {
+            "type": "object",
+            "required": [
+                "speaker"
+            ],
+            "properties": {
+                "turn_id": {
+                    "type": "string"
+                },
+                "speaker": {
+                    "type": "string",
+                    "enum": [
+                        "user",
+                        "system",
+                        "unknown"
+                    ]
+                },
+                "source_type": {
+                    "type": "string",
+                    "enum": [
+                        "Primary_Information",
+                        "Secondary_Information"
+                    ]
+                },
+                "raw_text": {
+                    "type": "string"
+                },
+                "summary": {
+                    "type": "string"
+                },
+                "affective_inference": {
+                    "type": "object",
+                    "properties": {
+                        "emotion_signal": {
+                            "type": "string"
+                        },
+                        "intensity": {
+                            "type": "number"
+                        },
+                        "confidence": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "semantic_frames": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "salience_anchor": {
+                    "type": "object",
+                    "properties": {
+                        "phrase": {
+                            "type": "string"
+                        },
+                        "Resonance_impact": {
+                            "type": "number"
+                        }
+                    }
+                }
+            }
+        },
+        "turn_eva": {
+            "type": "object",
+            "required": [
+                "speaker"
+            ],
+            "properties": {
+                "turn_id": {
+                    "type": "string"
+                },
+                "speaker": {
+                    "type": "string",
+                    "enum": [
+                        "eva"
+                    ]
+                },
+                "text_excerpt": {
+                    "type": "string"
+                },
+                "summary": {
+                    "type": "string"
+                },
+                "epistemic_mode": {
+                    "type": "string",
+                    "enum": [
+                        "explore",
+                        "hypothesize",
+                        "assert",
+                        "caution",
+                        "reflect"
+                    ]
+                },
+                "confidence": {
+                    "type": "number"
+                },
+                "salience_anchor": {
+                    "type": "object",
+                    "properties": {
+                        "phrase": {
+                            "type": "string"
+                        },
+                        "Resonance_impact": {
+                            "type": "number"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

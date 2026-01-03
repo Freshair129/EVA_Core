@@ -1,0 +1,56 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Module State Registry Schema",
+    "description": "Generic schema for module state registration in MSP. Each module can register its current operational state following this pattern.",
+    "type": "object",
+    "required": [
+        "module_name",
+        "timestamp",
+        "state_data"
+    ],
+    "properties": {
+        "module_name": {
+            "type": "string",
+            "description": "Unique identifier for the module (e.g., 'eva_matrix', 'physio_core', 'rms')"
+        },
+        "module_version": {
+            "type": "string",
+            "description": "Version of the module"
+        },
+        "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+        },
+        "state_data": {
+            "type": "object",
+            "description": "Module-specific state data (flexible schema)",
+            "additionalProperties": true
+        },
+        "metadata": {
+            "type": "object",
+            "properties": {
+                "update_frequency": {
+                    "type": "string",
+                    "enum": [
+                        "real-time",
+                        "per-turn",
+                        "per-session",
+                        "on-demand"
+                    ]
+                },
+                "source": {
+                    "type": "string",
+                    "description": "Component that generated this state"
+                },
+                "dependencies": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Other modules this state depends on"
+                }
+            }
+        }
+    }
+}
